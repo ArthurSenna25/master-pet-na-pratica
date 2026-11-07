@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
+import "./landing/styles.css";
+import "./landing/landing-v6.css";
+import "./landing/static-overrides.css";
 
 const display = Playfair_Display({
   subsets: ["latin"],

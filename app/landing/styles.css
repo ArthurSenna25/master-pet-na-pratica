@@ -1,0 +1,3 @@
+/* Cópia de handoff/styles.css. Os @import de tokens/ foram omitidos: já vivem em app/tokens.css
+   (Paleta B, fontes via next/font). Só resta o import dos componentes. */
+@import "./components.css";

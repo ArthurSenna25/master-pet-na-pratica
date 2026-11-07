@@ -42,3 +42,9 @@ next-env.d.ts
 
 # originais pesados (fora de public/)
 /design-src/
+
+# testes / comparação visual (fora do git)
+/test-results/
+/playwright-report/
+/design-src/
+/qa/shots/

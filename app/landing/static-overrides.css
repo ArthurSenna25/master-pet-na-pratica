@@ -1,0 +1,47 @@
+/* Overrides do porte ESTÁTICO (F2). Importado DEPOIS de landing-v6.css, que fica intacto.
+   Estado estático = estado reduced-motion: tudo visível sem JS. Na F3-motion, remover ou
+   restringir ao estado "sem JS" cada regra marcada [F3]. Lista completa em PROGRESS.md. */
+
+/* Âncoras: scroll-padding no html (pedido) + zera o scroll-margin do protótipo para não somar. */
+html { scroll-padding-top: var(--hdr); }
+[id] { scroll-margin-top: 0; }
+#problema { scroll-margin-top: calc(var(--hdr) * -1); } /* protótipo: 0 (a seção já tem padding-top do header) */
+
+/* Hero: next/image fill injeta inset:0/height:100% inline; o protótipo usa inset:-4% 0 / 108% (folga p/ parallax). */
+.lp-hero .lp-cover { inset: -4% 0 !important; height: 108% !important; }
+
+/* Véu do hero em @keyframes (sem .mp-js, sem JS). reduced-motion: landing-v6.css já faz display:none. [F3: GSAP assume] */
+.lp-veil { animation: lp-veil-out 1800ms var(--motion-reveal-ease) both; }
+@keyframes lp-veil-out { from { opacity: .92; } to { opacity: 0; } }
+
+/* FAQ com <details>: desfaz o accordion por grid-template-rows (0fr) e o visibility:hidden. [F3: FaqItem aria-expanded] */
+.lp-q summary { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 28px 0; cursor: pointer; list-style: none; font: 600 28px/1.2 var(--font-display); color: var(--text-1); }
+.lp-q summary::-webkit-details-marker { display: none; }
+.lp-q summary:focus-visible { outline: 0; box-shadow: 0 0 0 3px var(--focus-ring); border-radius: var(--radius-md); }
+.lp-q[open] .lp-plus { transform: rotate(45deg); }
+.lp-a { display: block; }
+.lp-a > div { visibility: visible; overflow: visible; }
+@media (max-width: 899px) { .lp-q summary { font-size: 22px; padding: 22px 0; } }
+
+/* Header: no protótipo o JS troca para .is-solid ao rolar. Estático = sólido (senão o logo cai sobre o conteúdo).
+   Chromium: volta ao degradê translúcido no topo via scroll-timeline (CSS puro). reduced-motion: fica sólido. [F3: JS assume] */
+.lp-header { background: rgba(8, 19, 46, .94); box-shadow: 0 1px 0 rgba(205, 170, 85, .4); }
+@supports (animation-timeline: scroll()) {
+  .lp-header { animation: lp-hdr-solid linear both; animation-timeline: scroll(root block); animation-range: 0 120px; }
+}
+@keyframes lp-hdr-solid {
+  from { background: linear-gradient(180deg, rgba(6, 15, 38, .72), transparent); box-shadow: 0 0 0 rgba(205, 170, 85, 0); }
+  to { background: rgba(8, 19, 46, .94); box-shadow: 0 1px 0 rgba(205, 170, 85, .4); }
+}
+
+/* Formulário: os 3 passos aparecem juntos; no protótipo só um por vez, então não há espaçamento entre eles. [F4: passos por JS] */
+.lp-panes { gap: 20px; }
+
+/* Links do consentimento: o link padrão (navy) some sobre o vidro navy. Ouro sobre navy é permitido (DESIGN.md). */
+.lp-consent a { color: var(--mp-gold-400); text-decoration: underline; text-underline-offset: 3px; }
+.lp-consent a:hover { color: var(--mp-gold-300); }
+
+/* Formulário (porte): campos lado a lado estouravam o cartão (min-width:auto do input > trilha minmax(0,1fr)). */
+.lp-row > .mp-field { min-width: 0; }
+.lp-form .mp-field__input { min-width: 0; }
+#lp-previa { justify-self: start; margin: 0; }
