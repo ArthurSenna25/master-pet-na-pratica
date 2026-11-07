@@ -1,45 +1,31 @@
 # PROGRESS — Master Pet na Prática (≤ 40 linhas; o Claude lê só isto ao retomar)
 
 **Nível:** N2 enxuto (sobe para N3 se: área de aluno, pagamento ou mais de um usuário com permissões)
-**Fase atual:** F3-motion CP1 + CP2 commit 2 (Problema, Como funciona) concluídos; falta commit 3 (Camila em ação) · **Atualizado:** 2026-11-07 · **Ordem:** F1 → F2 → F3-motion (CP2 pendente) → F4-banco → F5-painel → F6 (QA/legais/deploy)
+**Fase atual:** F3-motion (CP1 + CP2) concluída · **Atualizado:** 2026-11-07 · **Ordem:** F1 → F2 → F3-motion ✔ → F4-banco → F5-painel → F6 (QA/legais/deploy)
 
 ## Feito
 - F1: scaffold Next 16.4.5, tokens Paleta B, next/font, 7 webp (528 KB), headers, DESIGN/PLANO.
-- F2: LP estática em Server Components (`app/_components/`, 1 arquivo por seção). CSS do handoff intacto em `app/landing/` (+ `static-overrides.css`).
-- F2b: /politica-de-privacidade e /termos-de-uso (rascunho, noindex, sem JS). Versão única em `app/_lib/legal-version.ts` (`LEGAL_TEXT_VERSION`), a F4 grava o mesmo valor em `consent_events.texto_versao`.
-- F3 CP1 (gsap 3.15.1 + @gsap/react 2.1.2; SplitText/ScrollTrigger do pacote grátis): `LandingFx` (único client de cenas, `return null`) em `app/_components/`; cenas em `app/_fx/`
-  (`util` onceIn · `hero` 1/1b/2 · `chrome` header/progresso/magnético/sticky · `secoes` reveal/6/7/8/8b). `matchMedia`: tudo sob `no-preference`; hover/cursor sob `(hover:hover) and (pointer:fine)`.
-  Reveal só esconde `.mp-reveal` abaixo da dobra, após hidratar (sem JS e reduced-motion: tudo visível). Header: `.is-solid`/`.is-top` por JS. StickyCta: IO + `inert`. FaqItem: client, botão `aria-expanded`, accordion CSS 0fr (8c).
-  `<noscript><style>` em layout.tsx abre as respostas do FAQ sem JS. Barra de progresso (`.lp-progress`) no SiteHeader.
-- Verificação CP1 (`node qa/fx-check.mjs`, servidor em :3100): chromium+webkit 390x844 e 1440x800, chromium 1366x657, com/sem reducedMotion: sem overflow, sem pin-spacer, reduced sem oculto,
-  FAQ Enter/Espaço/Tab, sticky aparece/some (+inert), header, progresso, 0 erros de console, resize 1440→390 sem órfãos. Build/lint/tsc ok · googleapis 0 · public 528 KB.
-- Vitals mobile (`qa/vitals.mjs`, Pixel 7, CPU 4x): após as correções LCP 0,64–1,6 s (ruído de máquina), **CLS 0** em 390 e 1440 (`qa/cls-src.mjs` lista as fontes de shift).
-- Correção CLS (commit pré-CP2): causa = SplitText no h1 (confirmado: CLS 0 sem ele). Três efeitos: (1) `.lp-h1{justify-self:stretch}` (o grid `justify-items:start` encolhia o h1 ao split); (2) `reduceWhiteSpace:false` no SplitText (senão o nbsp de "Banho & Tosa" virava espaço e quebrava a linha: o 390 passa a ter 6 linhas, antes 5 — quebra agora correta); (3) margens negativas de `.ln__i-mask` colapsavam (soma errada +.06em/junta): `margin:0 0 -.2em` + first/last-child.
-- Sticky CTA agora também em reduced-motion (fora do `matchMedia`, CSS sem transição). `fx-check` cobre sticky nos dois modos: TUDO OK.
-
-- F3 CP2 commit 2: `app/_fx/problema.ts` (3/3m) e `como.ts` (4/4m), cada um com `gsap.matchMedia` interno (PIN = `(min-width:900px) and (min-height:720px)`; consts em `util.ts`). Cenas criadas na ordem da página em `LandingFx`; `ScrollTrigger.sort()` uma vez após todas, `refresh()` no load e em `fonts.ready`; pins com `refreshPriority:1`; cleanup por revert (sem spacer órfão). Estado inicial só via `gsap.set` pós-hidratação. `fx-check`: 1440x800 = 2 pin-spacers (#problema, #como; #acao não), cabem em 100svh, 1366x657 e mobile sem pin, 1º paint do #problema sem oculto. Vitals: CLS 0, LCP 0,7–2,2 s (ruído), googleapis 0.
-- Override novo (só `.is-pin`): `.lp-prob__stage.is-pin` compactado em `static-overrides.css`; em 1440x800 o 1º sinal ia para baixo do header (o `fx-check` agora mede isso).
+- F2: LP estática em Server Components (`app/_components/`, 1 arquivo por seção). CSS do handoff intacto em `app/landing/` (+ `static-overrides.css`). F2b: páginas legais em rascunho (noindex); versão única `app/_lib/legal-version.ts`.
+- F3 (gsap 3.15.1 + @gsap/react; SplitText/ScrollTrigger grátis): `LandingFx` (client, `return null`) cria as cenas de `app/_fx/` NA ORDEM DA PÁGINA (reveal · hero · progresso · problema · diferença · como · acao · destrava · quem); depois um único `ScrollTrigger.sort()`; `refresh()` no load e em `fonts.ready`; cleanup por `mm.revert()`.
+  `util` (onceIn, PIN/NOPIN/pinEnd) · `hero` · `chrome` · `secoes` · `problema` (3/3m) · `como` (4/4m) · `acao` (pin+snap, troca de cena). Pin só em `(min-width:900px) and (min-height:720px)`; mobile/altura baixa = 3m/4m sem pin.
+  Estado inicial só por `gsap.set` pós-hidratação (sem JS e reduced-motion = tudo visível; sticky CTA funciona nos dois). Reveal só esconde o que está abaixo da dobra.
+- CamilaEmAcao é client: estado `tema`, abas (clique), setas ← → (listener no componente, cleanup no unmount; só com a seção no centro da tela), tema do pin chega por CustomEvent (`acao:tema`) na seção. Pin dourado: `<span aria-hidden>` decorativo, `container-type:size` na foto + `translate(cqw,cqh)` (coords do MOTION.md), `display:none` fora do desktop. Reduced-motion: troca instantânea.
+- Correções de CLS (h1 SplitText): `.lp-h1{justify-self:stretch}`, `reduceWhiteSpace:false`, margens da `.ln__i-mask`. CLS 0 em 390 e 1440 (`qa/cls-src.mjs` lista as fontes de shift).
+- Verificação (`node qa/fx-check.mjs`, servidor `next start -p 3100`): chromium+webkit 390x844 e 1440x800, chromium 1366x657, com/sem reducedMotion: TUDO OK. 1440x800 = 3 pin-spacers (#problema, #como, #acao) e cada um cabe em 100svh (1º sinal abaixo do header); 1366x657 e mobile sem pin; #problema sem oculto no 1º paint; abas por clique e seta; resize 1440→390 sem órfãos; 0 erros de console. Build/lint/tsc ok · googleapis 0 · LCP mobile 0,7–2,2 s (ruído) · CLS 0.
 
 ## static-overrides.css (restante)
-- scroll-padding/`[id]` margin; `#problema` margem negativa · `.lp-cover` !important (next/image fill) · véu do hero em @keyframes (MANTIDO em CSS por decisão) ·
-  header sólido por padrão + `.is-top` (degradê) · `.ln__i-mask` (respiro da máscara do SplitText) · `.lp-panes{gap:20px}` [F4] · links do consentimento · `.lp-row`/`#lp-previa`.
-- Removidas (F3): estilos de `<details>` do FAQ e scroll-timeline do header.
-
-## Pendente (CP2, próxima sessão, após reset da janela)
-- Commit 3: cena 5 (Camila em ação: pin+snap) e CamilaEmAcao client (tema, abas, setas, pin dourado).
-  Atenção: criar na ordem da página; `ScrollTrigger.sort()`/refreshPriority por causa dos pin-spacers; pins só em `(min-width:900px) and (min-height:720px)`; cenas 9 (form) é F4.
-- Não feito no CP1: cena 9 (formulário, F4), tilt do protótipo (fora do pedido).
+- scroll-padding/`[id]` · `#problema` margem negativa · `.lp-cover` !important (next/image fill) · véu do hero em @keyframes (CSS por decisão) · header sólido + `.is-top` · `.ln__i-mask` · `.lp-panes{gap:20px}` [F4] · links do consentimento · `.lp-row`/`#lp-previa`.
+- F3: `.lp-prob__stage.is-pin` compactado (1º sinal ia sob o header em 1440x800) · pin dourado (container + transform) · sticky sem transição em reduced-motion. Removidas: estilos do `<details>` do FAQ e scroll-timeline do header.
 
 ## Desvios do protótipo (registrados)
-- Ainda omitidos: pin das 3 fotos de "Camila em ação" (ficha mostra só o tema 01) até o CP2.
-- FAQ: chips `provisório` em "Quantos encontros?" e "Quanto custa?". Formulário: sem barra de passos; botão de envio `disabled` + chip "prévia visual" (F4).
-- Hook Impeccable acusa `gradient-text` em `.lp-gold` (landing-v6.css:20): protótipo aprovado, mantido.
+- FAQ: chips `provisório` em "Quantos encontros?" e "Quanto custa?". Formulário: sem barra de passos; envio `disabled` + chip "prévia visual" (F4). Cena 9 (formulário) é F4.
+- Fora do pedido: tilt do protótipo. Hook Impeccable acusa `gradient-text` em `.lp-gold` (landing-v6.css:20): protótipo aprovado, mantido.
+- Camila em ação: texto da ficha é exemplo (`[exemplo — substituir…]`), igual nos 3 temas.
 
 ## Pendências / bloqueios
-- Legais [PENDENTE]: controladora (razão social/CNPJ/endereço) · ME/EPP · operadores · transferência internacional (art. 33) · retenção · e-mail do titular · encarregado · TERMOS: responsável, titular da marca/imagens, limitação de responsabilidade, foro, contato.
-- Jurídico F4: consentimento caixa única × duas · cookie de sessão do painel na política · verbos "coletamos" · IP HMAC × puro. Revisão antes de qualquer lead real.
+- Legais [PENDENTE]: controladora (razão social/CNPJ/endereço) · ME/EPP · operadores · transferência internacional (art. 33) · retenção · e-mail do titular · encarregado · TERMOS: responsável, titular da marca/imagens, responsabilidade, foro, contato. Revisão jurídica antes de qualquer lead real (consentimento caixa única × duas, cookie do painel, IP HMAC × puro).
 - Camila: preço · formato e nº de encontros · FAQ real · vetor do wordmark · regiões · pré-requisito da Mentoria online · texto real de "Camila em ação".
-- Técnico: `npm audit` (triar na F6) · hero-bg ~2400 px se ficar mole em 1920 · matriz completa de QA só na F6.
+- Técnico: `npm audit` (F6) · hero-bg ~2400 px se ficar mole em 1920 · matriz completa de QA só na F6.
 
 ## Backlog: (vazio)
-## Consumo — F1 ≈ US$ 6–7. F2: ~63% da janela (inclui Claude Design e prompts do dia; início não medido). F3 CP1: janela não medida. Commit 1 do CP2 (CLS + sticky): 76% → 82% (≈ 6 pontos); semana em 9%. Commits 2 e 3 do CP2 (pins): Inicio 0%.
+## Consumo — F1 ≈ US$ 6–7. F2: ~63% da janela. Commit 1 do CP2: 76% → 82%. Commits 2 e 3 do CP2: início 0% (após reset); valor atual informado como "X%" (não medido) → preencher.

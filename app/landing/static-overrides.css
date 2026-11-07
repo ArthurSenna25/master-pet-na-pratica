@@ -47,5 +47,11 @@ html { scroll-padding-top: var(--hdr); }
 .lp-prob__stage.is-pin .lp-sign p { font-size: clamp(16px, 2.3vh, 20px); margin-top: 6px; }
 .lp-prob__stage.is-pin .lp-prob__close { margin-top: clamp(14px, 2.6vh, 32px); font-size: clamp(22px, 3.6vh, 34px); }
 
+/* Camila em ação (F3): pin dourado decorativo. A caixa da foto é container, então cqw/cqh = % da foto
+   e o pin anda só por transform (CSS, 600 ms). Sem clique (aria-hidden). */
+.lp-panel__photo { container-type: size; }
+#acao .mp-cf__pin { left: 0; top: 0; pointer-events: none; cursor: default; transition: transform 600ms cubic-bezier(.215, .61, .355, 1); }
+@media (prefers-reduced-motion: reduce) { #acao .mp-cf__pin { transition: none; } }
+
 /* Sticky CTA em reduced-motion: aparece/some sem transição. */
 @media (prefers-reduced-motion: reduce) { .lp-sticky { transition: none; } }

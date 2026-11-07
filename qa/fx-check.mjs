@@ -28,18 +28,20 @@ for (const [name, type, w, h] of cases) {
     ok(await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), `${tag}: sem overflow`);
     const pinned = w === 1440 && rm === "no-preference"; // único caso com pin (min 900x720)
     if (pinned) {
-      // CP2 commit 2: pin em #problema e #como; #acao ainda NÃO (commit 3). Nenhum spacer extra.
+      // CP2: pin em #problema, #como e #acao (e só neles).
       const s = await p.evaluate(() => ({
         n: document.querySelectorAll(".pin-spacer").length,
         prob: !!document.querySelector("#problema .pin-spacer"),
         como: document.querySelector("#como")?.parentElement?.classList.contains("pin-spacer") ?? false,
-        acao: !!document.querySelector("#acao.pin-spacer, #acao .pin-spacer") || (document.querySelector("#acao")?.parentElement?.classList.contains("pin-spacer") ?? false),
+        acao: document.querySelector("#acao")?.parentElement?.classList.contains("pin-spacer") ?? false,
+        fitAcao: (() => { const e = document.querySelector("#acao"); const c = document.querySelector("#acao .lp-acao6").getBoundingClientRect(); const hdr = document.querySelector(".lp-header").getBoundingClientRect().height; return e.scrollHeight <= innerHeight && e.getBoundingClientRect().height <= innerHeight + 1 && c.height <= innerHeight - hdr; })(),
         fitProb: (() => { const e = document.querySelector(".lp-prob__stage"); return e.scrollHeight <= innerHeight && e.getBoundingClientRect().height <= innerHeight + 1; })(),
         fitComo: (() => { const e = document.querySelector("#como"); return e.scrollHeight <= innerHeight && e.getBoundingClientRect().height <= innerHeight + 1; })(),
       }));
-      ok(s.prob && s.como && !s.acao && s.n === 2, `${tag}: pin-spacer em #problema e #como, não em #acao ${JSON.stringify(s)}`);
+      ok(s.prob && s.como && s.acao && s.n === 3, `${tag}: pin-spacer em #problema, #como e #acao ${JSON.stringify(s)}`);
       ok(s.fitProb, `${tag}: Problema cabe em 100svh`);
       ok(s.fitComo, `${tag}: Como funciona cabe em 100svh`);
+      ok(s.fitAcao, `${tag}: Camila em ação cabe em 100svh`);
     } else {
       ok((await p.locator(".pin-spacer").count()) === 0, `${tag}: sem pin-spacer`);
     }
@@ -76,6 +78,28 @@ for (const [name, type, w, h] of cases) {
       ok(await p.locator(".lp-sticky.is-on").count() === 0 && (await p.locator(".lp-sticky").evaluate((e) => e.inert)), `${tag}: sticky some no formulário (inert)`);
       if (rm === "reduce") ok((await p.locator(".lp-sticky").evaluate((e) => getComputedStyle(e).transitionProperty === "none" || parseFloat(getComputedStyle(e).transitionDuration) < 0.001)), `${tag}: sticky sem transição`);
     }
+    // Camila em ação: abas por clique e por seta (com e sem pin, com e sem reduced-motion)
+    {
+      await p.evaluate(() => document.querySelector("#acao").scrollIntoView({ block: "center" })); await p.waitForTimeout(900);
+      const pressed = () => p.evaluate(() => [...document.querySelectorAll("#acao .lp-tab")].findIndex((b) => b.getAttribute("aria-pressed") === "true"));
+      const scene = () => p.evaluate(() => [...document.querySelectorAll("#acao .lp-scene")].findIndex((e) => getComputedStyle(e).opacity === "1"));
+      ok((await pressed()) === 0 && (await scene()) === 0, `${tag}: Camila em ação começa no tema 01`);
+      await p.locator("#acao .lp-tab").nth(1).click(); await p.waitForTimeout(1200);
+      ok((await pressed()) === 1 && (await scene()) === 1, `${tag}: aba 2 por clique (aba ${await pressed()}, cena ${await scene()})`);
+      await p.keyboard.press("ArrowRight"); await p.waitForTimeout(1200);
+      ok((await pressed()) === 2 && (await scene()) === 2, `${tag}: ArrowRight → tema 3`);
+      await p.keyboard.press("ArrowLeft"); await p.waitForTimeout(1200);
+      ok((await pressed()) === 1, `${tag}: ArrowLeft → tema 2`);
+      ok(await p.evaluate(() => document.querySelector("#acao .mp-cf__pin").getAttribute("aria-hidden") === "true"), `${tag}: pin dourado aria-hidden`);
+      if (!(w >= 900)) ok(await p.evaluate(() => getComputedStyle(document.querySelector("#acao .mp-cf__pin")).display === "none"), `${tag}: pin dourado oculto no mobile`);
+      if (pinned) {
+        await p.screenshot({ path: `qa/out/${w}-${rm}-acao-t2.png` });
+        await p.locator("#acao .lp-tab").nth(0).click(); await p.waitForTimeout(1200);
+        ok((await pressed()) === 0, `${tag}: aba 1 volta por clique no pin`);
+        await p.screenshot({ path: `qa/out/${w}-${rm}-acao-t1.png` });
+      }
+      await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(500);
+    }
     // FAQ por teclado
     await p.locator("#faq").scrollIntoViewIfNeeded(); await p.waitForTimeout(1200);
     const btn = p.locator(".lp-q button").first();
@@ -90,10 +114,10 @@ for (const [name, type, w, h] of cases) {
     if (name === "chromium" && !(w === 1366)) {
       await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(2800);
       await p.screenshot({ path: `qa/out/${w}-${rm}-hero.png` });
-      for (const id of ["problema", "como", "diferenca", "destrava", "quem", "para-quem", "faq"]) {
+      for (const id of ["problema", "como", "acao", "diferenca", "destrava", "quem", "para-quem", "faq"]) {
         await p.locator(`#${id}`).scrollIntoViewIfNeeded(); await p.waitForTimeout(1600);
         await p.screenshot({ path: `qa/out/${w}-${rm}-${id}.png` });
-        if (pinned && (id === "problema" || id === "como")) {
+        if (pinned && (id === "problema" || id === "como" || id === "acao")) {
           // meio e fim do pin
           for (const [tagK, k] of [["mid", 0.55], ["end", 0.95]]) {
             await p.evaluate(([i, kk]) => { const sp = (i === "como" ? document.querySelector("#como") : document.querySelector("#problema .lp-prob__stage")).parentElement; scrollTo(0, sp.getBoundingClientRect().top + scrollY + (sp.offsetHeight - innerHeight) * kk); }, [id, k]);

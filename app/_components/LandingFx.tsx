@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { header, magnet, progress, sticky } from "../_fx/chrome";
 import { hero, heroLight } from "../_fx/hero";
+import { acao } from "../_fx/acao";
 import { como } from "../_fx/como";
 import { problema } from "../_fx/problema";
 import { destrava, destravaHover, diferenca, quemEParaQuem, reveal } from "../_fx/secoes";
@@ -35,6 +36,7 @@ export function LandingFx() {
       const stopProblema = problema();
       diferenca();
       const stopComo = como();
+      const stopAcao = acao();
       destrava();
       quemEParaQuem();
       // sort uma vez, depois de todas as cenas; refresh no load e em fonts.ready
@@ -43,7 +45,7 @@ export function LandingFx() {
       window.addEventListener("load", refresh);
       let live = true;
       void document.fonts.ready.then(() => live && refresh());
-      return undo(cleanup, stopProblema, stopComo, () => {
+      return undo(cleanup, stopProblema, stopComo, stopAcao, () => {
         live = false;
         window.removeEventListener("load", refresh);
       });
