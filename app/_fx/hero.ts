@@ -23,6 +23,7 @@ export function hero(): void {
     linesClass: "ln__i",
     aria: "none",
     ignore: ".lp-shine",
+    reduceWhiteSpace: false, // preserva o &nbsp; de "Banho & Tosa" (senão o split quebra a linha ali)
     autoSplit: true,
     onSplit: (self) => {
       gsap.set(self.lines, { yPercent: 100 });

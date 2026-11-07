@@ -40,15 +40,17 @@ for (const [name, type, w, h] of cases) {
       ok(await p.locator(".lp-header.is-top").count() === 1, `${tag}: header em degradê no topo`);
       await p.mouse.wheel(0, w < 900 ? 1400 : 600); await p.waitForTimeout(700);
       ok(await p.locator(".lp-header.is-solid").count() === 1, `${tag}: header sólido ao rolar`);
-      // sticky (só mobile)
-      if (w < 900) {
-        ok(await p.locator(".lp-sticky.is-on").count() === 1 && (await p.locator(".lp-sticky").evaluate((e) => !e.inert)), `${tag}: sticky aparece (sem inert)`);
-        await p.locator("#conversar").scrollIntoViewIfNeeded(); await p.waitForTimeout(700);
-        ok(await p.locator(".lp-sticky.is-on").count() === 0 && (await p.locator(".lp-sticky").evaluate((e) => e.inert)), `${tag}: sticky some no formulário (inert)`);
-      }
       // progresso
       const sx = await p.locator(".lp-progress i").evaluate((e) => new DOMMatrix(getComputedStyle(e).transform).a);
       ok(sx > 0, `${tag}: barra de progresso anda (${sx.toFixed(2)})`);
+    }
+    // sticky (só mobile), com e sem reduced-motion
+    if (w < 900) {
+      await p.evaluate(() => scrollTo(0, 1400)); await p.waitForTimeout(700);
+      ok(await p.locator(".lp-sticky.is-on").count() === 1 && (await p.locator(".lp-sticky").evaluate((e) => !e.inert)), `${tag}: sticky aparece (sem inert)`);
+      await p.locator("#conversar").scrollIntoViewIfNeeded(); await p.waitForTimeout(700);
+      ok(await p.locator(".lp-sticky.is-on").count() === 0 && (await p.locator(".lp-sticky").evaluate((e) => e.inert)), `${tag}: sticky some no formulário (inert)`);
+      if (rm === "reduce") ok((await p.locator(".lp-sticky").evaluate((e) => getComputedStyle(e).transitionProperty === "none" || parseFloat(getComputedStyle(e).transitionDuration) < 0.001)), `${tag}: sticky sem transição`);
     }
     // FAQ por teclado
     await p.locator("#faq").scrollIntoViewIfNeeded(); await p.waitForTimeout(1200);

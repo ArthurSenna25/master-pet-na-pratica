@@ -20,9 +20,11 @@ const undo = (...fns: (Cleanup | undefined)[]): Cleanup => () => fns.forEach((f)
 export function LandingFx() {
   useGSAP(() => {
     const mm = gsap.matchMedia();
+    // Sticky CTA também em reduced-motion (sem transição: ver CSS); não depende de GSAP.
+    const stopSticky = sticky();
 
     mm.add(MOTION, () => {
-      const cleanup = undo(header(), sticky());
+      const cleanup = undo(header());
       reveal();
       hero();
       progress();
@@ -37,7 +39,10 @@ export function LandingFx() {
 
     mm.add(FINE, () => undo(heroLight(), magnet(), destravaHover()));
 
-    return () => mm.revert();
+    return () => {
+      mm.revert();
+      stopSticky?.();
+    };
   });
 
   return null;

@@ -32,4 +32,13 @@ html { scroll-padding-top: var(--hdr); }
 #lp-previa { justify-self: start; margin: 0; }
 
 /* H1 por linhas (SplitText): a máscara gerada é .ln__i-mask; mesmo respiro do .ln do protótipo (descendentes do Playfair). */
-.ln__i-mask { padding: .06em 0 .14em; margin: -.06em 0 -.14em; }
+.ln__i-mask { padding: .06em 0 .14em; margin: 0 0 -.2em; }
+/* CLS: margens negativas entre irmãos colapsam (vale só a maior). -.2em em cada junta dá a soma exata, e o h1 mantém a altura de antes do split. */
+.ln__i-mask:first-child { margin-top: -.06em; }
+.ln__i-mask:last-child { margin-bottom: -.14em; }
+
+/* CLS: .lp-hero__copy é grid com justify-items:start; antes do split o h1 ocupa a largura toda (texto inline) e depois encolhe para a linha mais larga. Largura fixa nos dois estados. */
+.lp-h1 { justify-self: stretch; }
+
+/* Sticky CTA em reduced-motion: aparece/some sem transição. */
+@media (prefers-reduced-motion: reduce) { .lp-sticky { transition: none; } }
