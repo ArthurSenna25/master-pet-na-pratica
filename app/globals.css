@@ -1,0 +1,4 @@
+/* Tailwind sem preflight (só admin; a LP usa o CSS do protótipo) */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "./tokens.css";

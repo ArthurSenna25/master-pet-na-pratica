@@ -1,0 +1,95 @@
+/* ───────── Master Pet na Prática · cor ─────────
+   Paleta B (PADRÃO, ouro antigo/champanhe) · Paleta A (ouro vivo) via <html data-palette="a">
+   Exceção: o preenchimento do botão primário usa o ouro vivo da A (--mp-gold-action) em qualquer paleta
+   Regras: texto principal = navy (nunca preto) · ouro = AÇÃO (nunca texto sobre claro) */
+:root {
+  /* Navy */
+  --mp-navy-950: #060f26;
+  --mp-navy-900: #0a1633; /* tinta / texto principal */
+  --mp-navy-800: #10224f; /* navy de marca (superfícies) */
+  --mp-navy-700: #1b3470;
+  --mp-navy-600: #2f4a86;
+  /* Ouro — ação */
+  --mp-gold-300: #dcc58a;
+  --mp-gold-400: #cdaa55; /* hover do primário · texto sobre navy */
+  --mp-gold-500: #b8913a; /* preenchimento do botão primário */
+  --mp-gold-600: #9f7b2a; /* pressed */
+  --mp-gold-700: #8a6a1e; /* borda/ícone sobre claro (3.7:1) */
+  /* Bege quente */
+  --mp-beige-50: #f9f5ec;
+  --mp-beige-100: #f4ede0;
+  --mp-beige-200: #e6dbc6;
+  --mp-beige-300: #d3c5a6;
+  --mp-beige-400: #bbaa86;
+  /* Azul-bebê — apoio */
+  --mp-blue-50: #eef5fb;
+  --mp-blue-100: #d6e7f6;
+  --mp-blue-200: #c6ddf2;
+  --mp-blue-300: #afcfea;
+  --mp-blue-600: #27557f; /* texto/link sobre claro (6.1:1) */
+  /* Neutros de texto (azulados, nunca cinza puro) */
+  --mp-ink-muted: #46536f;
+  --mp-ink-faint: #7a869f; /* só desabilitado / decorativo */
+  /* Estados */
+  --mp-success: #1f6b4a;
+  --mp-success-bg: #e4f1ea;
+  --mp-danger: #a3322f;
+  --mp-danger-bg: #f8e6e3;
+
+  /* ───── Semânticos ───── */
+  --text-1: var(--mp-navy-900);
+  --text-2: var(--mp-ink-muted);
+  --text-disabled: var(--mp-ink-faint);
+  --text-link: var(--mp-blue-600);
+  --text-on-navy: var(--mp-beige-50);
+  --text-on-navy-2: var(--mp-beige-200);
+  --text-accent-on-navy: var(--mp-gold-400);
+
+  --surface-page: var(--mp-beige-100);
+  --surface-raised: var(--mp-beige-50);
+  --surface-sunken: var(--mp-beige-200);
+  --surface-support: var(--mp-blue-100);
+  --surface-navy: var(--mp-navy-800);
+  --surface-navy-deep: var(--mp-navy-900);
+
+  --mp-gold-action: #c9a24a; /* ouro vivo — SÓ preenchimento do botão (navy ≥7:1) */
+  --mp-gold-action-hover: #d9b96a;
+  --mp-gold-action-active: #b58e36;
+  --action-bg: var(--mp-gold-action);
+  --action-bg-hover: var(--mp-gold-action-hover);
+  --action-bg-active: var(--mp-gold-action-active);
+  --action-fg: var(--mp-navy-900);
+  --action-secondary-bg: var(--mp-navy-800);
+  --action-secondary-bg-hover: var(--mp-navy-700);
+  --action-secondary-bg-active: var(--mp-navy-900);
+
+  --border-1: var(--mp-beige-300); /* decorativo */
+  --border-input: #6a7a9b; /* ≥3:1 sobre bege-50 */
+  --border-input-hover: var(--mp-navy-700);
+  --border-focus: var(--mp-navy-800);
+  --focus-ring: var(--mp-navy-700);
+  --focus-ring-on-navy: var(--mp-gold-400);
+  --focus-halo: rgba(175, 207, 234, 0.6); /* azul-bebê */
+}
+
+/* Paleta A — ouro vivo, navy mais azulado */
+[data-palette="a"] {
+  --mp-navy-950: #08132e;
+  --mp-navy-900: #0c1b3f;
+  --mp-navy-800: #14275c;
+  --mp-navy-700: #1f3978;
+  --mp-navy-600: #34508f;
+  --mp-gold-300: #e6cf93;
+  --mp-gold-400: #d9b96a;
+  --mp-gold-500: #c9a24a;
+  --mp-gold-600: #b58e36;
+  --mp-gold-700: #9a7620;
+  --mp-beige-50: #fbf8f2;
+  --mp-beige-100: #f6f0e4;
+  --mp-beige-200: #ebe2cf;
+  --mp-beige-300: #d9ccb0;
+  --mp-blue-100: #dcebf8;
+  --mp-blue-200: #cfe4f6;
+  --mp-blue-600: #2b5c8e;
+  --mp-ink-muted: #4a5878;
+}

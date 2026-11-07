@@ -1,0 +1,8 @@
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body { margin: 0; font-family: var(--font-body); font-size: var(--fs-body); line-height: var(--lh-body); color: var(--text-1); background: var(--surface-page); }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: var(--fw-semibold); line-height: var(--lh-heading); letter-spacing: var(--ls-display); color: var(--text-1); margin: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+a { color: var(--text-link); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--mp-navy-800); }
+::selection { background: var(--mp-blue-200); color: var(--mp-navy-900); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; } }

@@ -1,0 +1,29 @@
+:root {
+  /* Sombras: sempre tingidas de navy, longas e suaves */
+  --shadow-xs: 0 1px 2px rgba(12, 27, 63, 0.08);
+  --shadow-sm: 0 1px 2px rgba(12, 27, 63, 0.1), 0 2px 6px -2px rgba(12, 27, 63, 0.12);
+  --shadow-md: 0 2px 4px rgba(12, 27, 63, 0.06), 0 12px 28px -10px rgba(12, 27, 63, 0.22);
+  --shadow-lg: 0 4px 8px rgba(12, 27, 63, 0.08), 0 28px 56px -18px rgba(12, 27, 63, 0.34);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --shadow-inset-press: inset 0 2px 4px rgba(12, 27, 63, 0.22);
+
+  /* Movimento */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 360ms;
+
+  /* Fundos com atmosfera — nunca chapados */
+  --bg-atmosphere:
+    radial-gradient(900px 520px at 88% -8%, rgba(207, 228, 246, 0.85), transparent 62%),
+    radial-gradient(760px 480px at -6% 104%, rgba(230, 207, 147, 0.34), transparent 60%),
+    linear-gradient(180deg, var(--mp-beige-50) 0%, var(--mp-beige-100) 55%, var(--mp-beige-200) 100%);
+  --bg-navy-depth:
+    radial-gradient(720px 420px at 85% 0%, rgba(52, 80, 143, 0.55), transparent 65%),
+    radial-gradient(520px 360px at 0% 100%, rgba(217, 185, 106, 0.1), transparent 70%),
+    linear-gradient(160deg, var(--mp-navy-800) 0%, var(--mp-navy-900) 100%);
+  --bg-support:
+    radial-gradient(520px 300px at 100% 0%, rgba(255, 255, 255, 0.7), transparent 65%),
+    linear-gradient(180deg, var(--mp-blue-100), var(--mp-blue-50));
+  --hairline-gold-on-navy: 1px solid rgba(217, 185, 106, 0.4);
+}

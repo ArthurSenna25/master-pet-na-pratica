@@ -1,0 +1,25 @@
+:root {
+  /* Reveal */
+  --motion-reveal-dur: 700ms;
+  --motion-reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-reveal-y: 24px;
+  --motion-stagger: 90ms;
+  /* Foto principal: tilt 3D + parallax */
+  --motion-tilt-rotate: 6deg; /* rotateY ±6° */
+  --motion-tilt-perspective: 1400px;
+  --motion-tilt-shift: 10px; /* máx. de deslocamento ao mouse */
+  --motion-parallax-max: 4%; /* máx. no scroll */
+  /* Luz (2 radiais, mix-blend screen) */
+  --motion-light-opacity: 0.45;
+  --motion-light-blend: screen;
+  --motion-light-gold: radial-gradient(60% 55% at 0% 0%, #cdaa55, transparent 70%);
+  --motion-light-blue: radial-gradient(60% 55% at 100% 100%, #afcfea, transparent 70%);
+  /* Textura e acabamento */
+  --motion-grain-opacity: 0.045; /* 4–5% */
+  --motion-vignette: inset 0 0 12rem rgba(6, 15, 38, 0.6);
+  --motion-scrim: linear-gradient(90deg, rgba(10, 22, 51, 0.82) 0%, rgba(10, 22, 51, 0) 100%); /* navy 82% → 0, esq → dir */
+  --motion-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* Loop único por seção: brilho do CTA */
+  --motion-glow-dur: 3.2s;
+  /* Regras: só transform/opacity animam · 1 loop por seção · reduced-motion = estático */
+}

@@ -1,0 +1,20 @@
+# PRODUCT — [Projeto] (brief; N0 usa só as seções 1–7)
+
+1. **Objetivo e métrica:** [ex.: 30 contatos/mês; taxa de conversão ≥ x%]
+2. **CTA único:** [  ]
+3. **Público/persona:** [quem, o que busca, como decide, objeção]
+4. **Proposta de valor / diferencial:** [  ]
+5. **Seções/páginas e conteúdo de cada uma:** [  ]
+6. **Premissas:** [registradas em vez de perguntas]
+7. **Fora de escopo (Won't):** [  ]
+— N1+ —
+8. **Sitemap:** [  ]
+9. **Histórias e critérios de aceite:** [Como…, quero…, para…; Dado/Quando/Então]
+— N2+ —
+10. **RF/RNF numerados (MoSCoW):** RF-01 … / RNF-01 (com número) …
+11. **Modelo de dados (rascunho):** [entidades e relações]
+12. **Riscos e decisões (ADRs):** [  ]
+— N3/N4 —
+13. **Casos de uso, regras de negócio, fluxos de estado, glossário do domínio.**
+
+**Triagem aprovada:** Nível N_ · data · o que subiria o nível: [  ]

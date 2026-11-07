@@ -1,0 +1,25 @@
+# DESIGN — [Projeto] (≤ 60 linhas)
+
+**Conceito/metáfora:** [1 frase ligada à narrativa do negócio]
+**Sentimento (3 adjetivos):** [  ] · **Evitar:** [anti-referências + 3 clichês de "site de IA"]
+
+## Cores (nome → hex → uso)
+base [#] fundo · superfície [#] cards · texto [#] · destaque [#] CTA/links (contraste AA conferido) · apoio [#] · sucesso/erro/alerta [#]
+
+## Tipografia
+Display: [família, pesos] · Corpo: [família, pesos] · Escala: [ex.: 1.25] · Corpo ≥ 16 px · linha 45–75 car.
+
+## Espaço, raio, sombra
+Escala 4/8 px: [4 8 12 16 24 32 48 64 96] · raio: [  ] · sombras: [níveis 1–3 com valores]
+
+## Elemento-assinatura
+[o que é, onde aparece, como se anima]
+
+## Componentes e estados
+[botões, inputs, cards: normal/hover/foco/ativo/desabilitado/erro/vazio]
+
+## Motion (nível _)
+[motor, durações, easing, o que anima; reduced-motion]
+
+## Imagens e performance
+[formatos, proporções, hero com priority]
