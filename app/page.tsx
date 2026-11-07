@@ -4,6 +4,7 @@ import { Destrava } from "./_components/Destrava";
 import { Diferenca } from "./_components/Diferenca";
 import { Faq } from "./_components/Faq";
 import { Hero } from "./_components/Hero";
+import { LandingFx } from "./_components/LandingFx";
 import { LeadForm } from "./_components/LeadForm";
 import { ParaQuem } from "./_components/ParaQuem";
 import { Problema } from "./_components/Problema";
@@ -30,6 +31,7 @@ export default function Page() {
       </main>
       <SiteFooter />
       <StickyCta />
+      <LandingFx />
     </>
   );
 }

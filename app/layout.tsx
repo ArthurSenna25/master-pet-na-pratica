@@ -29,7 +29,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-BR" className={`${display.variable} ${body.variable}`}>
-      <body>{children}</body>
+      <body>
+        {/* Sem JS o FAQ não abre: mostra as respostas (CSS puro, sem script). */}
+        <noscript><style>{".lp-a{grid-template-rows:1fr}.lp-a>div{visibility:visible}"}</style></noscript>
+        {children}
+      </body>
     </html>
   );
 }

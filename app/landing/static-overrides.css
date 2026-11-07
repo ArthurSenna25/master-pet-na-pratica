@@ -10,29 +10,14 @@ html { scroll-padding-top: var(--hdr); }
 /* Hero: next/image fill injeta inset:0/height:100% inline; o protótipo usa inset:-4% 0 / 108% (folga p/ parallax). */
 .lp-hero .lp-cover { inset: -4% 0 !important; height: 108% !important; }
 
-/* Véu do hero em @keyframes (sem .mp-js, sem JS). reduced-motion: landing-v6.css já faz display:none. [F3: GSAP assume] */
+/* Véu do hero em @keyframes (sem .mp-js, sem JS). reduced-motion: landing-v6.css já faz display:none. Mantido em CSS por decisão (funciona sem JS e cobre o hero até a hidratação). */
 .lp-veil { animation: lp-veil-out 1800ms var(--motion-reveal-ease) both; }
 @keyframes lp-veil-out { from { opacity: .92; } to { opacity: 0; } }
 
-/* FAQ com <details>: desfaz o accordion por grid-template-rows (0fr) e o visibility:hidden. [F3: FaqItem aria-expanded] */
-.lp-q summary { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 28px 0; cursor: pointer; list-style: none; font: 600 28px/1.2 var(--font-display); color: var(--text-1); }
-.lp-q summary::-webkit-details-marker { display: none; }
-.lp-q summary:focus-visible { outline: 0; box-shadow: 0 0 0 3px var(--focus-ring); border-radius: var(--radius-md); }
-.lp-q[open] .lp-plus { transform: rotate(45deg); }
-.lp-a { display: block; }
-.lp-a > div { visibility: visible; overflow: visible; }
-@media (max-width: 899px) { .lp-q summary { font-size: 22px; padding: 22px 0; } }
-
-/* Header: no protótipo o JS troca para .is-solid ao rolar. Estático = sólido (senão o logo cai sobre o conteúdo).
-   Chromium: volta ao degradê translúcido no topo via scroll-timeline (CSS puro). reduced-motion: fica sólido. [F3: JS assume] */
+/* Header: sólido por padrão (sem JS / reduced-motion o logo não cai sobre o conteúdo).
+   Com JS (LandingFx) a classe .is-top, no scrollY <= 40, volta ao degradê do protótipo. */
 .lp-header { background: rgba(8, 19, 46, .94); box-shadow: 0 1px 0 rgba(205, 170, 85, .4); }
-@supports (animation-timeline: scroll()) {
-  .lp-header { animation: lp-hdr-solid linear both; animation-timeline: scroll(root block); animation-range: 0 120px; }
-}
-@keyframes lp-hdr-solid {
-  from { background: linear-gradient(180deg, rgba(6, 15, 38, .72), transparent); box-shadow: 0 0 0 rgba(205, 170, 85, 0); }
-  to { background: rgba(8, 19, 46, .94); box-shadow: 0 1px 0 rgba(205, 170, 85, .4); }
-}
+.lp-header.is-top { background: linear-gradient(180deg, rgba(6, 15, 38, .72), transparent); box-shadow: none; }
 
 /* Formulário: os 3 passos aparecem juntos; no protótipo só um por vez, então não há espaçamento entre eles. [F4: passos por JS] */
 .lp-panes { gap: 20px; }
@@ -45,3 +30,6 @@ html { scroll-padding-top: var(--hdr); }
 .lp-row > .mp-field { min-width: 0; }
 .lp-form .mp-field__input { min-width: 0; }
 #lp-previa { justify-self: start; margin: 0; }
+
+/* H1 por linhas (SplitText): a máscara gerada é .ln__i-mask; mesmo respiro do .ln do protótipo (descendentes do Playfair). */
+.ln__i-mask { padding: .06em 0 .14em; margin: -.06em 0 -.14em; }
