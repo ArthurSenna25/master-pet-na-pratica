@@ -4,6 +4,7 @@ import "./globals.css";
 import "./landing/styles.css";
 import "./landing/landing-v6.css";
 import "./landing/static-overrides.css";
+import "./landing/legal.css";
 
 const display = Playfair_Display({
   subsets: ["latin"],

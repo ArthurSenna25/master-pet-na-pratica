@@ -74,7 +74,7 @@ export function LeadForm() {
                   <input type="checkbox" id="consent" name="consentimento" />
                   <span>
                     Concordo em ser contatado(a) pelo WhatsApp e com o tratamento dos meus dados para esta finalidade, conforme a LGPD.{" "}
-                    Veja a <Link href="/politica-de-privacidade">Política de Privacidade</Link> e os <Link href="/termos-de-uso">Termos de Uso</Link>.
+                    Veja a <Link href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer">Política de Privacidade</Link> e os <Link href="/termos-de-uso" target="_blank" rel="noopener noreferrer">Termos de Uso</Link>.
                   </span>
                 </label>
               </div>

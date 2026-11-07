@@ -1,7 +1,7 @@
 # PROGRESS — Master Pet na Prática (≤ 40 linhas; o Claude lê só isto ao retomar)
 
 **Nível:** N2 enxuto (sobe para N3 se: área de aluno, pagamento ou mais de um usuário com permissões)
-**Fase atual:** F2 concluída · **Atualizado:** 2026-11-07 · **Ordem:** F1 → F2 → F3-motion → F4-banco → F5-painel → F6 (QA/legais/deploy)
+**Fase atual:** F2 e F2b concluídas · **Atualizado:** 2026-11-07 · **Ordem:** F1 → F2 → F3-motion → F4-banco → F5-painel → F6 (QA/legais/deploy)
 
 ## Feito
 - F1: scaffold Next 16.4.5, tokens Paleta B, next/font, 7 webp (528 KB), headers, DESIGN/PLANO.
@@ -21,6 +21,9 @@
 - Sem regra: `mp-reveal`/`mp-js` só agem com a classe `.mp-js`, ausente (tudo visível). Estados ocultos que o JS usa e ficam como no
   protótipo: StickyCta (oculto + `inert`), `.lp-count`, cenas 2-3 de "Camila em ação", `.lp-n__r`, `.lp-shine`.
 
+- F2b: /politica-de-privacidade e /termos-de-uso (rascunho, noindex, sem JS). Versão única em `app/_lib/legal-version.ts` (`LEGAL_TEXT_VERSION` = "0.1 de 2026-11-07"):
+  a faixa da página é montada dela e a F4 grava o mesmo valor em `consent_events.texto_versao`. Links legais no rodapé e no consentimento (nova aba).
+
 ## Desvios do protótipo (registrados)
 - Omitidos (JS/motion): barra de progresso, pin das 3 fotos de "Camila em ação" (ficha mostra só o tema 01), scripts GSAP/CDN.
 - FAQ: `<details>` sem h3; "Quantos encontros?" e "Quanto custa?" ganharam chip `provisório` (dependem da Camila).
@@ -31,9 +34,14 @@
 - Hook Impeccable acusou `gradient-text` em `.lp-gold` (landing-v6.css:20): é o protótipo aprovado, mantido.
 
 ## Pendências / bloqueios
+- Legais [PENDENTE] nas páginas: controladora (razão social/CNPJ/endereço) · ME/EPP · operadores (nome e país; Vercel/Neon só na F4, com localização conferida) ·
+  transferência internacional (art. 33) · retenção · e-mail do titular (2x) · encarregado/dispensa · TERMOS: responsável (CNPJ), titular da marca e das imagens,
+  revisão da limitação de responsabilidade, foro, e-mail de contato.
+- Jurídico F4: consentimento em caixa única (dados + Termos) × duas caixas · citar o cookie de sessão do painel (Better Auth) na política, se a revisão entender
+  necessário (hoje o texto diz só "a página pública não usa cookies não essenciais") · reler os verbos "coletamos" quando o formulário ficar ativo · IP HMAC × puro.
 - Camila: preço · formato e nº de encontros · FAQ real · vetor do wordmark · regiões · pré-requisito da Mentoria online · texto real de "Camila em ação".
 - Jurídico: ME/EPP · retenção · IP como HMAC × puro · revisão dos textos legais antes de qualquer lead real.
 - Técnico: `npm audit` (triar na F6) · hero-bg ~2400 px se ficar mole em 1920 · rodar `qa/compare.mjs` precisa de rede (CDN do protótipo).
 
 ## Backlog: (vazio)
-## Consumo — F1 ≈ US$ 6–7 (alerta de custo). F2: janela do Pro (/usage) — início e fim: [preencher; não consigo ler daqui].
+## Consumo — F1 ≈ US$ 6–7 (alerta de custo). F2: janela do Pro (/usage) — início e fim: “F2 + sessões anteriores do dia: ~63% da janela, 7% da semana (início não medido)”.
