@@ -16,5 +16,10 @@ export function onceIn(trigger: gsap.DOMTarget, start: string, tween: gsap.core.
   });
 }
 
-export const all = <T extends HTMLElement = HTMLElement>(sel: string): T[] =>
+/** Pin só em tela grande E alta; fora disso as cenas usam a versão sem pin (3m/4m). */
+export const PIN = "(min-width:900px) and (min-height:720px)";
+export const NOPIN = "(max-width:899px), (min-width:900px) and (max-height:719px)";
+export const pinEnd = (k: number) => () => `+=${Math.round(innerHeight * k)}`;
+
+export const all =<T extends HTMLElement = HTMLElement>(sel: string): T[] =>
   gsap.utils.toArray<T>(sel);

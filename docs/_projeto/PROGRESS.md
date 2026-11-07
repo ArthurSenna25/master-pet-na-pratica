@@ -1,7 +1,7 @@
 # PROGRESS — Master Pet na Prática (≤ 40 linhas; o Claude lê só isto ao retomar)
 
 **Nível:** N2 enxuto (sobe para N3 se: área de aluno, pagamento ou mais de um usuário com permissões)
-**Fase atual:** F3-motion CP1 + correções pré-CP2 concluídos · **Atualizado:** 2026-11-07 · **Ordem:** F1 → F2 → F3-motion (CP2 pendente) → F4-banco → F5-painel → F6 (QA/legais/deploy)
+**Fase atual:** F3-motion CP1 + CP2 commit 2 (Problema, Como funciona) concluídos; falta commit 3 (Camila em ação) · **Atualizado:** 2026-11-07 · **Ordem:** F1 → F2 → F3-motion (CP2 pendente) → F4-banco → F5-painel → F6 (QA/legais/deploy)
 
 ## Feito
 - F1: scaffold Next 16.4.5, tokens Paleta B, next/font, 7 webp (528 KB), headers, DESIGN/PLANO.
@@ -17,13 +17,16 @@
 - Correção CLS (commit pré-CP2): causa = SplitText no h1 (confirmado: CLS 0 sem ele). Três efeitos: (1) `.lp-h1{justify-self:stretch}` (o grid `justify-items:start` encolhia o h1 ao split); (2) `reduceWhiteSpace:false` no SplitText (senão o nbsp de "Banho & Tosa" virava espaço e quebrava a linha: o 390 passa a ter 6 linhas, antes 5 — quebra agora correta); (3) margens negativas de `.ln__i-mask` colapsavam (soma errada +.06em/junta): `margin:0 0 -.2em` + first/last-child.
 - Sticky CTA agora também em reduced-motion (fora do `matchMedia`, CSS sem transição). `fx-check` cobre sticky nos dois modos: TUDO OK.
 
+- F3 CP2 commit 2: `app/_fx/problema.ts` (3/3m) e `como.ts` (4/4m), cada um com `gsap.matchMedia` interno (PIN = `(min-width:900px) and (min-height:720px)`; consts em `util.ts`). Cenas criadas na ordem da página em `LandingFx`; `ScrollTrigger.sort()` uma vez após todas, `refresh()` no load e em `fonts.ready`; pins com `refreshPriority:1`; cleanup por revert (sem spacer órfão). Estado inicial só via `gsap.set` pós-hidratação. `fx-check`: 1440x800 = 2 pin-spacers (#problema, #como; #acao não), cabem em 100svh, 1366x657 e mobile sem pin, 1º paint do #problema sem oculto. Vitals: CLS 0, LCP 0,7–2,2 s (ruído), googleapis 0.
+- Override novo (só `.is-pin`): `.lp-prob__stage.is-pin` compactado em `static-overrides.css`; em 1440x800 o 1º sinal ia para baixo do header (o `fx-check` agora mede isso).
+
 ## static-overrides.css (restante)
 - scroll-padding/`[id]` margin; `#problema` margem negativa · `.lp-cover` !important (next/image fill) · véu do hero em @keyframes (MANTIDO em CSS por decisão) ·
   header sólido por padrão + `.is-top` (degradê) · `.ln__i-mask` (respiro da máscara do SplitText) · `.lp-panes{gap:20px}` [F4] · links do consentimento · `.lp-row`/`#lp-previa`.
 - Removidas (F3): estilos de `<details>` do FAQ e scroll-timeline do header.
 
 ## Pendente (CP2, próxima sessão, após reset da janela)
-- h) Cenas 3/3m (Problema, teleprompter, pin só ≥900x720), 4/4m (Como funciona, 6 nós, contador), 5 (Camila em ação: pin+snap). i) CamilaEmAcao client (tema, abas, setas, pin dourado).
+- Commit 3: cena 5 (Camila em ação: pin+snap) e CamilaEmAcao client (tema, abas, setas, pin dourado).
   Atenção: criar na ordem da página; `ScrollTrigger.sort()`/refreshPriority por causa dos pin-spacers; pins só em `(min-width:900px) and (min-height:720px)`; cenas 9 (form) é F4.
 - Não feito no CP1: cena 9 (formulário, F4), tilt do protótipo (fora do pedido).
 
@@ -39,4 +42,4 @@
 - Técnico: `npm audit` (triar na F6) · hero-bg ~2400 px se ficar mole em 1920 · matriz completa de QA só na F6.
 
 ## Backlog: (vazio)
-## Consumo — F1 ≈ US$ 6–7. F2: ~63% da janela. F3 CP1: janela do Pro não medida (sem acesso a /usage); início e fim: informar pelo usuário. CP2 iniciado com janela em 76%
+## Consumo — F1 ≈ US$ 6–7. F2: ~63% da janela (inclui Claude Design e prompts do dia; início não medido). F3 CP1: janela não medida. Commit 1 do CP2 (CLS + sticky): 76% → 82% (≈ 6 pontos); semana em 9%. Commits 2 e 3 do CP2 (pins): Inicio 0%.

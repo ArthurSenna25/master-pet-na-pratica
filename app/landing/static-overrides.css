@@ -40,5 +40,12 @@ html { scroll-padding-top: var(--hdr); }
 /* CLS: .lp-hero__copy é grid com justify-items:start; antes do split o h1 ocupa a largura toda (texto inline) e depois encolhe para a linha mais larga. Largura fixa nos dois estados. */
 .lp-h1 { justify-self: stretch; }
 
+/* Problema com pin (F3): em 1440x800 os 4 sinais + fechamento estouravam para cima do header. Compacta só no pin. */
+.lp-prob__stage.is-pin { padding: calc(var(--hdr) + 12px) 0 28px; }
+.lp-prob__stage.is-pin .lp-sign { --t: clamp(30px, min(3.2vw, 4.6vh), 52px); }
+.lp-prob__stage.is-pin .lp-signs { gap: clamp(10px, 2.2vh, 24px); }
+.lp-prob__stage.is-pin .lp-sign p { font-size: clamp(16px, 2.3vh, 20px); margin-top: 6px; }
+.lp-prob__stage.is-pin .lp-prob__close { margin-top: clamp(14px, 2.6vh, 32px); font-size: clamp(22px, 3.6vh, 34px); }
+
 /* Sticky CTA em reduced-motion: aparece/some sem transição. */
 @media (prefers-reduced-motion: reduce) { .lp-sticky { transition: none; } }

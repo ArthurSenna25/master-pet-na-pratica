@@ -6,6 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { header, magnet, progress, sticky } from "../_fx/chrome";
 import { hero, heroLight } from "../_fx/hero";
+import { como } from "../_fx/como";
+import { problema } from "../_fx/problema";
 import { destrava, destravaHover, diferenca, quemEParaQuem, reveal } from "../_fx/secoes";
 import type { Cleanup } from "../_fx/util";
 
@@ -24,17 +26,27 @@ export function LandingFx() {
     const stopSticky = sticky();
 
     mm.add(MOTION, () => {
+      // Ordem da página: pins criados fora de ordem dão alturas erradas. Cada cena pinada
+      // tem seu próprio matchMedia interno (revertido no cleanup).
       const cleanup = undo(header());
       reveal();
       hero();
       progress();
+      const stopProblema = problema();
       diferenca();
+      const stopComo = como();
       destrava();
       quemEParaQuem();
+      // sort uma vez, depois de todas as cenas; refresh no load e em fonts.ready
+      ScrollTrigger.sort();
       const refresh = () => ScrollTrigger.refresh();
       window.addEventListener("load", refresh);
-      void document.fonts.ready.then(refresh);
-      return undo(cleanup, () => window.removeEventListener("load", refresh));
+      let live = true;
+      void document.fonts.ready.then(() => live && refresh());
+      return undo(cleanup, stopProblema, stopComo, () => {
+        live = false;
+        window.removeEventListener("load", refresh);
+      });
     });
 
     mm.add(FINE, () => undo(heroLight(), magnet(), destravaHover()));

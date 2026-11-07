@@ -7,6 +7,7 @@ mkdirSync("qa/out", { recursive: true });
 const fails = [];
 const ok = (c, m) => { if (!c) fails.push(m); console.log(c ? "ok  " : "FAIL", m); };
 
+const innerHeightOf = (h) => h;
 const cases = [
   ["chromium", chromium, 390, 844], ["webkit", webkit, 390, 844],
   ["chromium", chromium, 1440, 800], ["webkit", webkit, 1440, 800],
@@ -25,7 +26,30 @@ for (const [name, type, w, h] of cases) {
     await p.goto(url, { waitUntil: "load" });
     await p.waitForTimeout(2500);
     ok(await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), `${tag}: sem overflow`);
-    ok((await p.locator(".pin-spacer").count()) === 0, `${tag}: sem pin-spacer (CP1 não pina)`);
+    const pinned = w === 1440 && rm === "no-preference"; // único caso com pin (min 900x720)
+    if (pinned) {
+      // CP2 commit 2: pin em #problema e #como; #acao ainda NÃO (commit 3). Nenhum spacer extra.
+      const s = await p.evaluate(() => ({
+        n: document.querySelectorAll(".pin-spacer").length,
+        prob: !!document.querySelector("#problema .pin-spacer"),
+        como: document.querySelector("#como")?.parentElement?.classList.contains("pin-spacer") ?? false,
+        acao: !!document.querySelector("#acao.pin-spacer, #acao .pin-spacer") || (document.querySelector("#acao")?.parentElement?.classList.contains("pin-spacer") ?? false),
+        fitProb: (() => { const e = document.querySelector(".lp-prob__stage"); return e.scrollHeight <= innerHeight && e.getBoundingClientRect().height <= innerHeight + 1; })(),
+        fitComo: (() => { const e = document.querySelector("#como"); return e.scrollHeight <= innerHeight && e.getBoundingClientRect().height <= innerHeight + 1; })(),
+      }));
+      ok(s.prob && s.como && !s.acao && s.n === 2, `${tag}: pin-spacer em #problema e #como, não em #acao ${JSON.stringify(s)}`);
+      ok(s.fitProb, `${tag}: Problema cabe em 100svh`);
+      ok(s.fitComo, `${tag}: Como funciona cabe em 100svh`);
+    } else {
+      ok((await p.locator(".pin-spacer").count()) === 0, `${tag}: sem pin-spacer`);
+    }
+    // nada de #problema oculto no 1º paint (dobra) — evita piscar/CLS
+    if (rm === "no-preference" && w !== 1366) {
+      const dim = await p.evaluate(() => [...document.querySelectorAll("#problema *")].filter((e) => {
+        const r = e.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0 && r.height > 0 && getComputedStyle(e).opacity !== "1" && !e.matches(".lp-prob__img--bw") && !e.closest(".mp-fx,.lp-prob__bg");
+      }).map((e) => e.className));
+      ok(dim.length === 0, `${tag}: #problema sem oculto/atenuado na dobra inicial ${JSON.stringify(dim)}`);
+    }
     if (rm === "reduce") {
       const hidden = await p.evaluate(() => [...document.querySelectorAll("main *")].filter((e) => {
         const s = getComputedStyle(e); return s.opacity === "0" && !e.matches(".lp-veil,.lp-shine,.lp-glow,.lp-count,.lp-n__r,.lp-prob__img--bw,.lp-scene,.lp-sticky,.lp-acao__lights i,.mp-fx,.lp-q .lp-a>div") && !e.closest(".lp-scene,.lp-acao__lights,.lp-sticky,.mp-fx");
@@ -66,9 +90,22 @@ for (const [name, type, w, h] of cases) {
     if (name === "chromium" && !(w === 1366)) {
       await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(2800);
       await p.screenshot({ path: `qa/out/${w}-${rm}-hero.png` });
-      for (const id of ["diferenca", "destrava", "quem", "para-quem", "faq"]) {
+      for (const id of ["problema", "como", "diferenca", "destrava", "quem", "para-quem", "faq"]) {
         await p.locator(`#${id}`).scrollIntoViewIfNeeded(); await p.waitForTimeout(1600);
         await p.screenshot({ path: `qa/out/${w}-${rm}-${id}.png` });
+        if (pinned && (id === "problema" || id === "como")) {
+          // meio e fim do pin
+          for (const [tagK, k] of [["mid", 0.55], ["end", 0.95]]) {
+            await p.evaluate(([i, kk]) => { const sp = (i === "como" ? document.querySelector("#como") : document.querySelector("#problema .lp-prob__stage")).parentElement; scrollTo(0, sp.getBoundingClientRect().top + scrollY + (sp.offsetHeight - innerHeight) * kk); }, [id, k]);
+            await p.waitForTimeout(1200);
+            await p.screenshot({ path: `qa/out/${w}-${rm}-${id}-${tagK}.png` });
+            if (id === "problema") {
+              // conteúdo visível: 1º sinal abaixo do header e fechamento dentro da tela
+              const g = await p.evaluate(() => ({ hdr: document.querySelector(".lp-header").getBoundingClientRect().bottom, top: document.querySelector(".lp-sign").getBoundingClientRect().top, bot: document.querySelector(".lp-prob__close").getBoundingClientRect().bottom }));
+              ok(g.top >= g.hdr - 1 && g.bot <= innerHeightOf(h), `${tag}: Problema ${tagK}: sinais entre header e base ${JSON.stringify(g)}`);
+            }
+          }
+        }
       }
     }
     // resize 1440 -> 390 sem órfãos
