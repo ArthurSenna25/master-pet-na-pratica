@@ -1,7 +1,7 @@
 # PROGRESS — Master Pet na Prática (≤ 40 linhas; o Claude lê só isto ao retomar)
 
 **Nível:** N2 enxuto (sobe para N3 se: área de aluno, pagamento ou mais de um usuário com permissões)
-**Fase atual:** F4 em andamento (commits 1-3 de 5) · F3-motion concluída · **Ordem:** F1 → F2 → F3-motion ✔ → F4-banco → F5-painel → F6 (QA/legais/deploy)
+**Fase atual:** F4 em andamento (commits 1-4 de 5; falta o DECISOES-LGPD.md completo) · F3-motion concluída · **Ordem:** F1 → F2 → F3-motion ✔ → F4-banco → F5-painel → F6 (QA/legais/deploy)
 
 ## Feito
 - F1: scaffold Next 16.4.5, tokens Paleta B, next/font, 7 webp (528 KB), headers, DESIGN/PLANO.
@@ -13,7 +13,8 @@
 - F4 c1: drizzle-orm, @neondatabase/serverless, drizzle-kit. Schema `app/_lib/db/schema.ts` (lead, consent_events c/ `tipo`, rate_limit, audit_log sem FK/sem PII, Better Auth conferido c/ CLI). `getDb()` preguiçoso. Migrações 0000/0001. **Migração aplicada só no branch teste do Neon (sa-east-1, expira 2026-12-07). Banco de produção: sem migração.**
 - F4 c2: better-auth + zod. `auth.ts` (signup desligado, cookie httpOnly path=/admin, login 5/min), `session.ts` (`requireSession()` em toda página/action admin), `/admin/login` (sem JS ok), `/admin`, `scripts/create-admin.mjs`. Verificado em produção: /admin sem sessão→307 · sign-up 400, 0 usuários · login 200 · 6º login→429. Testes de auth devem enviar `Origin` = BETTER_AUTH_URL (localhost:3000).
 - F4 c3: `lead-action.ts` (`enviarLead`: honeypot `site` → Zod `lead-schema.ts` → IP→HMAC `seguranca.ts` → limite `rate-limit.ts` 5/10 min, limpeza 24 h → `db.batch` lead+consent_events+rate_limit) · `CONSENT_TEXT` em legal-version.ts (hash SHA-256) · `anonimizar.ts` (`anonimizarLead`: chamar só após `requireSession()`; grava audit_log) · `lead-options.ts` provisório. Campos = names do LeadForm. `npm test` (Vitest 5; @types/node→^24): 19 verdes, 6 contra o branch teste (prefixo `zz-teste-`, limpeza em afterEach, banco sem sobras). POST inválido não consome o limite. `admin_events` NÃO feito (não coube): início da F5.
-- F4 IP em texto puro (decisão a validar, não alterado): Better Auth grava IP em `rate_limit_auth.key` ("<IP>|/sign-in/email") e em `session.ip_address`. Fora do HMAC; entra no DECISOES-LGPD.md.
+- F4 IP no Better Auth (aberto; detalhes em lgpd/DECISOES-LGPD.md): grava IP em texto puro em `session.ip_address` e `rate_limit_auth.key`. (a) sessão: POSSÍVEL (`databaseHooks.session.create.before` com ipAddress null; `disableIpTracking` também desliga o limite por IP). (b) chave: POSSÍVEL só com código (`rateLimit.customStorage` + HMAC). Recomendação: ambos, se aceitos; senão documentar + retenção. Política (0.2) já diz a verdade.
+- F4 c4: `LeadForm` client (`useActionState`, 3 passos só após hidratação; sem JS = 3 passos juntos e envio ok), `_fx/form.ts` (cena 9: entrada, troca 140/350 ms, sucesso; sem traço do check), `consent.ts` (texto do label = CONSENT_TEXT), textos legais 0.2 (histórico em legal-version.ts), `playwright.config.ts` (porta 3000, branch teste) + `e2e/f4.spec.ts` (`npm run e2e`: 16 ok, 4 pulados; banco sem sobras). Vitest 20 ok. LCP 0,7–0,9 s, CLS 0, fx-check ok, googleapis 0. `next start` injeta x-forwarded-for (IP do socket): em produção direta o IP nunca fica vazio; na Vercel vale x-vercel-forwarded-for.
 - F4 pendências: admin existe só no branch teste (criar no banco de produção com script) · audit_log sem prazo de retenção e cascade = pendências jurídicas · Vercel Function Region (padrão iad1, suposição; conferir) · BETTER_AUTH_URL de produção · Neon: grátis, AWS sa-east-1, Postgres 18.
 
 ## static-overrides.css (restante)
@@ -21,7 +22,7 @@
 - F3: `.lp-prob__stage.is-pin` compactado (1º sinal ia sob o header em 1440x800) · pin dourado (container + transform) · sticky sem transição em reduced-motion. Removidas: estilos do `<details>` do FAQ e scroll-timeline do header.
 
 ## Desvios do protótipo (registrados)
-- FAQ: chips `provisório` em "Quantos encontros?" e "Quanto custa?". Formulário: sem barra de passos; envio `disabled` + chip "prévia visual" (F4). Cena 9 (formulário) é F4.
+- FAQ: chips `provisório` em "Quantos encontros?" e "Quanto custa?". Formulário: sem barra de passos, só a legenda "Passo N de 3" (aria-live).
 - Fora do pedido: tilt do protótipo. Hook Impeccable acusa `gradient-text` em `.lp-gold` (landing-v6.css:20): protótipo aprovado, mantido.
 - Camila em ação: texto da ficha é exemplo (`[exemplo — substituir…]`), igual nos 3 temas.
 
@@ -35,4 +36,4 @@
 - Pendência jurídica: prazo de retenção de audit_log e admin_events.
 
 ## Backlog: (vazio)
-## Consumo — F1 ≈ US$ 6–7. F2: ~63% da janela (inclui Claude Design e prompts do dia). F3 CP1: não medido. CP2 commit 1 (CLS + sticky): 76% → 82%, semana 9%. CP2 commits 2+3 (pins e Camila em ação): sessão US$ 1,55 (estimativa de API, não é cobrança); fim em 19% da janela, semana 11%. F4: planejamento 24% → 30%. Commits 1+2 (schema, migração, auth, login, script do admin): 30% → 35% (≈ 5 pontos). Commit 3 (action, consentimento, rate limit, anonimizar_lead, Vitest): início em 35%, fim não medido pelo agente (anotar).
+## Consumo — F1 ≈ US$ 6–7. F2: ~63% da janela (inclui Claude Design e prompts do dia). F3 CP1: não medido. CP2 commit 1 (CLS + sticky): 76% → 82%, semana 9%. CP2 commits 2+3 (pins e Camila em ação): sessão US$ 1,55 (estimativa de API, não é cobrança); fim em 19% da janela, semana 11%. F4: planejamento 24% → 30%. Commits 1+2 (schema, migração, auth, login, script do admin): 30% → 35% (≈ 5 pontos). Commit 3 (action, consentimento, rate limit, anonimizar_lead, Vitest): início em 35% → 38%. Commit 4: início em 38%.

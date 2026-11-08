@@ -29,7 +29,12 @@ html { scroll-padding-top: var(--hdr); }
 /* Formulário (porte): campos lado a lado estouravam o cartão (min-width:auto do input > trilha minmax(0,1fr)). */
 .lp-row > .mp-field { min-width: 0; }
 .lp-form .mp-field__input { min-width: 0; }
-#lp-previa { justify-self: start; margin: 0; }
+/* F4: aviso de demonstração, honeypot, mensagem geral e erros do formulário. Sem JS os 3 passos aparecem juntos: Continuar/Voltar já somem (.is-steps), então os rodapés dos passos 1-2 também. */
+.lp-demo { justify-self: start; align-self: flex-start; margin: 0; }
+.lp-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.lp-gmsg, .lp-cmsg, .lp-formmsg { margin: 8px 0 0; font-size: 14px; line-height: 1.4; }
+.lp-glass .lp-formmsg { color: #ffb3a7; }
+.lp-form:not(.is-steps) .lp-fs:not([data-step="3"]) .lp-actions { display: none; }
 
 /* H1 por linhas (SplitText): a máscara gerada é .ln__i-mask; mesmo respiro do .ln do protótipo (descendentes do Playfair). */
 .ln__i-mask { padding: .06em 0 .14em; margin: 0 0 -.2em; }

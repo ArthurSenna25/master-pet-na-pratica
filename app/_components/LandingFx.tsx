@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { header, magnet, progress, sticky } from "../_fx/chrome";
+import { formEntrada } from "../_fx/form";
 import { hero, heroLight } from "../_fx/hero";
 import { acao } from "../_fx/acao";
 import { como } from "../_fx/como";
@@ -39,6 +40,7 @@ export function LandingFx() {
       const stopAcao = acao();
       destrava();
       quemEParaQuem();
+      formEntrada();
       // sort uma vez, depois de todas as cenas; refresh no load e em fonts.ready
       ScrollTrigger.sort();
       const refresh = () => ScrollTrigger.refresh();

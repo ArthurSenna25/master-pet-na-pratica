@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { consentParts } from "./consent";
 import { CONSENT_TEXT, LEGAL_TEXT_VERSION } from "./legal-version";
 import { errosPorCampo, leadSchema } from "./lead-schema";
 import { corteRetencao, inicioJanela, isLimited, JANELA_MS, MAX_ENVIOS, RETENCAO_MS } from "./rate-limit";
@@ -81,6 +82,14 @@ describe("hash do texto de consentimento", () => {
   it("muda se o texto muda; versão registrada tem o formato esperado", () => {
     expect(sha256Hex(CONSENT_TEXT)).not.toBe(sha256Hex(CONSENT_TEXT + "."));
     expect(LEGAL_TEXT_VERSION).toMatch(/^\d+\.\d+ de \d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+describe("consentParts", () => {
+  it("o texto contínuo é idêntico a CONSENT_TEXT e só os 2 rótulos viram link", () => {
+    const p = consentParts();
+    expect(p.map((x) => x.text).join("")).toBe(CONSENT_TEXT);
+    expect(p.filter((x) => x.href).map((x) => x.href)).toEqual(["/politica-de-privacidade", "/termos-de-uso"]);
   });
 });
 

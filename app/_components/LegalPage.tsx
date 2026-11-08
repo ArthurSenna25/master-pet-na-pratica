@@ -18,7 +18,7 @@ export function LegalPage({ titulo, children }: LegalPageProps) {
     <div className="lg-body">
       <div className="lg-draft" role="note">
         <p>RASCUNHO, sem revisão jurídica. Versão <span className="lg-nowrap">{LEGAL_TEXT_VERSION}</span>.</p>
-        <p>Esta é uma versão de demonstração; o formulário ainda não coleta dados.</p>
+        <p>Versão de demonstração: o formulário grava os dados enviados. Use apenas dados fictícios.</p>
       </div>
       <header className="lg-header">
         <Link href="/" aria-label="Master Pet na Prática — início"><Wordmark /></Link>

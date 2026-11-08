@@ -38,7 +38,8 @@ export default function Page() {
 
       <h2>5. Uso adequado</h2>
       <p>
-        O formulário deve ser usado com informações verdadeiras e só pela própria pessoa ou com autorização dela. Não é permitido tentar
+        Na versão de demonstração, o formulário grava o que for enviado: use apenas dados fictícios. Em uso real, ele deve ser usado
+        com informações verdadeiras e só pela própria pessoa ou com autorização dela. Não é permitido tentar
         burlar a segurança do site nem enviar conteúdo ilegal, ofensivo ou automatizado em massa.
       </p>
 

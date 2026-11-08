@@ -11,8 +11,8 @@ export default function Page() {
   return (
     <LegalPage titulo="Política de Privacidade">
       <p>
-        Este texto descreve como os dados pessoais serão tratados quando o formulário do site estiver em funcionamento. Na versão de
-        demonstração atual, o formulário ainda não coleta nem armazena nenhum dado. É um rascunho e não foi revisado por advogado.
+        Este texto descreve como os dados pessoais são tratados pelo formulário do site. A versão atual é uma demonstração: o
+        formulário grava os dados enviados, por isso deve receber apenas dados fictícios. É um rascunho e não foi revisado por advogado.
       </p>
 
       <h2>1. Quem somos (controladora)</h2>
@@ -22,21 +22,30 @@ export default function Page() {
         <Pendente>confirmar se é ME/EPP e quais obrigações isso afeta</Pendente>.
       </p>
 
-      <h2>2. Dados que serão coletados</h2>
-      <p>Pelo formulário, quando ativo, a pessoa informará:</p>
+      <h2>2. Dados tratados pelo formulário</h2>
+      <p>Ao enviar o formulário, a pessoa informa:</p>
       <ul>
         <li>nome e WhatsApp;</li>
         <li>cidade/UF e nome do negócio;</li>
         <li>tempo de funcionamento e número de pessoas na equipe;</li>
-        <li>maior desafio e mensagem (opcional).</li>
+        <li>maior desafio, se já fez mentoria ou curso, e mensagem (opcional).</li>
       </ul>
-      <p>No registro do consentimento, serão guardados:</p>
+      <p>No registro do consentimento (tabela <code>consent_events</code>), são guardados:</p>
       <ul>
         <li>data e hora, em UTC;</li>
-        <li>versão do texto aceito e o hash do texto;</li>
+        <li>versão do texto aceito e o hash (SHA-256) do texto;</li>
         <li>URL de origem e user agent do navegador;</li>
-        <li>o IP, apenas em forma de hash HMAC, sem guardar o IP em texto puro.</li>
+        <li>o IP do formulário, apenas em forma de hash HMAC, sem guardar o IP em texto puro.</li>
       </ul>
+      <p>
+        Para limitar envios em excesso, o hash HMAC do IP e a hora de cada envio ficam em uma tabela de controle por até 24 horas e
+        depois são apagados.
+      </p>
+      <p>
+        Painel de acesso restrito: o endereço IP de quem acessa o painel (apenas a pessoa administradora, não os titulares que preenchem
+        o formulário) pode constar em texto puro na tabela de sessão e no controle de tentativas de login.{" "}
+        <Pendente>prazo de retenção desses registros e eventual troca por hash (item em aberto)</Pendente>.
+      </p>
 
       <h2>3. Finalidade</h2>
       <p>
@@ -51,17 +60,17 @@ export default function Page() {
 
       <h2>5. Compartilhamento e operadores</h2>
       <p>
-        Os dados não serão vendidos. Poderão ser tratados por operadores de hospedagem e de banco de dados:{" "}
-        <Pendente>nome e localização (país) dos operadores, a definir na implantação do formulário</Pendente>. Se algum operador estiver
-        fora do Brasil, haverá transferência internacional (LGPD, art. 33):{" "}
+        Os dados não são vendidos. São tratados por operadores de hospedagem e de banco de dados. Banco de dados: Neon, em servidor da
+        AWS na região América do Sul (São Paulo, <code>sa-east-1</code>). Hospedagem: <Pendente>provedor (Vercel, a confirmar) e região
+        de execução das funções</Pendente>. Transferência internacional (LGPD, art. 33):{" "}
         <Pendente>confirmar se ocorre e qual a salvaguarda aplicável</Pendente>. O contato posterior é feito pelo WhatsApp, serviço de
         terceiros sujeito aos próprios termos.
       </p>
 
       <h2>6. Retenção</h2>
       <p>
-        Os dados ficarão guardados pelo tempo necessário à finalidade acima: <Pendente>prazo de retenção</Pendente>. Ao fim desse prazo,
-        serão eliminados ou anonimizados.
+        Os dados ficam guardados pelo tempo necessário à finalidade acima: <Pendente>prazo de retenção</Pendente>. Ao fim desse prazo,
+        são eliminados ou anonimizados. O controle de limite de envios é apagado em até 24 horas.
       </p>
 
       <h2>7. Direitos do titular (LGPD, art. 18)</h2>
@@ -89,15 +98,16 @@ export default function Page() {
 
       <h2>9. Segurança</h2>
       <p>
-        Estão previstas medidas como conexão segura (HTTPS), validação dos dados no servidor, limite de envios por origem e acesso
-        restrito, com login, às pessoas autorizadas. Nenhuma medida elimina todos os riscos. Este item será revisto antes de qualquer
-        coleta real.
+        Adotamos medidas como conexão segura (HTTPS), validação dos dados no servidor, campo oculto contra robôs, limite de envios por
+        origem (pelo hash do IP), registros do servidor sem dados pessoais e acesso restrito, com login, às pessoas autorizadas. Nenhuma
+        medida elimina todos os riscos. Este item será revisto antes de qualquer coleta de dados reais.
       </p>
 
       <h2>10. Cookies, analytics e pixels</h2>
       <p>
-        A página pública do site não usa cookies não essenciais, ferramentas de analytics nem pixels de terceiros. As fontes são servidas
-        pelo próprio site.
+        A página pública e o formulário não definem cookies, não usam ferramentas de analytics nem pixels de terceiros. As fontes são
+        servidas pelo próprio site. O painel administrativo (<code>/admin</code>), de uso exclusivo da equipe, usa um único cookie de
+        sessão, essencial, <code>httpOnly</code> e válido apenas no caminho <code>/admin</code>.
       </p>
 
       <h2>11. Incidentes de segurança</h2>
