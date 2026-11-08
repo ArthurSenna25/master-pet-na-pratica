@@ -15,6 +15,20 @@
       "when": 1794098447298,
       "tag": "0001_f4_auth_conferido",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794102022277,
+      "tag": "0002_f4b_checks_lead",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794102026109,
+      "tag": "0003_f4b_triggers",
+      "breakpoints": true
     }
   ]
 }

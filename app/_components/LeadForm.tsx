@@ -3,21 +3,23 @@
 // depois da hidratação (`js`) vira passo a passo. Validação de verdade: Zod no servidor (enviarLead).
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useActionState, useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
+import { Fragment, useActionState, useEffect, useRef, useState, useSyncExternalStore, type FocusEvent, type FormEvent, type PointerEvent } from "react";
 import { entrarPasso, reduzido, sairPasso, sucesso } from "../_fx/form";
 import { consentParts } from "../_lib/consent";
 import { enviarLead, type LeadState } from "../_lib/lead-action";
 import { JA_FEZ_MENTORIA, MAIOR_DESAFIO, PESSOAS, TEMPO_FUNCIONAMENTO } from "../_lib/lead-options";
+import { formatarTelefone } from "../_lib/lead-rules";
 import type { LeadField } from "../_lib/lead-schema";
 import { BrandChip } from "./BrandChip";
 import { ArrowIcon, CheckIcon } from "./icons";
-import { CAMPOS_POR_PASSO, NOMES_DOS_PASSOS, passoDoCampo, validarPassos } from "./lead-form-check";
+import { avaliarTexto, CAMPOS_POR_PASSO, ehCampoDeTexto, NOMES_DOS_PASSOS, passoDoCampo, validarPassos } from "./lead-form-check";
 
 type Erros = Partial<Record<LeadField, string>>;
 const INICIAL: LeadState = {};
 const ORDEM = CAMPOS_POR_PASSO.flat();
 const ULTIMO = CAMPOS_POR_PASSO.length - 1;
 const semAssinatura = () => () => {};
+const ATRASO_MS = 300; // debounce dos erros de "incompleto" depois que o campo já foi tocado
 
 function AlertIcon() {
   return (
@@ -89,6 +91,10 @@ export function LeadForm() {
   const ocupado = useRef(false);
   const entrada = useRef<{ dir: 1 | -1; anima: boolean } | null>(null);
   const foco = useRef<LeadField | null>(null);
+  const tocados = useRef(new Set<string>()); // campos de texto em que o usuário já saiu (blur)
+  const atrasos = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const clicandoBotao = useRef(false); // ponteiro pressionado num botão: o erro de blur empurraria o botão e o clique se perderia
+  useEffect(() => { const t = atrasos.current; return () => t.forEach(clearTimeout); }, []);
 
   // Resultado novo do servidor: zera erros locais e abre o passo do 1º campo inválido (ajuste durante o render).
   if (vista !== state) {
@@ -145,6 +151,7 @@ export function LeadForm() {
   }
 
   function mostrar(erros: Erros, passos: number[]) {
+    passos.flatMap((p) => CAMPOS_POR_PASSO[p]).forEach((c) => tocados.current.add(c));
     const zerado = Object.fromEntries(passos.flatMap((p) => CAMPOS_POR_PASSO[p]).map((c) => [c, erros[c] ?? ""]));
     setLocal((p) => ({ ...p, ...zerado }));
     const primeiro = ORDEM.find((c) => erros[c]);
@@ -167,10 +174,41 @@ export function LeadForm() {
     if (mostrar(validarPassos(todos, fd), todos)) e.preventDefault();
   }
 
-  const limpar = (e: FormEvent<HTMLFormElement>) => {
-    const n = (e.target as HTMLInputElement).name as LeadField;
-    if (n) setLocal((p) => (p[n] === "" ? p : { ...p, [n]: "" }));
-  };
+  const definir = (c: LeadField, erro: string) => setLocal((p) => (p[c] === erro ? p : { ...p, [c]: erro }));
+
+  // Tempo real: caractere inválido acusa na hora; "incompleto" só depois do 1º blur, com debounce. Campos que não são de texto só limpam o erro.
+  function aoDigitar(e: FormEvent<HTMLFormElement>) {
+    const el = e.target as HTMLInputElement;
+    const n = el.name as LeadField;
+    if (!n) return;
+    if (!ehCampoDeTexto(n)) return definir(n, "");
+    clearTimeout(atrasos.current.get(n));
+    const r = avaliarTexto(n, el.value); // avalia o que foi digitado, antes da máscara
+    if (n === "whatsapp") {
+      const f = formatarTelefone(el.value);
+      if (f !== el.value) el.value = f;
+    }
+    if (!r) return definir(n, "");
+    if (r.tipo === "invalido") return definir(n, r.erro);
+    if (tocados.current.has(n)) atrasos.current.set(n, setTimeout(() => definir(n, r.erro), ATRASO_MS));
+    else definir(n, "");
+  }
+
+  function aoPressionar(e: PointerEvent<HTMLFormElement>) {
+    if (!(e.target as HTMLElement).closest("button")) return;
+    clicandoBotao.current = true;
+    setTimeout(() => { clicandoBotao.current = false; }, 400);
+  }
+
+  function aoSair(e: FocusEvent<HTMLFormElement>) {
+    if (clicandoBotao.current) return; // Voltar não valida; Continuar/Enviar validam tudo no submit
+    const el = e.target as unknown as HTMLInputElement;
+    const n = el.name as LeadField;
+    if (!n || !ehCampoDeTexto(n)) return;
+    tocados.current.add(n);
+    clearTimeout(atrasos.current.get(n));
+    definir(n, avaliarTexto(n, el.value)?.erro ?? "");
+  }
 
   const pane = (i: number) => ({ "data-step": i + 1, hidden: js && step !== i });
   const actions = (i: number) => (
@@ -198,7 +236,7 @@ export function LeadForm() {
       <div className="mp-fx mp-fx--light-gold" /><div className="mp-fx mp-fx--grain" /><div className="mp-fx mp-fx--vignette" />
       <div className="lp-wrap lp-end__grid">
         <form
-          ref={formRef} action={action} onSubmit={aoEnviar} onInput={limpar} noValidate={js} aria-busy={pending}
+          ref={formRef} action={action} onSubmit={aoEnviar} onInput={aoDigitar} onBlur={aoSair} onPointerDown={aoPressionar} noValidate={js} aria-busy={pending}
           className={`lp-form lp-glass${js ? " is-steps" : ""}${state.ok ? " is-done" : ""}`} id="lp-form" aria-label="Quero conversar com a Camila"
         >
           <h2>Vamos conversar sobre o seu negócio.</h2>

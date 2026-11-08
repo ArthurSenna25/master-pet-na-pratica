@@ -1,0 +1,7 @@
+ALTER TABLE "lead" ADD CONSTRAINT "lead_nome_ck" CHECK ("lead"."anonimizado_em" is not null or (char_length("lead"."nome") between 2 and 80 and "lead"."nome" ~ '^[[:alpha:]][[:alpha:] ''.-]*$' and "lead"."nome" ~ '[[:alpha:]].*[[:alpha:]]'));--> statement-breakpoint
+ALTER TABLE "lead" ADD CONSTRAINT "lead_whatsapp_ck" CHECK ("lead"."anonimizado_em" is not null or "lead"."whatsapp" ~ '^[0-9]{10,11}$');--> statement-breakpoint
+ALTER TABLE "lead" ADD CONSTRAINT "lead_negocio_ck" CHECK ("lead"."anonimizado_em" is not null or (char_length("lead"."negocio") between 2 and 80 and "lead"."negocio" ~ '[[:alpha:]]'));--> statement-breakpoint
+ALTER TABLE "lead" ADD CONSTRAINT "lead_cidade_uf_ck" CHECK (char_length("lead"."cidade_uf") <= 70 and "lead"."cidade_uf" ~ '^[[:alpha:]][[:alpha:] ''-]*/[A-Z]{2}$' and right("lead"."cidade_uf", 2) in ('AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'));--> statement-breakpoint
+ALTER TABLE "lead" ADD CONSTRAINT "lead_mensagem_ck" CHECK ("lead"."mensagem" is null or char_length("lead"."mensagem") <= 1000);--> statement-breakpoint
+ALTER TABLE "lead" ADD CONSTRAINT "lead_observacao_ck" CHECK ("lead"."observacao" is null or char_length("lead"."observacao") <= 2000);--> statement-breakpoint
+ALTER TABLE "lead" ADD CONSTRAINT "lead_origem_ck" CHECK (char_length("lead"."origem") <= 300);

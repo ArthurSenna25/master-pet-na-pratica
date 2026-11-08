@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { LEGAL_TEXT_VERSION } from "../_lib/legal-version";
+import { FecharAba } from "./FecharAba";
 import { Wordmark } from "./Wordmark";
 
 /** Marcador destacado para o que depende da Camila ou do advogado. Nunca preencher com dado inventado. */
@@ -29,7 +30,7 @@ export function LegalPage({ titulo, children }: LegalPageProps) {
         {children}
       </main>
       <footer className="lg-footer">
-        <Link href="/#conversar">Voltar ao formulário</Link>
+        <FecharAba />
       </footer>
     </div>
   );

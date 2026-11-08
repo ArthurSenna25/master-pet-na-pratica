@@ -1,7 +1,6 @@
 // F4 E2E contra `next start` (porta 3000) e o branch "teste" do Neon. Tudo que criam tem prefixo "zz-teste-" e é apagado em afterEach/afterAll.
 import { neon } from "@neondatabase/serverless";
 import { expect, test as base, type APIRequestContext, type Page } from "@playwright/test";
-import { randomUUID } from "node:crypto";
 import { CONSENT_TEXT, LEGAL_TEXT_VERSION } from "../app/_lib/legal-version";
 import { ipHmac, sha256Hex } from "../app/_lib/seguranca";
 
@@ -36,7 +35,8 @@ test.afterAll(async () => {
   expect(r.limite).toBe(0);
 });
 
-const nomeUnico = () => `${PREFIXO}${randomUUID().slice(0, 8)}`;
+// só letras: a regra do nome rejeita dígitos
+const nomeUnico = () => `${PREFIXO}${Array.from({ length: 8 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join("")}`;
 const contar = async (nome: string) => Number((await sql`select count(*)::int c from lead where nome = ${nome}`)[0].c);
 
 // ---------- UI ----------
@@ -44,8 +44,8 @@ async function passo1(page: Page, nome: string) {
   await page.getByLabel("Nome", { exact: true }).fill(nome);
   await page.getByLabel("WhatsApp", { exact: true }).fill("(14) 99999-0000");
 }
-async function passo2(page: Page) {
-  await page.getByLabel("Cidade/UF").fill("Lins/SP");
+async function passo2(page: Page, cidade = "Lins/SP") {
+  await page.getByLabel("Cidade/UF").fill(cidade);
   await page.getByLabel("Nome do negócio").fill(`${PREFIXO}negocio`);
   await page.getByText("1 a 3 anos", { exact: true }).click();
   await page.getByText("2 a 3", { exact: true }).click();
@@ -105,19 +105,49 @@ test.describe("formulário (com JS)", () => {
     await expect(page.getByText("Informe a cidade/UF.")).toHaveCount(0);
   });
 
-  test("erro do servidor abre o passo do 1º campo inválido e foca", async ({ page }) => {
+  test("erro do servidor (cidade fora do IBGE) abre o passo 2 e foca o campo", async ({ page }) => {
     await page.goto("/");
     await page.locator("#conversar").scrollIntoViewIfNeeded();
-    await passo1(page, "x".repeat(101)); // passa no navegador (>= 2), o Zod do servidor rejeita (> 100)
+    await passo1(page, nomeUnico());
     await continuar(page);
-    await passo2(page);
+    await passo2(page, "Cidadeinexistente/SP"); // formato ok no navegador; só o servidor conhece os municípios
     await continuar(page);
     await passo3(page);
     await page.getByRole("button", { name: "Quero conversar com a Camila" }).click();
-    await expect(page.getByText("Passo 1 de 3 · Contato")).toBeVisible();
-    await expect(page.getByText("Informe seu nome.")).toBeVisible();
-    await expect(page.getByLabel("Nome", { exact: true })).toBeFocused();
+    await expect(page.getByText("Passo 2 de 3 · Seu negócio")).toBeVisible();
+    await expect(page.getByText("Cidade não encontrada nesta UF. Confira a grafia.")).toBeVisible();
+    await expect(page.getByLabel("Cidade/UF")).toBeFocused();
     await expect(page.locator(".lp-success")).toBeHidden();
+  });
+
+  test("erro em tempo real: inválido na hora, incompleto só após o blur, máscara do telefone", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#conversar").scrollIntoViewIfNeeded();
+    const nome = page.getByLabel("Nome", { exact: true });
+    const zap = page.getByLabel("WhatsApp", { exact: true });
+    await nome.pressSequentially("Ana1"); // dígito: acusa na hora, sem sair do campo
+    await expect(page.getByText("Use apenas letras, espaço, apóstrofo, hífen ou ponto.")).toBeVisible();
+    await expect(nome).toHaveAttribute("aria-invalid", "true");
+    await nome.fill("Ana");
+    await expect(page.getByText("Use apenas letras")).toHaveCount(0);
+    await expect(nome).not.toHaveAttribute("aria-invalid", "true");
+    await nome.fill("A"); // curto: ainda não avisa (campo não foi abandonado)
+    await expect(page.getByText("Informe ao menos 2 letras.")).toHaveCount(0);
+    await zap.focus(); // blur do nome
+    await expect(page.getByText("Informe ao menos 2 letras.")).toBeVisible();
+    await nome.fill("Ab"); // válido: some na hora
+    await expect(page.getByText("Informe ao menos 2 letras.")).toHaveCount(0);
+    await nome.fill("A"); // depois do blur acompanha a digitação (debounce ~300 ms)
+    await expect(page.getByText("Informe ao menos 2 letras.")).toBeVisible();
+
+    await zap.pressSequentially("14999990001");
+    await expect(zap).toHaveValue("(14) 99999-0001");
+    await zap.fill("");
+    await zap.pressSequentially("10");
+    await expect(page.getByText("DDD inválido.")).toBeVisible();
+    await zap.fill("abc");
+    await expect(page.getByText("Use apenas números.")).toBeVisible();
+    await expect(zap).toHaveValue("");
   });
 
   test("texto do consentimento no DOM é idêntico a CONSENT_TEXT; links em nova aba", async ({ page }) => {
@@ -129,6 +159,31 @@ test.describe("formulário (com JS)", () => {
       const a = page.locator(`.lp-consent a[href="${href}"]`);
       await expect(a).toHaveAttribute("target", "_blank");
       await expect(a).toHaveAttribute("rel", /noopener/);
+    }
+  });
+});
+
+test.describe("aba dos termos", () => {
+  test("Fechar e voltar: fecha a aba ou orienta, sem navegar para a home", async ({ page, context, browserName }) => {
+    await page.goto("/");
+    await page.locator("#conversar").scrollIntoViewIfNeeded();
+    await passo1(page, nomeUnico());
+    await continuar(page);
+    await passo2(page);
+    await continuar(page); // o link do consentimento está no passo 3
+    const [aba] = await Promise.all([context.waitForEvent("page"), page.locator('.lp-consent a[href="/termos-de-uso"]').click()]);
+    await aba.waitForLoadState();
+    await expect(aba.getByRole("heading", { name: "Termos de Uso" })).toBeVisible();
+    await expect(aba.getByRole("button", { name: "Fechar e voltar ao formulário" })).toBeVisible();
+    await aba.getByRole("button", { name: "Fechar e voltar ao formulário" }).click();
+    await page.waitForTimeout(700);
+    const fechou = aba.isClosed();
+    const resultado = `${browserName}: ${fechou ? "window.close() fechou a aba" : "aba continuou aberta; mostrou o aviso"}`;
+    test.info().annotations.push({ type: "resultado", description: resultado });
+    console.log("ABA-TERMOS", resultado);
+    if (!fechou) {
+      await expect(aba.getByText("Pode fechar esta aba e voltar ao formulário.")).toBeVisible();
+      expect(new URL(aba.url()).pathname).toBe("/termos-de-uso");
     }
   });
 });

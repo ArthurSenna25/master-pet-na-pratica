@@ -25,7 +25,24 @@ export const lead = pgTable(
     atualizadoEm: timestamp("atualizado_em", { withTimezone: true }).notNull().defaultNow(),
     anonimizadoEm: timestamp("anonimizado_em", { withTimezone: true }),
   },
-  (t) => [check("lead_status_ck", sql`${t.status} in ('novo','em_contato','convertido','nao_convertido')`)],
+  (t) => {
+    // Regras espelham app/_lib/lead-rules.ts (3ª camada). [[:alpha:]] cobre letras acentuadas (testado: José, Conceição, D'Ávila).
+    // Lead anonimizado (anonimizado_em) tem nome/WhatsApp/negócio vazios por desenho: fica fora destes três CHECKs.
+    const anon = sql`${t.anonimizadoEm} is not null`;
+    return [
+      check("lead_status_ck", sql`${t.status} in ('novo','em_contato','convertido','nao_convertido')`),
+      check("lead_nome_ck", sql`${anon} or (char_length(${t.nome}) between 2 and 80 and ${t.nome} ~ '^[[:alpha:]][[:alpha:] ''.-]*$' and ${t.nome} ~ '[[:alpha:]].*[[:alpha:]]')`),
+      check("lead_whatsapp_ck", sql`${anon} or ${t.whatsapp} ~ '^[0-9]{10,11}$'`),
+      check("lead_negocio_ck", sql`${anon} or (char_length(${t.negocio}) between 2 and 80 and ${t.negocio} ~ '[[:alpha:]]')`),
+      check(
+        "lead_cidade_uf_ck",
+        sql`char_length(${t.cidadeUf}) <= 70 and ${t.cidadeUf} ~ '^[[:alpha:]][[:alpha:] ''-]*/[A-Z]{2}$' and right(${t.cidadeUf}, 2) in ('AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO')`,
+      ),
+      check("lead_mensagem_ck", sql`${t.mensagem} is null or char_length(${t.mensagem}) <= 1000`),
+      check("lead_observacao_ck", sql`${t.observacao} is null or char_length(${t.observacao}) <= 2000`),
+      check("lead_origem_ck", sql`char_length(${t.origem}) <= 300`),
+    ];
+  },
 );
 
 // Fonte única de consentimento. Só INSERT na operação normal; exceção: anonimizar_lead() zera ip_hmac e user_agent.

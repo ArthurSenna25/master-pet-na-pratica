@@ -16,6 +16,8 @@ import { CONSENT_TEXT, LEGAL_TEXT_VERSION } from "./legal-version";
 import { ipHmac, sha256Hex } from "./seguranca";
 
 const PREFIXO = "zz-teste-";
+/** Nome só com letras (a regra do nome rejeita dígitos): identificável pelo prefixo e único. */
+const letras = (n = 8) => Array.from({ length: n }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join("");
 const db = getDb();
 const ipsUsados = new Set<string>();
 
@@ -27,7 +29,7 @@ function novoIp(): string {
 
 function form(over: Record<string, string> = {}): FormData {
   const base: Record<string, string> = {
-    nome: `${PREFIXO}${randomUUID().slice(0, 8)}`,
+    nome: `${PREFIXO}${letras()}`,
     whatsapp: "(14) 99999-0000",
     cidade: "Lins/SP",
     negocio: `${PREFIXO}negocio`,

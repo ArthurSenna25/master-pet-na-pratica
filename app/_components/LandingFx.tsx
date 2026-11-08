@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { header, magnet, progress, sticky } from "../_fx/chrome";
 import { formEntrada } from "../_fx/form";
+import { seguirHash } from "../_fx/hash";
 import { hero, heroLight } from "../_fx/hero";
 import { acao } from "../_fx/acao";
 import { como } from "../_fx/como";
@@ -26,6 +27,13 @@ export function LandingFx() {
     const mm = gsap.matchMedia();
     // Sticky CTA também em reduced-motion (sem transição: ver CSS); não depende de GSAP.
     const stopSticky = sticky();
+    // Hash na URL: reposiciona depois das cenas e de cada refresh (ver _fx/hash.ts). Vale também em reduced-motion (fontes mexem na altura).
+    const hash = seguirHash();
+    let refresh = () => {};
+    const aoCarregar = () => { refresh(); hash.assentar(); };
+    window.addEventListener("load", aoCarregar);
+    let vivo = true;
+    void document.fonts.ready.then(() => vivo && aoCarregar());
 
     mm.add(MOTION, () => {
       // Ordem da página: pins criados fora de ordem dão alturas erradas. Cada cena pinada
@@ -43,19 +51,17 @@ export function LandingFx() {
       formEntrada();
       // sort uma vez, depois de todas as cenas; refresh no load e em fonts.ready
       ScrollTrigger.sort();
-      const refresh = () => ScrollTrigger.refresh();
-      window.addEventListener("load", refresh);
-      let live = true;
-      void document.fonts.ready.then(() => live && refresh());
-      return undo(cleanup, stopProblema, stopComo, stopAcao, () => {
-        live = false;
-        window.removeEventListener("load", refresh);
-      });
+      refresh = () => ScrollTrigger.refresh();
+      hash.reaplicar();
+      return undo(cleanup, stopProblema, stopComo, stopAcao, () => { refresh = () => {}; });
     });
 
     mm.add(FINE, () => undo(heroLight(), magnet(), destravaHover()));
 
     return () => {
+      vivo = false;
+      window.removeEventListener("load", aoCarregar);
+      hash.parar();
       mm.revert();
       stopSticky?.();
     };
