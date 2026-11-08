@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { consentParts } from "./consent";
 import { CONSENT_TEXT, LEGAL_TEXT_VERSION } from "./legal-version";
@@ -93,6 +94,18 @@ describe("consentParts", () => {
   });
 });
 
+describe("DECISOES-LGPD.md", () => {
+  const doc = readFileSync("docs/_projeto/lgpd/DECISOES-LGPD.md", "utf8");
+  it("cita a versão vigente dos textos legais", () => expect(doc).toContain(LEGAL_TEXT_VERSION));
+  it("tem as 11 seções e não afirma conformidade total", () => {
+    for (let i = 1; i <= 11; i++) expect(doc).toMatch(new RegExp(`^## ${i}\\. `, "m"));
+    expect(doc).not.toMatch(/100\s?%\s*(LGPD|conforme)/i);
+  });
+  it("não contém segredos nem credenciais", () => {
+    expect(doc).not.toMatch(/postgres(ql)?:\/\/|_SECRET=|_PASSWORD=|sk-[A-Za-z0-9]{10,}/);
+  });
+});
+
 describe("limite de envio", () => {
   it("bloqueia a partir do 6º (5 já gravados)", () => {
     expect(MAX_ENVIOS).toBe(5);
@@ -108,3 +121,4 @@ describe("limite de envio", () => {
     expect(RETENCAO_MS).toBe(24 * 60 * 60 * 1000);
   });
 });
+

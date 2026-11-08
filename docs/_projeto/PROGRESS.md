@@ -1,11 +1,12 @@
 # PROGRESS — Master Pet na Prática (≤ 40 linhas; o Claude lê só isto ao retomar)
-**Nível:** N2 enxuto (sobe para N3 se: área de aluno, pagamento ou mais de um usuário com permissões) · **Fase atual:** F4, commits 1–4b feitos; falta o 5 (DECISOES-LGPD.md completo) · F1 ✔ F2 ✔ F3 ✔ → F4 → F5-painel → F6 (QA/legais/deploy)
+**Nível:** N2 enxuto (sobe para N3 se: área de aluno, pagamento ou mais de um usuário com permissões) · **Fase atual:** F4 concluída (commits 1–5; sem push) · F1 ✔ F2 ✔ F3 ✔ F4 ✔ → **F5-painel** → F6 (QA/legais/deploy)
 
 ## Feito
 - F1–F3: Next 16.4.5 + Paleta B; LP estática em Server Components (CSS do handoff intacto em `app/landing/`); gsap: `LandingFx` cria as cenas de `app/_fx/` na ordem da página, pin só em ≥900x720 (#problema, #como, #acao), estado inicial por `gsap.set` pós-hidratação. CLS 0, `node qa/fx-check.mjs <url>` TUDO OK.
 - F4 c1–c2: Neon + Drizzle (`app/_lib/db/schema.ts`, `getDb()`); Better Auth (signup off, cookie httpOnly path=/admin, `requireSession()` em toda página/action admin, `scripts/create-admin.mjs`). **Migrações 0000–0003 aplicadas SÓ no branch teste do Neon (sa-east-1, expira 2026-12-07). Banco de produção: sem migração; admin existe só no teste.**
 - F4 c3: `enviarLead` (honeypot → Zod → IP→HMAC → limite 5/10 min, limpeza 24 h → `db.batch` lead+consent_events), `CONSENT_TEXT` + hash SHA-256, `anonimizarLead` (+audit_log). `admin_events` NÃO feito: início da F5.
 - F4 c4: `LeadForm` client (3 passos só pós-hidratação; sem JS = 3 passos juntos), cena 9 `_fx/form.ts`, textos legais 0.2 (histórico em `legal-version.ts`), Playwright na porta 3000 com o branch teste.
+- F4 c5: `docs/_projeto/lgpd/DECISOES-LGPD.md` completo (11 seções, versão 0.2 de 2026-11-08; teste de Vitest garante a versão e a ausência de segredos). Entregar à Camila e ao advogado.
 - F4 c4b: regras únicas `lead-rules.ts` (navegador + Zod). Cidade×IBGE só no servidor (`municipios.ts` + `data/municipios.json`; 0 byte no bundle). Banco: 8 CHECKs em `lead` + triggers (`atualizado_em`; `consent_events` imutável, só zera ip_hmac/user_agent). Tempo real: inválido na hora, incompleto no blur + debounce 300 ms, máscara do telefone; erro de blur é ignorado ao pressionar botão (senão o erro empurrava o botão e o clique se perdia).
 - Aba dos termos: botão "Fechar e voltar ao formulário" (`window.close()`; senão mostra o aviso). Playwright: fechou em chromium e webkit; Safari/iOS real NÃO testado.
 - Hash+pins (causa medida): o salto nativo vem antes dos pin-spacers e o Chromium faz scroll suave pós-load com destino defasado; chromium parava em scrollY 0, webkit dentro de #acao. Correção `_fx/hash.ts`: scroll-behavior:auto + reaplica `scrollIntoView` após cenas, load e fonts.ready (+120/450/1000 ms) até haver interação. 3 viewports × 2 navegadores × #conversar/#acao: alvo a 76 px (abaixo do header); estado das cenas = rolagem natural; F5 e reduced-motion ok.
@@ -36,4 +37,4 @@
 - Pendência jurídica: prazo de retenção de audit_log e admin_events.
 
 ## Backlog: (vazio)
-## Consumo — F1 ≈ US$ 6–7. F2: ~63% da janela. F3 CP1: não medido. CP2 commit 1: 76% → 82%, semana 9%. CP2 commits 2+3: US$ 1,55 (estimativa de API); fim em 19%, semana 11%. F4: planejamento 24% → 30%. Commits 1+2: 30% → 35%. Commit 3: 35% → 38%. Commit 4: 38% → 45%. Commit 4b (validação, UX, aba, hash+pins): início em 45%, fim não medido pelo agente (anotar). Commit 5 (DECISOES-LGPD.md): a fazer.
+## Consumo — F1 ≈ US$ 6–7. F2: ~63% da janela. F3 CP1: não medido. CP2 commit 1: 76% → 82%, semana 9%. CP2 commits 2+3: US$ 1,55 (estimativa de API); fim em 19%, semana 11%. F4: planejamento 24% → 30%. Commits 1+2: 30% → 35%. Commit 3: 35% → 38%. Commit 4: 38% → 45%. Commit 4b (validação 3 camadas, UX em tempo real, aba dos termos, hash+pins): início 45%; fim não medido (a janela de 5 h virou no meio; ~90k tokens). Commit 5 (DECISOES-LGPD.md): 13% da janela; fim não medido.
