@@ -66,7 +66,7 @@ export const auditLog = pgTable("audit_log", {
   criadoEm: agora(),
 });
 
-// --- Better Auth (formato padrão; conferido contra o CLI no commit 2) ---
+// --- Better Auth (conferido contra o CLI em 2026-11-07; rateLimit mapeia a tabela física rate_limit_auth) ---
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -86,7 +86,7 @@ export const session = pgTable("session", {
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-});
+}, (t) => [index("session_userId_idx").on(t.userId)]);
 
 export const account = pgTable("account", {
   id: text("id").primaryKey(),
@@ -102,7 +102,7 @@ export const account = pgTable("account", {
   password: text("password"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [index("account_userId_idx").on(t.userId)]);
 
 export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
@@ -111,11 +111,11 @@ export const verification = pgTable("verification", {
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [index("verification_identifier_idx").on(t.identifier)]);
 
 export const rateLimit = pgTable("rate_limit_auth", {
   id: text("id").primaryKey(),
-  key: text("key").notNull(),
+  key: text("key").notNull().unique(),
   count: integer("count").notNull(),
   lastRequest: bigint("last_request", { mode: "number" }).notNull(),
 });

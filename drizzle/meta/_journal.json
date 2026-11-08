@@ -8,6 +8,13 @@
       "when": 1794097702640,
       "tag": "0000_f4_schema_inicial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794098447298,
+      "tag": "0001_f4_auth_conferido",
+      "breakpoints": true
     }
   ]
 }

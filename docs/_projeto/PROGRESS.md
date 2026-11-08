@@ -1,7 +1,7 @@
 # PROGRESS — Master Pet na Prática (≤ 40 linhas; o Claude lê só isto ao retomar)
 
 **Nível:** N2 enxuto (sobe para N3 se: área de aluno, pagamento ou mais de um usuário com permissões)
-**Fase atual:** F4 em andamento (commit 1/5 feito) · F3-motion concluída · **Ordem:** F1 → F2 → F3-motion ✔ → F4-banco → F5-painel → F6 (QA/legais/deploy)
+**Fase atual:** F4 em andamento (commits 1-2 de 5) · F3-motion concluída · **Ordem:** F1 → F2 → F3-motion ✔ → F4-banco → F5-painel → F6 (QA/legais/deploy)
 
 ## Feito
 - F1: scaffold Next 16.4.5, tokens Paleta B, next/font, 7 webp (528 KB), headers, DESIGN/PLANO.
@@ -13,8 +13,9 @@
 - Correções de CLS (h1 SplitText): `.lp-h1{justify-self:stretch}`, `reduceWhiteSpace:false`, margens da `.ln__i-mask`. CLS 0 em 390 e 1440 (`qa/cls-src.mjs` lista as fontes de shift).
 - Verificação (`node qa/fx-check.mjs`, servidor `next start -p 3100`): chromium+webkit 390x844 e 1440x800, chromium 1366x657, com/sem reducedMotion: TUDO OK. 1440x800 = 3 pin-spacers (#problema, #como, #acao) e cada um cabe em 100svh (1º sinal abaixo do header); 1366x657 e mobile sem pin; #problema sem oculto no 1º paint; abas por clique e seta; resize 1440→390 sem órfãos; 0 erros de console. Build/lint/tsc ok · googleapis 0 · LCP mobile 0,7–2,2 s (ruído) · CLS 0.
 
-- F4 c1: deps drizzle-orm, @neondatabase/serverless, drizzle-kit (dev). Schema em `app/_lib/db/schema.ts` (lead, consent_events c/ `tipo`, rate_limit, audit_log sem FK/sem PII, tabelas Better Auth escritas à mão: conferir com o CLI no c2). Conexão preguiçosa `getDb()`. Migração `drizzle/0000_f4_schema_inicial.sql` GERADA, **NÃO aplicada em nenhum banco** (`.env.local` ainda não existe; o agente não gera segredos). `.env.example` versionado (`!.env.example`).
-- F4 pendências: criar `.env.local` (DATABASE_URL, BETTER_AUTH_SECRET, IP_HMAC_SECRET, BETTER_AUTH_URL) · aplicar migração primeiro em branch/local do Neon, nunca direto no banco da Vercel · conferir Function Region da Vercel (Settings > Functions; padrão iad1, suposição) · Neon: plano grátis, AWS sa-east-1, Postgres 18 · audit_log sem prazo de retenção e cascade = pendências jurídicas (DECISOES-LGPD.md).
+- F4 c1: deps drizzle-orm, @neondatabase/serverless, drizzle-kit (dev). Schema em `app/_lib/db/schema.ts` (lead, consent_events c/ `tipo`, rate_limit, audit_log sem FK/sem PII, Better Auth conferido com o CLI em 07/11). Conexão preguiçosa `getDb()`. Migrações 0000 e 0001 em `drizzle/`. **Migração aplicada no branch teste do Neon (sa-east-1, expira 2026-12-07). Banco de produção: sem migração.**
+- F4 c2: better-auth + zod. `app/_lib/auth.ts` (signup desligado, cookie httpOnly path=/admin, limite de login 5/min em tabela `rate_limit_auth`), `session.ts` (`requireSession()` em toda página/action do admin), `/admin/login` (action, funciona sem JS), `/admin` ("Sessão ativa" + sair), `scripts/create-admin.mjs` (admin único, idempotente, não imprime senha). Verificado no build de produção: /admin sem sessão→307 login · sign-up 400 e 0 usuários criados · login 200 com cookie path=/admin httpOnly · 6º login→429. Origem do Better Auth = BETTER_AUTH_URL (testes devem enviar esse Origin).
+- F4 pendências: conferir Function Region da Vercel (padrão iad1, suposição) · Neon: plano grátis, AWS sa-east-1, Postgres 18 · audit_log sem prazo de retenção e cascade = pendências jurídicas (DECISOES-LGPD.md) · BETTER_AUTH_URL de produção · porta 3100 estava ocupada por next start antigo (encerrado).
 
 ## static-overrides.css (restante)
 - scroll-padding/`[id]` · `#problema` margem negativa · `.lp-cover` !important (next/image fill) · véu do hero em @keyframes (CSS por decisão) · header sólido + `.is-top` · `.ln__i-mask` · `.lp-panes{gap:20px}` [F4] · links do consentimento · `.lp-row`/`#lp-previa`.
