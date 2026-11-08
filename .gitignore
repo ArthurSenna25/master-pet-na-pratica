@@ -49,3 +49,6 @@ next-env.d.ts
 /design-src/
 /qa/shots/
 qa/out/
+
+# exceção: modelo de variáveis, sem valores
+!.env.example
