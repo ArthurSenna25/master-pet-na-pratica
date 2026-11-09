@@ -1,5 +1,5 @@
 # PROGRESS — Master Pet na Prática (≤ 40 linhas; o Claude lê só isto ao retomar)
-**Nível:** N2 enxuto (sobe para N3 se: área de aluno, pagamento ou mais de um usuário com permissões) · **Fase atual:** F5 commits 1–3/5 feitos (sem push) · F1 ✔ F2 ✔ F3 ✔ F4 ✔ → **F5-painel** → F6 (QA/legais/deploy)
+**Nível:** N2 enxuto (sobe para N3 se: área de aluno, pagamento ou mais de um usuário com permissões) · **Fase atual:** F5 commits 1–4/5 feitos (sem push) · F1 ✔ F2 ✔ F3 ✔ F4 ✔ → **F5-painel** → F6 (QA/legais/deploy)
 
 ## Feito
 - F1–F3: Next 16.4.5 + Paleta B; LP estática em Server Components (CSS do handoff intacto em `app/landing/`); gsap: `LandingFx` cria as cenas de `app/_fx/` na ordem da página, pin só em ≥900x720 (#problema, #como, #acao), estado inicial por `gsap.set` pós-hidratação. CLS 0, `node qa/fx-check.mjs <url>` TUDO OK.
@@ -12,6 +12,7 @@
 
 - F5 c2: `/admin` lista (Server Component, URL como estado: q/status/ordem/pagina, 20 por página), resumo por status, busca ILIKE com `escaparLike` (telefone só com 3+ dígitos; termo vazio nunca vira '%%'). Admin com superfície clara própria (`bg-slate-50`) porque o body global é azul-marinho e sem preflight. Specs `e2e/admin-*.spec.ts` (login uma vez por teste: limite 5/min). Nome não aceita % e _ (CHECK): testes de escape usam `negocio`.
 - F5 c3: `/admin/lead/[id]` (detalhe, status, observação ≤ 2000) + `lead-actions.ts` (requireSession na 1ª linha; Zod uuid/enum; excluir = `db.batch` audit_log `excluir_lead` + DELETE). Excluir/anonimizar: 2 passos por GET `?confirmar=` + form `confirmar=sim` (funciona sem JS; testado). CUIDADO: `landing-v6.css:249 main section:not(.lp-hero)` dá margem -28px/borda redonda a QUALQUER `<section>` no admin: usar `<div role=region>`. Sem preflight: `box-border` nos campos e wrapper `flex` em torno de `inline-flex`. `pkill` não existe no shell: matar servidor da :3000 via PowerShell antes de e2e após rebuild.
+- F5 c4: `GET /admin/auditoria.csv` (audit_log+consent_events+admin_events; colunas `fonte,id,evento,lead_id,texto_versao,texto_hash,data_utc`; sem PII/origem/ip/ua; `csv.ts` com proteção de fórmula, reusar no CSV de leads) e `GET /admin/decisoes-lgpd` (.md; `outputFileTracingIncludes` p/ Vercel). `negarSeSemSessao` (`rota-protegida.ts`): 401 sem redirect, 403 se `sec-fetch-site: cross-site`. O export se grava ANTES de ler (admin_events + audit_log). Migração 0005: `audit_log.lead_id` nulo (só branch teste). Links no painel são `<a>` (Link faria prefetch e gravaria export). DECISOES-LGPD atualizado (5.3, 5.13, mapa, seção 9); textos públicos intactos, versão 0.2 mantida.
 
 ## Pesquisa de validação (4b, 2026-11-08: web, não Context7)
 - Nome: Unicode `\p{L}\p{M}` + espaço ' - . (NFC), ≥2 letras, sem dígitos/símbolos; não restringir a ASCII (José, Conceição, D'Ávila, 李雷).

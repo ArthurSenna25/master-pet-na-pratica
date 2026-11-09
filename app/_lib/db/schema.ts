@@ -75,11 +75,11 @@ export const rateLimitEnvio = pgTable(
   (t) => [index("rate_limit_ip_idx").on(t.ipHmac, t.criadoEm)],
 );
 
-// Sem FK e sem dado pessoal: sobrevive à exclusão do lead. Retenção: pendência jurídica.
+// Sem FK e sem dado pessoal: sobrevive à exclusão do lead. lead_id é nulo em ações sem lead (export_auditoria). Retenção: pendência jurídica.
 export const auditLog = pgTable("audit_log", {
   id: uuid("id").primaryKey().defaultRandom(),
   acao: text("acao").notNull(),
-  leadId: uuid("lead_id").notNull(),
+  leadId: uuid("lead_id"),
   criadoEm: agora(),
 });
 

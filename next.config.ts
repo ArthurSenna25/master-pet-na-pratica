@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // O documento fica fora de app/: sem isto a função serverless da Vercel não o empacota.
+  outputFileTracingIncludes: { "/admin/decisoes-lgpd": ["./docs/_projeto/lgpd/DECISOES-LGPD.md"] },
   turbopack: {
     rules: {
       "*.css": {

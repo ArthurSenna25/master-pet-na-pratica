@@ -38,6 +38,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <form action={logoutAction}><button type="submit" className={BOTAO}>Sair</button></form>
       </header>
 
+      {/* <a> e não <Link>: Link faria prefetch e dispararia o export (que grava registro). */}
+      <nav aria-label="Auditoria e privacidade" className="mb-6 flex flex-wrap gap-3">
+        <a href="/admin/auditoria.csv" download className={BOTAO}>Baixar auditoria (CSV)</a>
+        <a href="/admin/decisoes-lgpd" download className={BOTAO}>Baixar documento LGPD</a>
+      </nav>
+
       <nav aria-label="Resumo por status" className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {STATUS.map((s) => (
           <Link key={s} href={href(p, { status: p.status === s ? undefined : s, pagina: 1 })} aria-current={p.status === s ? "true" : undefined}
