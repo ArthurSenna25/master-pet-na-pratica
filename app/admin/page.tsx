@@ -23,7 +23,9 @@ function href(p: ParamsLista, mudar: Partial<ParamsLista>) {
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await requireSession();
-  const p = lerParams(await searchParams);
+  const raw = await searchParams;
+  const p = lerParams(raw);
+  const ok = raw.ok;
   const [{ total, linhas }, resumo] = await Promise.all([listarLeads(p), resumoPorStatus()]);
   const totalGeral = Object.values(resumo).reduce((a, b) => a + b, 0);
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
@@ -65,6 +67,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <button type="submit" className={`${BOTAO} !bg-slate-900 !text-white`}>Filtrar</button>
       </form>
 
+      {ok === "excluido" && <p role="status" className="mb-3 rounded-md bg-green-100 p-3">Lead excluído.</p>}
       <p role="status" className="m-0 mb-3 text-sm">{total} {total === 1 ? "lead" : "leads"}{filtrando ? " no filtro" : ""}</p>
 
       {linhas.length === 0 ? (
@@ -77,7 +80,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           {linhas.map((l) => (
             <li key={l.id} className="rounded-md border border-slate-300 bg-white p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="m-0 break-words text-lg font-semibold">{l.anonimizadoEm ? "Anonimizado" : l.nome}</h2>
+                <h2 className="m-0 flex break-words text-lg font-semibold"><Link href={`/admin/lead/${l.id}`} className={`inline-flex min-h-11 items-center no-underline text-slate-900 hover:underline ${FOCO}`}>{l.anonimizadoEm ? "Anonimizado" : l.nome}</Link></h2>
                 <span className="rounded bg-slate-100 px-2 py-1 text-sm">{STATUS_ROTULO[l.status as keyof typeof STATUS_ROTULO] ?? l.status}</span>
               </div>
               {!l.anonimizadoEm && <p className="mt-1 break-words text-sm">{l.negocio} · {l.cidadeUf} · {l.whatsapp}</p>}
