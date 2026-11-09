@@ -6,6 +6,7 @@ import { getDb } from "../../../_lib/db";
 import { lead } from "../../../_lib/db/schema";
 import { idSchema, OBSERVACAO_MAX } from "../../../_lib/admin/lead-edit";
 import { STATUS, STATUS_ROTULO } from "../../../_lib/admin/status";
+import { linkWhatsapp } from "../../../_lib/admin/whatsapp";
 import { anonimizarLeadAction, atualizarLeadAction, excluirLeadAction } from "../../lead-actions";
 
 const FOCO = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700";
@@ -27,6 +28,7 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
   const confirmar = um(q.confirmar);
   const anon = l.anonimizadoEm !== null;
   const base = `/admin/lead/${l.id}`;
+  const wa = anon ? null : linkWhatsapp(l.whatsapp); // montado no servidor; nunca para lead anonimizado
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-6">
@@ -49,6 +51,8 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
           {l.mensagem && <div className="sm:col-span-2"><dt className="text-slate-600">Mensagem</dt><dd className="m-0 whitespace-pre-wrap break-words">{l.mensagem}</dd></div>}
         </dl>
       )}
+
+      {wa && <p className="m-0 mt-6 flex"><a href={wa} target="_blank" rel="noopener noreferrer" className={BOTAO}>Chamar no WhatsApp</a></p>}
 
       {!anon && (
         <form action={atualizarLeadAction} className="mt-8 grid gap-4">

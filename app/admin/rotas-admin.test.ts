@@ -9,6 +9,7 @@ import { getDb } from "../_lib/db";
 import { adminEvents } from "../_lib/db/schema";
 import { GET as auditoria } from "./auditoria.csv/route";
 import { GET as documento } from "./decisoes-lgpd/route";
+import { GET as leadsCsv } from "./leads.csv/route";
 
 const db = getDb();
 const eventos = async () => (await db.select({ n: count() }).from(adminEvents))[0].n;
@@ -28,6 +29,28 @@ describe("sem sessão", () => {
     const r = await documento(req());
     expect(r.status).toBe(401);
     expect(await r.text()).not.toContain("DECISOES-LGPD");
+  });
+});
+
+describe("leads.csv", () => {
+  it("sem sessão: 401 sem redirect e sem gravar; cross-site com sessão: 403 e sem gravar", async () => {
+    const antes = await eventos();
+    const r = await leadsCsv(req());
+    expect(r.status).toBe(401);
+    expect(r.headers.get("location")).toBeNull();
+    sessao = { user: {} };
+    expect((await leadsCsv(req({ "sec-fetch-site": "cross-site" }))).status).toBe(403);
+    expect(await eventos()).toBe(antes);
+  });
+  it("com sessão: 200, anexo CSV, no-store, e grava 1 admin_events", async () => {
+    sessao = { user: {} };
+    const antes = await eventos();
+    const r = await leadsCsv(req());
+    expect(r.status).toBe(200);
+    expect(r.headers.get("content-type")).toContain("text/csv");
+    expect(r.headers.get("content-disposition")).toMatch(/attachment; filename="leads-\d{4}-\d{2}-\d{2}\.csv"/);
+    expect(r.headers.get("cache-control")).toBe("no-store");
+    expect(await eventos()).toBe(antes + 1);
   });
 });
 

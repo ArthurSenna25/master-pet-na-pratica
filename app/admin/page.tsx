@@ -4,6 +4,7 @@ import { requireSession } from "../_lib/session";
 import { lerParams, POR_PAGINA, type ParamsLista } from "../_lib/admin/busca";
 import { listarLeads, resumoPorStatus } from "../_lib/admin/leads-query";
 import { STATUS, STATUS_ROTULO } from "../_lib/admin/status";
+import { linkWhatsapp } from "../_lib/admin/whatsapp";
 
 const FOCO = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700";
 const BOTAO = `inline-flex font-[inherit] no-underline text-slate-900 min-h-11 items-center justify-center rounded-md border border-slate-400 bg-white px-4 text-sm font-medium ${FOCO}`;
@@ -39,10 +40,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       </header>
 
       {/* <a> e não <Link>: Link faria prefetch e dispararia o export (que grava registro). */}
-      <nav aria-label="Auditoria e privacidade" className="mb-6 flex flex-wrap gap-3">
+      <nav aria-label="Exportações e privacidade" className="mb-3 flex flex-wrap gap-3">
+        <a href="/admin/leads.csv" download className={BOTAO}>Baixar leads (CSV)</a>
         <a href="/admin/auditoria.csv" download className={BOTAO}>Baixar auditoria (CSV)</a>
         <a href="/admin/decisoes-lgpd" download className={BOTAO}>Baixar documento LGPD</a>
       </nav>
+      <p className="m-0 mb-6 text-sm text-slate-700">O CSV de leads contém dados pessoais; guarde o arquivo com cuidado.</p>
 
       <nav aria-label="Resumo por status" className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {STATUS.map((s) => (
@@ -83,7 +86,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         </p>
       ) : (
         <ul className="m-0 grid list-none gap-3 p-0">
-          {linhas.map((l) => (
+          {linhas.map((l) => {
+            const wa = l.anonimizadoEm ? null : linkWhatsapp(l.whatsapp);
+            return (
             <li key={l.id} className="rounded-md border border-slate-300 bg-white p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="m-0 flex break-words text-lg font-semibold"><Link href={`/admin/lead/${l.id}`} className={`inline-flex min-h-11 items-center no-underline text-slate-900 hover:underline ${FOCO}`}>{l.anonimizadoEm ? "Anonimizado" : l.nome}</Link></h2>
@@ -91,8 +96,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               </div>
               {!l.anonimizadoEm && <p className="mt-1 break-words text-sm">{l.negocio} · {l.cidadeUf} · {l.whatsapp}</p>}
               <p className="mt-1 text-sm text-slate-600">Recebido em {data(l.criadoEm)}</p>
+              {wa && (
+                <p className="m-0 mt-2 flex"><a href={wa} target="_blank" rel="noopener noreferrer" className={BOTAO}>Chamar no WhatsApp</a></p>
+              )}
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
 

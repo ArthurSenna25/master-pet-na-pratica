@@ -1,6 +1,7 @@
 import { asc } from "drizzle-orm";
 import { getDb } from "../db";
 import { adminEvents, auditLog, consentEvents } from "../db/schema";
+import { registrarExportacao } from "./events";
 import { montarCsv } from "./csv";
 
 // Sem nome, WhatsApp, origem (URL), ip_hmac, user_agent nem texto livre: só ação/tipo, ids, versão/hash e datas UTC.
@@ -12,10 +13,7 @@ export const CABECALHO_AUDITORIA = ["fonte", "id", "evento", "lead_id", "texto_v
  * ponytail: sem LIMIT (volume N2 pequeno); se passar de ~100 mil linhas, paginar/stream.
  */
 export async function gerarCsvAuditoria(db = getDb()): Promise<string> {
-  await db.batch([
-    db.insert(adminEvents).values({ acao: "export_auditoria" }),
-    db.insert(auditLog).values({ acao: "export_auditoria" }),
-  ]);
+  await registrarExportacao("export_auditoria", db);
   const [audit, consent, admin] = await Promise.all([
     db.select().from(auditLog).orderBy(asc(auditLog.criadoEm)),
     db.select().from(consentEvents).orderBy(asc(consentEvents.aceitoEm)),
