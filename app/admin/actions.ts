@@ -3,6 +3,7 @@ import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { registrarAdminEvento } from "../_lib/admin/events";
 import { auth } from "../_lib/auth";
 import { requireSession } from "../_lib/session";
 
@@ -23,11 +24,13 @@ export async function loginAction(_prev: LoginState, form: FormData): Promise<Lo
     if (e instanceof APIError && e.statusCode === 429) return { error: "Muitas tentativas. Aguarde um minuto." };
     return { error: "E-mail ou senha incorretos." };
   }
+  await registrarAdminEvento("login");
   redirect("/admin");
 }
 
 export async function logoutAction() {
   await requireSession();
+  await registrarAdminEvento("logout");
   await auth.api.signOut({ headers: await headers() });
   redirect("/admin/login");
 }

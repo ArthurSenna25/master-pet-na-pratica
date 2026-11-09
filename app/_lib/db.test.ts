@@ -160,3 +160,18 @@ describe("enviarLead", () => {
     }
   });
 });
+
+describe("admin_events", () => {
+  it("grava só ação e data UTC; ação fora da lista é rejeitada pelo CHECK", async () => {
+    const { registrarAdminEvento } = await import("./admin/events");
+    const { adminEvents } = await import("./db/schema");
+    const antes = new Date(Date.now() - 1000);
+    await registrarAdminEvento("login");
+    const linhas = await db.select().from(adminEvents).orderBy(adminEvents.criadoEm);
+    const ultima = linhas[linhas.length - 1];
+    expect(Object.keys(ultima).sort()).toEqual(["acao", "criadoEm", "id"]);
+    expect(ultima.criadoEm.getTime()).toBeGreaterThan(antes.getTime());
+    await expect(registrarAdminEvento("hack" as never)).rejects.toThrow();
+    await db.delete(adminEvents).where(eq(adminEvents.id, ultima.id)); // limpeza
+  });
+});
