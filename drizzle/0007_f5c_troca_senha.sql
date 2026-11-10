@@ -1,0 +1,2 @@
+ALTER TABLE "admin_events" DROP CONSTRAINT "admin_events_acao_ck";--> statement-breakpoint
+ALTER TABLE "admin_events" ADD CONSTRAINT "admin_events_acao_ck" CHECK ("admin_events"."acao" in ('login','logout','export_auditoria','export_leads','troca_senha'));

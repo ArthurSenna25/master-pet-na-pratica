@@ -50,6 +50,13 @@
       "when": 1794288369263,
       "tag": "0006_f5b_user_email_ck",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794307835990,
+      "tag": "0007_f5c_troca_senha",
+      "breakpoints": true
     }
   ]
 }

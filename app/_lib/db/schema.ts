@@ -84,7 +84,7 @@ export const auditLog = pgTable("audit_log", {
 });
 
 // Ações do painel (RF-14/RNF-08): só ação e data UTC. Sem IP, sem user agent, sem dado pessoal. Retenção: pendência jurídica.
-export const ADMIN_ACOES = ["login", "logout", "export_auditoria", "export_leads"] as const;
+export const ADMIN_ACOES = ["login", "logout", "export_auditoria", "export_leads", "troca_senha"] as const;
 export const adminEvents = pgTable(
   "admin_events",
   {
@@ -92,7 +92,7 @@ export const adminEvents = pgTable(
     acao: text("acao").notNull(),
     criadoEm: agora(),
   },
-  (t) => [check("admin_events_acao_ck", sql`${t.acao} in ('login','logout','export_auditoria','export_leads')`)],
+  (t) => [check("admin_events_acao_ck", sql`${t.acao} in ('login','logout','export_auditoria','export_leads','troca_senha')`)],
 );
 
 // --- Better Auth (conferido contra o CLI em 2026-11-07; rateLimit mapeia a tabela física rate_limit_auth) ---

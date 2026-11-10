@@ -1,4 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { like } from "drizzle-orm";
+import { getDb } from "../app/_lib/db";
+import { rateLimit } from "../app/_lib/db/schema";
 
 const ERRO = "E-mail ou senha incorretos.";
 
@@ -37,5 +40,23 @@ test.describe("login em 3 camadas", () => {
       await page.locator("form").evaluate((f) => ((f as HTMLFormElement).noValidate = true));
     }
     expect(mensagens).toEqual([ERRO, ERRO, ERRO]);
+  });
+
+  test("limite próprio: a 6ª tentativa errada vira 'Muitas tentativas' e o contador é limpo no fim", async ({ page }) => {
+    try {
+      let ultima = "";
+      for (let i = 0; i < 6; i++) {
+        await page.getByLabel("E-mail").fill("alguem-inexistente@exemplo.com");
+        await page.getByLabel("Senha").fill("senha-errada-123");
+        await page.getByRole("button", { name: "Entrar" }).click();
+        await expect(page.locator("form").getByRole("alert")).toBeVisible();
+        ultima = (await page.locator("form").getByRole("alert").textContent()) ?? "";
+        await page.reload();
+        await page.locator("form").evaluate((f) => ((f as HTMLFormElement).noValidate = true));
+      }
+      expect(ultima).toContain("Muitas tentativas");
+    } finally {
+      await getDb().delete(rateLimit).where(like(rateLimit.key, "app:login:%")); // a chave real depende do IP que o Next repassa
+    }
   });
 });

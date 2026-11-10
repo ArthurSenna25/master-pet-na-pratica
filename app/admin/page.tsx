@@ -46,6 +46,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <a href="/admin/leads.csv" download className={BOTAO_NAVY}>Baixar leads (CSV)</a>
             <a href="/admin/auditoria.csv" download className={BOTAO_NAVY}>Baixar auditoria (CSV)</a>
             <a href="/admin/decisoes-lgpd" download className={BOTAO_NAVY}>Baixar documento LGPD</a>
+            <Link href="/admin/senha" prefetch={false} className={BOTAO_NAVY}>Alterar senha</Link>
             <form action={logoutAction}><button type="submit" className={BOTAO_NAVY}>Sair</button></form>
           </nav>
           <p className="m-0 mt-2 text-sm text-(--mp-beige-200)">O CSV de leads contém dados pessoais; guarde o arquivo com cuidado.</p>
@@ -101,7 +102,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </div>
         </div>
 
-        {ok === "excluido" && <p role="status" className="mb-3 rounded-md bg-green-100 p-3">Lead excluído.</p>}
+        {ok === "senha" && <p role="status" className="mb-3 rounded-md bg-green-100 p-3">Senha alterada. Os outros aparelhos foram desconectados.</p>}
+        {ok === "excluido" &&<p role="status" className="mb-3 rounded-md bg-green-100 p-3">Lead excluído.</p>}
 
         {linhas.length === 0 ? (
           <p className="m-0 rounded-lg border border-dashed border-slate-400 bg-white p-6 text-center">
