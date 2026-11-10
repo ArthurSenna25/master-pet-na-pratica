@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD CONSTRAINT "user_email_ck" CHECK (char_length("user"."email") <= 254 and "user"."email" = lower("user"."email") and "user"."email" ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:].]+$');

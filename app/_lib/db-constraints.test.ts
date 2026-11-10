@@ -114,3 +114,11 @@ describe("trigger consent_events (colunas de prova imutáveis)", () => {
     expect(await sql`select 1 from consent_events where id = ${evento}`).toHaveLength(0);
   });
 });
+
+describe("CHECK de e-mail em user (migração 0006)", () => {
+  const tenta = (email: string) =>
+    sql.transaction([sql`insert into "user" (id, name, email, email_verified) values (${"zz-teste-" + Math.random()}, 'zz', ${email}, false)`]);
+  it.each(["sem-arroba", "A@B.com", "a@b", "a b@c.com", "a".repeat(250) + "@x.com"])("rejeita %j", async (email) => {
+    await expect(tenta(email)).rejects.toThrow("user_email_ck");
+  });
+});

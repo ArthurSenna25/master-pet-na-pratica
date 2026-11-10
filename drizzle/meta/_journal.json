@@ -43,6 +43,13 @@
       "when": 1794224522743,
       "tag": "0005_f5_audit_lead_id_nulo",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794288369263,
+      "tag": "0006_f5b_user_email_ck",
+      "breakpoints": true
     }
   ]
 }

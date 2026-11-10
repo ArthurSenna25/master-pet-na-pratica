@@ -104,7 +104,10 @@ export const user = pgTable("user", {
   image: text("image"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [
+  // 3ª camada do login: o admin nasce em create-admin.mjs (já em minúsculas); o cadastro público está desligado.
+  check("user_email_ck", sql`char_length(${t.email}) <= 254 and ${t.email} = lower(${t.email}) and ${t.email} ~ '^[^@[:space:]]+@[^@[:space:]]+\\.[^@[:space:].]+$'`),
+]);
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
