@@ -39,7 +39,7 @@ test("abre em modal; Esc, Fechar e clique fora fecham; foco volta ao item; filtr
   const { link, dialog } = await abrir(page);
   await expect(page).toHaveURL(/\/admin\/lead\/[0-9a-f-]{36}$/);
   await expect(dialog).toHaveAttribute("aria-labelledby", "lead-titulo");
-  await page.screenshot({ path: `${SHOTS}/modal-desktop.png` });
+  await page.screenshot({ path: `${SHOTS}/modal-desktop.png`, mask: [page.locator("[data-admin-email]")] });
 
   // foco preso: Tab várias vezes nunca sai do dialog (Safari não passa o Tab por links; lá vale só o dialog inerte nativo)
   for (let i = 0; i < (browserName === "webkit" ? 0 : 12); i++) {
@@ -75,7 +75,7 @@ test("URL direta mostra a página (sem dialog) e no celular o modal ocupa a tela
   const box = (await dialog.boundingBox())!;
   expect([Math.round(box.x), Math.round(box.width), Math.round(box.height)]).toEqual([0, 390, 844]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await page.screenshot({ path: `${SHOTS}/modal-mobile.png` });
+  await page.screenshot({ path: `${SHOTS}/modal-mobile.png`, mask: [page.locator("[data-admin-email]")] });
 });
 
 // Teste do redirect das actions na rota interceptada (decisão do plano): registra qual comportamento vale.
