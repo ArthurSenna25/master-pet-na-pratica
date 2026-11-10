@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "./actions";
 import { requireSession } from "../_lib/session";
-import { lerParams, POR_PAGINA, type ParamsLista } from "../_lib/admin/busca";
+import { filtrosAtivos, lerParams, POR_PAGINA, type ParamsLista } from "../_lib/admin/busca";
 import { listarLeads, resumoPorStatus } from "../_lib/admin/leads-query";
 import { STATUS, STATUS_ROTULO } from "../_lib/admin/status";
 import { linkWhatsapp } from "../_lib/admin/whatsapp";
@@ -30,7 +30,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const [{ total, linhas }, resumo] = await Promise.all([listarLeads(p), resumoPorStatus()]);
   const totalGeral = Object.values(resumo).reduce((a, b) => a + b, 0);
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
-  const filtrando = Boolean(p.q || p.status);
+  const ativos = filtrosAtivos(p);
+  const filtrando = ativos.length > 0;
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-6">
@@ -77,12 +78,26 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       </form>
 
       {ok === "excluido" && <p role="status" className="mb-3 rounded-md bg-green-100 p-3">Lead excluído.</p>}
-      <p role="status" className="m-0 mb-3 text-sm">{total} {total === 1 ? "lead" : "leads"}{filtrando ? " no filtro" : ""}</p>
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <p role="status" className="m-0 text-sm">{total} {total === 1 ? "lead" : "leads"}{filtrando ? " no filtro" : ""}</p>
+        {filtrando && <Link href="/admin" className={`inline-flex min-h-11 items-center text-sm underline text-blue-700 ${FOCO}`}>Limpar filtros</Link>}
+        {filtrando && (
+          <ul aria-label="Filtros ativos" className="m-0 flex list-none flex-wrap gap-2 p-0">
+            {ativos.map((f) => (
+              <li key={f.id}>
+                <Link href={href(p, f.limpar)} aria-label={`Remover filtro: ${f.rotulo}`} className={`inline-flex min-h-11 max-w-full items-center gap-2 break-all rounded-full border border-slate-400 bg-white px-3 text-sm no-underline text-slate-900 ${FOCO}`}>
+                  <span>{f.rotulo}</span><span aria-hidden="true">×</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {linhas.length === 0 ? (
         <p className="m-0 rounded-md border border-dashed border-slate-400 p-6 text-center">
           {totalGeral === 0 ? "Nenhum lead ainda. Quando alguém enviar o formulário, aparece aqui."
-            : <>Nenhum lead para este filtro. <Link href="/admin" className={`underline ${FOCO}`}>Limpar filtros</Link></>}
+            : "Nenhum lead para este filtro. Use “Limpar filtros” acima ou remova um filtro."}
         </p>
       ) : (
         <ul className="m-0 grid list-none gap-3 p-0">

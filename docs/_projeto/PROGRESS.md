@@ -16,6 +16,7 @@
 - F5 c5: botão WhatsApp (`whatsapp.ts`: 10/11 dígitos → 55+DDD+nº; 12/13 com 55 não duplica; texto neutro; montado no servidor; ausente p/ anonimizado) na lista e no detalhe. `GET /admin/leads.csv` (`leads-csv.ts`; sem ip/ua/consent; anonimizado só id/status/datas) com `registrarExportacao` (events.ts, admin_events+audit_log numa transação) compartilhado com a auditoria. Aviso de dado pessoal na tela. DECISOES-LGPD 5.15 + mapa. Para F6: migrações 0004/0005 NÃO estão no banco de produção; o lead "First Teste" é teste manual (limpar antes de produção).
 
 - F5b c1 (login 3 camadas): `login-schema.ts` (Zod: e-mail trim+minúsculas ≤254, senha 8–200), msg única; CHECK `user_email_ck` (migração 0006, SÓ branch teste, admin existente passou); DECISOES-LGPD 5.16. Specs `admin-login.spec.ts`. No Playwright, `getByRole("alert")` pega o route announcer do Next: escopar ao form.
+- F5b c2: `filtrosAtivos()` (busca.ts) alimenta chips `<a>` removíveis e "Limpar filtros" (ao lado do contador; conta busca, status e ordem≠desc); sem JS ok. Vazio sem 2º link (evita duplicado).
 
 ## Pesquisa de validação (4b, 2026-11-08: web, não Context7)
 - Nome: Unicode `\p{L}\p{M}` + espaço ' - . (NFC), ≥2 letras, sem dígitos/símbolos; não restringir a ASCII (José, Conceição, D'Ávila, 李雷).
