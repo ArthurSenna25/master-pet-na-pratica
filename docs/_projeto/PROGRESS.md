@@ -10,6 +10,8 @@
 - **NÃO há `loading.tsx` de propósito:** a fronteira de Suspense faz o React transmitir o conteúdo oculto, que só um script revela → /admin e a confirmação “sem JS” ficavam vazios (4 testes falharam, voltaram a passar sem ele). Reavaliar só se o sem-JS deixar de ser requisito.
 - Screenshots (e-mail coberto por `mask`): antes/depois em chromium+webkit, 390 e 1440 (specs `admin-lista` e `admin-modal`; `SHOT_DIR=<pasta>`).
 
+- **F6 Parte A (QA local, 2026-11-10):** tsc/lint/build/190 vitest ✔; e2e chromium+webkit 62 ✔ (4 skipped); `fx-check` TUDO OK (chromium+webkit 390/1440, chromium 1366×657; **fora: 1920×1080 e webkit 1366×657**); `--repeat-each=3` f4.spec (webkit) e db.test ✔ sem falha. Segredos: histórico/.next/static/DECISOES limpos. `npm audit`: 11 moderadas, 0 alta/crítica (drizzle-kit/esbuild/typescript-eslint, só dev; fix = major do drizzle-kit, não aplicado). Headers: 4 básicos ✔, legais+login noindex ✔. Lighthouse mobile `/`: a11y 96, BP 100, SEO 100, LCP 0,63 s, CLS 0 (local, sem throttling). Corrigido: aria-label do logo (label-content-name). Restante: numerais 01–06 de “Como funciona” 2,6:1 só no estado inicial dim (opacity .35 por `como.ts`), repouso passa. Banco teste: 0 “zz-teste-”; único lead real-ish “First Teste”. **Parte B (produção) não iniciada.**
+
 ## Contraste (WCAG, calculado 2026-11-10; todos ≥ 4,5:1)
 Cabeçalho: beige-50/navy-900 16,42 · beige-200/navy-900 13,03 · foco gold-400/navy-900 8,06. Selos (texto/fundo): Novo navy-900/blue-100 14,14 · Em contato #5c3d00/#f6e7bd 8,05 · Convertido success/success-bg 5,54 · Não convertido danger/danger-bg 5,70. Cartões e tabela: navy-900/branco 17,87 · ink-muted/branco 7,70 · ink-muted/slate-50 7,36 · ink-muted/blue-100 6,09 · link blue-600/branco 7,80 · cabeçalho de tabela navy-900/#eef2f7 15,89.
 
@@ -24,7 +26,10 @@ Cabeçalho: beige-50/navy-900 16,42 · beige-200/navy-900 13,03 · foco gold-400
 ## Pendências / bloqueios
 - Legais [PENDENTE]: controladora (razão social/CNPJ/endereço) · ME/EPP · hospedagem/região da função (Vercel, conferir iad1) · transferência internacional (art. 33) · retenção (incl. audit_log, admin_events) · e-mail do titular · encarregado · TERMOS (responsável, marca/imagens, foro, contato). Revisão jurídica antes de lead real. Camila: preço · encontros · FAQ · wordmark · regiões · texto de “Camila em ação”.
 - IP do login em texto puro no Better Auth (`session.ip_address`, `rate_limit_auth.key`; política 0.2 diz a verdade): hook de sessão e `customStorage`+HMAC são possíveis (ver DECISOES-LGPD). Também: `BETTER_AUTH_URL` de produção · `npm audit` · logs Vercel/Neon fora do painel (registrar no DECISOES-LGPD).
-- F6: migrações 0004–0006 NÃO estão na produção; lead “First Teste” é manual (limpar antes de produção); seed de testes usa prefixo `zz-teste-` e se limpa sozinho.
+- F6: migrações 0004–0006 NÃO estão na produção; lead “First Teste” apagado do teste (2026-11-10); seed de testes usa prefixo `zz-teste-` e se limpa sozinho.
 
-## Backlog: (vazio)
-## Consumo — F1 ≈ US$ 6–7 · F2 63% · F4 24%→45% (c4b/c5 fim não medido) · F5 c1 17→21%, c2 21→34% · F5b c1–c3 14→21% · F5b c4: início 21%; janela informada “não medida”.
+## Backlog
+- Pós-entrega: CSP estática só em /admin e legais (`frame-ancestors 'none'`, `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`; com `unsafe-inline` por causa do Next). CSP com nonce adiada (perde LP estática).
+- Numerais 01–06 do “Como funciona” no estado inicial dim (opacity .35) = 2,6:1; só se virar requisito.
+- Vercel (nomes): DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, IP_HMAC_SECRET, WHATSAPP_DESTINO.
+## Consumo — F1 ≈ US$ 6–7 · F2 63% · F4 24%→45% (c4b/c5 fim não medido) · F5 c1 17→21%, c2 21→34% · F5b c1–c3 14→21% ·F5b: início 14%; c1+c2+c3 fim __%; c4: início __%, fim 27%. F6 Parte A: sessão 27% → 2% (janela virou); semana em 48%. Parte B: início 2%%.

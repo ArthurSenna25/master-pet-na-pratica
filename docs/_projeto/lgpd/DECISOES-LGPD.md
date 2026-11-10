@@ -167,7 +167,7 @@ Direitos previstos: confirmação do tratamento e acesso; correção; anonimiza�
 - Segredos **fora do git** (arquivo local ignorado; só um modelo sem valores é versionado); busca automática por segredos antes de cada commit.
 - Cabeçalhos: `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `X-Frame-Options`. **Não há CSP** (decisão de escopo; reavaliar antes do deploy final). HTTPS depende da hospedagem: **a confirmar no deploy**.
 - Testes automatizados (unidade, banco e navegador) cobrem validação, imutabilidade do consentimento, honeypot, limite de envio, login e cadastro fechado, sempre com dados fictícios identificáveis e removidos ao fim.
-- **Limites conhecidos:** nenhuma medida elimina todos os riscos; sem revisão externa de segurança; `npm audit` ainda não executado (previsto na F6).
+- **Limites conhecidos:** nenhuma medida elimina todos os riscos; sem revisão externa de segurança; `npm audit` executado em 2026-11-10: 11 avisos moderados, nenhum alto/crítico, todos em ferramentas de desenvolvimento (drizzle-kit/esbuild, typescript-eslint/minimatch); a correção exigiria atualização major do drizzle-kit e não foi aplicada. Busca por segredos no histórico do git, em `.next/static` e neste documento: nada encontrado.
 
 ## 10. Pendências
 
