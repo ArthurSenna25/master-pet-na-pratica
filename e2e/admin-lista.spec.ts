@@ -25,20 +25,20 @@ test.describe("painel: lista, busca, filtro, resumo", () => {
     for (const [nome, w, h] of [["mobile", 390, 844], ["desktop", 1440, 900]] as const) {
       await page.setViewportSize({ width: w, height: h });
       await page.goto("/admin");
-      await expect(page.getByRole("heading", { name: "Zz Ana Teste" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Ver lead Zz Ana Teste" })).toBeVisible();
       expect(await semOverflowHorizontal(page)).toBe(true);
       await page.screenshot({ path: `${SHOTS}/lista-${nome}-${info.project.name}.png`, fullPage: true });
 
       // % é literal: "100%" acha só o "Pet 100%".
       await page.getByLabel(/Buscar/).fill("zz-teste-Pet 100%");
       await page.getByRole("button", { name: "Filtrar" }).click();
-      await expect(page.getByRole("heading", { name: "Zz Ana Teste" })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "Zz Bia Teste" })).toHaveCount(0);
+      await expect(page.getByRole("link", { name: "Ver lead Zz Ana Teste" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Ver lead Zz Bia Teste" })).toHaveCount(0);
 
       // telefone por dígitos
       await page.getByLabel(/Buscar/).fill("99990003");
       await page.getByRole("button", { name: "Filtrar" }).click();
-      await expect(page.getByRole("heading", { name: "Zz Caio Teste" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Ver lead Zz Caio Teste" })).toBeVisible();
 
       // filtro por status + estado vazio
       await page.goto("/admin?status=convertido&q=zz-teste-Pet_Sub");

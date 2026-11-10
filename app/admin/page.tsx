@@ -104,15 +104,20 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           {linhas.map((l) => {
             const wa = l.anonimizadoEm ? null : linkWhatsapp(l.whatsapp);
             return (
-            <li key={l.id} className="rounded-md border border-slate-300 bg-white p-4">
+            <li key={l.id} className="relative rounded-md border border-slate-300 bg-white p-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="m-0 flex break-words text-lg font-semibold"><Link href={`/admin/lead/${l.id}`} className={`inline-flex min-h-11 items-center no-underline text-slate-900 hover:underline ${FOCO}`}>{l.anonimizadoEm ? "Anonimizado" : l.nome}</Link></h2>
+                {/* Um único link por lead: o ::after cobre o cartão inteiro; o aria-label substitui o texto (sem leitura duplicada). */}
+                <Link href={`/admin/lead/${l.id}`} prefetch={false} aria-label={l.anonimizadoEm ? "Ver lead anonimizado" : `Ver lead ${l.nome}`}
+                  className={`flex min-h-11 items-center gap-2 break-words text-lg font-semibold no-underline text-slate-900 after:absolute after:inset-0 after:content-[''] hover:underline ${FOCO} focus-visible:after:outline-2 focus-visible:after:outline-blue-700`}>
+                  <span>{l.anonimizadoEm ? "Anonimizado" : l.nome}</span>
+                  <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg>
+                </Link>
                 <span className="rounded bg-slate-100 px-2 py-1 text-sm">{STATUS_ROTULO[l.status as keyof typeof STATUS_ROTULO] ?? l.status}</span>
               </div>
               {!l.anonimizadoEm && <p className="mt-1 break-words text-sm">{l.negocio} · {l.cidadeUf} · {l.whatsapp}</p>}
               <p className="mt-1 text-sm text-slate-600">Recebido em {data(l.criadoEm)}</p>
               {wa && (
-                <p className="m-0 mt-2 flex"><a href={wa} target="_blank" rel="noopener noreferrer" className={BOTAO}>Chamar no WhatsApp</a></p>
+                <p className="relative z-10 m-0 mt-2 flex"><a href={wa} target="_blank" rel="noopener noreferrer" className={BOTAO}>Chamar no WhatsApp</a></p>
               )}
             </li>
             );

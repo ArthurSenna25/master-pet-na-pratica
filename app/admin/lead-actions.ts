@@ -1,6 +1,6 @@
 "use server";
 import { and, eq, isNull } from "drizzle-orm";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { anonimizarLead } from "../_lib/anonimizar";
 import { confirmaSchema, editSchema, idSchema } from "../_lib/admin/lead-edit";
 import { getDb } from "../_lib/db";
@@ -8,6 +8,8 @@ import { auditLog, lead } from "../_lib/db/schema";
 import { requireSession } from "../_lib/session";
 
 const detalhe = (id: string, q: string) => `/admin/lead/${id}?${q}`;
+// replace: salvar/anonimizar não empilha histórico, então "Fechar" (voltar) no modal volta à lista com os filtros.
+const irAoDetalhe = (id: string, q: string): never => redirect(detalhe(id, q), RedirectType.replace);
 
 /** RF-07. requireSession() ANTES de qualquer outra coisa. */
 export async function atualizarLeadAction(form: FormData): Promise<void> {
@@ -15,7 +17,8 @@ export async function atualizarLeadAction(form: FormData): Promise<void> {
   const parsed = editSchema.safeParse({ id: form.get("id"), status: form.get("status"), observacao: form.get("observacao") ?? "" });
   if (!parsed.success) {
     const id = idSchema.safeParse({ id: form.get("id") });
-    redirect(id.success ? detalhe(id.data.id, "erro=dados") : "/admin");
+    if (id.success) irAoDetalhe(id.data.id, "erro=dados");
+    redirect("/admin");
   }
   const { id, status, observacao } = parsed.data;
   const alterados = await getDb()
@@ -23,7 +26,8 @@ export async function atualizarLeadAction(form: FormData): Promise<void> {
     .set({ status, observacao })
     .where(and(eq(lead.id, id), isNull(lead.anonimizadoEm)))
     .returning({ id: lead.id });
-  redirect(alterados.length ? detalhe(id, "ok=salvo") : "/admin");
+  if (alterados.length) irAoDetalhe(id, "ok=salvo");
+  redirect("/admin");
 }
 
 /** RF-14. Só roda com confirmar=sim (campo do formulário do 2º passo). audit_log + DELETE na mesma transação. */
@@ -52,5 +56,5 @@ export async function anonimizarLeadAction(form: FormData): Promise<void> {
   const [existe] = await getDb().select({ id: lead.id }).from(lead).where(eq(lead.id, id));
   if (!existe) redirect("/admin");
   await anonimizarLead(id);
-  redirect(detalhe(id, "ok=anonimizado"));
+  irAoDetalhe(id, "ok=anonimizado");
 }
