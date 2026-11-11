@@ -40,4 +40,12 @@ describe("tentativas (tabela rate_limit_auth)", () => {
     expect(await getDb().select().from(rateLimit).where(eq(rateLimit.key, `app:${velha}`))).toHaveLength(0);
     expect(await getDb().select().from(rateLimit).where(eq(rateLimit.key, alheia))).toHaveLength(1);
   });
+  it("retenção: linha app: DENTRO da janela continua contando depois da limpeza", async () => {
+    const k = nova(); const t = 20 * RETENCAO_MS;
+    await registrarFalha(k, regra, t - 1000);
+    await registrarFalha(k, regra, t - 500);
+    await registrarFalha(nova(), regra, t); // dispara a limpeza (só apaga >24 h)
+    await registrarFalha(k, regra, t + 1);
+    expect(await bloqueado(k, regra, t + 2)).toBe(true); // 3 falhas somadas, max 3
+  });
 });
