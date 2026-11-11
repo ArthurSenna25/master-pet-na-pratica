@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
-import { entrar } from "./admin-helpers";
+import { abrirExportar, entrar } from "./admin-helpers";
 
 test("sem sessão: auditoria.csv e documento respondem 401 (sem redirect)", async ({ request }) => {
   for (const rota of ["/admin/auditoria.csv", "/admin/decisoes-lgpd"]) {
@@ -12,6 +12,7 @@ test("sem sessão: auditoria.csv e documento respondem 401 (sem redirect)", asyn
 test("com sessão: baixa o CSV de auditoria (sem PII, com o próprio export) e o documento", async ({ page }) => {
   await entrar(page);
 
+  await abrirExportar(page);
   const [csvDl] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Baixar auditoria (CSV)" }).click()]);
   expect(csvDl.suggestedFilename()).toMatch(/^auditoria-\d{4}-\d{2}-\d{2}\.csv$/);
   const csv = await readFile((await csvDl.path())!, "utf8");
@@ -21,6 +22,7 @@ test("com sessão: baixa o CSV de auditoria (sem PII, com o próprio export) e o
   expect(csv).toMatch(/admin_events,[^,]+,export_auditoria,/); // o próprio export
   expect(csv).not.toMatch(/ip_hmac|user_agent|IPHMAC/i);
 
+  await abrirExportar(page);
   const [docDl] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Baixar documento LGPD" }).click()]);
   expect(docDl.suggestedFilename()).toBe("DECISOES-LGPD.md");
   const md = await readFile((await docDl.path())!, "utf8");

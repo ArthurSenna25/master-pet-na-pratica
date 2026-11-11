@@ -271,7 +271,7 @@ test.describe("admin", () => {
   test("/admin sem sessão redireciona ao login", async ({ page }) => {
     await page.goto("/admin");
     await expect(page).toHaveURL(/\/admin\/login$/);
-    await expect(page.getByRole("heading", { name: "Entrar" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Painel" })).toBeVisible();
   });
 
   test("sign-up inacessível e nenhum usuário criado", async ({ request, browserName }) => {

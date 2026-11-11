@@ -8,7 +8,10 @@ import { LeadsLista } from "./LeadsLista";
 import { BOTAO, CAMPO, FOCO, SeloStatus } from "./ui";
 
 // Botões sobre o cabeçalho navy: borda e texto beige (16,4:1), foco ouro (8,1:1).
-const BOTAO_NAVY = "inline-flex font-[inherit] no-underline min-h-11 items-center justify-center rounded-md border border-(--mp-beige-200)/60 bg-transparent px-4 text-sm font-medium !text-(--mp-beige-50) hover:bg-(--mp-navy-700) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--mp-gold-400)";
+const BOTAO_NAVY = "inline-flex font-[inherit] leading-6 no-underline min-h-11 items-center justify-center rounded-md border border-(--mp-beige-200)/60 bg-transparent px-4 text-sm font-medium !text-(--mp-beige-50) hover:bg-(--mp-navy-700) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--mp-gold-400)";
+
+// Item do menu Exportar (sobre navy-800): texto beige-50, foco ouro.
+const ITEM_MENU = "flex min-h-11 items-center rounded px-3 text-sm no-underline !text-(--mp-beige-50) hover:bg-(--mp-navy-700) focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-(--mp-gold-400)";
 
 function href(p: ParamsLista, mudar: Partial<ParamsLista>) {
   const n = { ...p, ...mudar };
@@ -41,15 +44,22 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             {/* E-mail só renderizado (nunca logado); data-admin-email serve para cobri-lo em screenshots. */}
             <p data-admin-email className="m-0 break-all text-sm text-(--mp-beige-200)">{session.user.email}</p>
           </div>
-          {/* <a> e não <Link>: Link faria prefetch e dispararia o export (que grava registro). */}
-          <nav aria-label="Exportações e conta" className="mt-3 flex flex-wrap gap-3">
-            <a href="/admin/leads.csv" download className={BOTAO_NAVY}>Baixar leads (CSV)</a>
-            <a href="/admin/auditoria.csv" download className={BOTAO_NAVY}>Baixar auditoria (CSV)</a>
-            <a href="/admin/decisoes-lgpd" download className={BOTAO_NAVY}>Baixar documento LGPD</a>
+          <nav aria-label="Conta e exportações" className="mt-3 flex flex-wrap items-start gap-3">
+            {/* details nativo: abre por teclado (Enter/Espaço) e sem JS. Links são <a>, não <Link>: Link faria prefetch e dispararia o export (que grava registro). */}
+            <details className="group relative">
+              <summary className={`${BOTAO_NAVY} cursor-pointer list-none gap-2 [&::-webkit-details-marker]:hidden group-open:bg-(--mp-navy-700)`}>
+                Exportar <span aria-hidden="true" className="inline-block text-xs group-open:rotate-180">▾</span>
+              </summary>
+              <div className="absolute left-0 z-10 mt-2 grid w-72 max-w-[calc(100vw-2rem)] gap-1 rounded-md border border-(--mp-beige-200)/60 bg-(--mp-navy-800) p-2">
+                <a href="/admin/leads.csv" download className={ITEM_MENU}>Baixar leads (CSV)</a>
+                <a href="/admin/auditoria.csv" download className={ITEM_MENU}>Baixar auditoria (CSV)</a>
+                <a href="/admin/decisoes-lgpd" download className={ITEM_MENU}>Baixar documento LGPD</a>
+                <p className="m-0 px-3 pb-1 pt-2 text-sm text-(--mp-beige-200)">O CSV de leads contém dados pessoais; guarde o arquivo com cuidado.</p>
+              </div>
+            </details>
             <Link href="/admin/senha" prefetch={false} className={BOTAO_NAVY}>Alterar senha</Link>
             <form action={logoutAction}><button type="submit" className={BOTAO_NAVY}>Sair</button></form>
           </nav>
-          <p className="m-0 mt-2 text-sm text-(--mp-beige-200)">O CSV de leads contém dados pessoais; guarde o arquivo com cuidado.</p>
         </div>
       </header>
 

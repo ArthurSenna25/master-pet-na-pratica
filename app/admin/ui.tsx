@@ -2,6 +2,7 @@ import { STATUS_ROTULO, type Status } from "../_lib/admin/status";
 
 export const FOCO = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700";
 export const BOTAO = `inline-flex font-[inherit] no-underline text-slate-900 min-h-11 items-center justify-center rounded-md border border-slate-400 bg-white px-4 text-sm font-medium ${FOCO}`;
+export const BOTAO_PRIMARIO = `${BOTAO} !border-(--mp-navy-900) !bg-(--mp-navy-900) !text-(--mp-beige-50) hover:!bg-(--mp-navy-700) disabled:cursor-wait disabled:!opacity-70`;
 export const CAMPO = `min-h-11 font-[inherit] text-slate-900 rounded-md border border-slate-400 bg-white px-3 ${FOCO}`;
 export const data = (d: Date) => d.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" });
 

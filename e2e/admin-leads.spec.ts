@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { anonimizarLead } from "../app/_lib/anonimizar";
 import { getDb } from "../app/_lib/db";
 import { auditLog, lead } from "../app/_lib/db/schema";
-import { criarLeads, entrar, limparLeads, semOverflowHorizontal } from "./admin-helpers";
+import { abrirExportar, criarLeads, entrar, limparLeads, semOverflowHorizontal } from "./admin-helpers";
 
 test("sem sessão: leads.csv responde 401 (sem redirect)", async ({ request }) => {
   const r = await request.get("/admin/leads.csv", { maxRedirects: 0 });
@@ -33,7 +33,8 @@ test.describe("com sessão: CSV de leads e botão WhatsApp", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await entrar(page);
 
-    // aviso + link comum (sem prefetch)
+    // aviso + link comum (sem prefetch), dentro do menu Exportar
+    await abrirExportar(page);
     await expect(page.getByText("contém dados pessoais; guarde o arquivo com cuidado")).toBeVisible();
     const link = page.getByRole("link", { name: "Baixar leads (CSV)" });
     await expect(link).toHaveAttribute("href", "/admin/leads.csv");
@@ -60,6 +61,7 @@ test.describe("com sessão: CSV de leads e botão WhatsApp", () => {
 
     // download do CSV
     await page.goto("/admin");
+    await abrirExportar(page);
     const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Baixar leads (CSV)" }).click()]);
     expect(dl.suggestedFilename()).toMatch(/^leads-\d{4}-\d{2}-\d{2}\.csv$/);
     const csv = await readFile((await dl.path())!, "utf8");

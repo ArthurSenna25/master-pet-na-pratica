@@ -1,6 +1,6 @@
 "use server";
 import { APIError } from "better-auth/api";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { registrarAdminEvento } from "../_lib/admin/events";
 import { ERRO_LOGIN, loginSchema } from "../_lib/admin/login-schema";
@@ -11,7 +11,8 @@ import { getClientIp, ipHmac } from "../_lib/seguranca";
 import { requireSession } from "../_lib/session";
 
 export interface LoginState { error?: string }
-export interface SenhaState { error?: string }
+export type CampoSenhaNome = "atual" | "nova" | "confirmacao";
+export interface SenhaState { errors?: Partial<Record<CampoSenhaNome, string>> }
 
 const ERRO_LIMITE = "Muitas tentativas. Aguarde um pouco.";
 
@@ -47,9 +48,16 @@ export async function logoutAction() {
 export async function changePasswordAction(_prev: SenhaState, form: FormData): Promise<SenhaState> {
   const session = await requireSession();
   const parsed = trocaSenhaSchema.safeParse({ atual: form.get("atual"), nova: form.get("nova"), confirmacao: form.get("confirmacao") });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? ERRO_SENHA_ATUAL };
+  if (!parsed.success) {
+    const errors: SenhaState["errors"] = {};
+    for (const i of parsed.error.issues) {
+      const campo = i.path[0] as CampoSenhaNome;
+      errors[campo] ??= i.message; // 1 mensagem por campo, a primeira
+    }
+    return { errors };
+  }
   const chave = chaveTrocaSenha(session.user.id);
-  if (await bloqueado(chave, TROCA_SENHA)) return { error: ERRO_LIMITE };
+  if (await bloqueado(chave, TROCA_SENHA)) return { errors: { atual: ERRO_LIMITE } };
   try {
     await auth.api.changePassword({
       body: { currentPassword: parsed.data.atual, newPassword: parsed.data.nova, revokeOtherSessions: true },
@@ -58,9 +66,11 @@ export async function changePasswordAction(_prev: SenhaState, form: FormData): P
   } catch {
     // qualquer falha vira a mesma mensagem: não revela se foi a senha atual, o banco ou outra causa
     await registrarFalha(chave, TROCA_SENHA);
-    return { error: ERRO_SENHA_ATUAL };
+    return { errors: { atual: ERRO_SENHA_ATUAL } };
   }
   await zerar(chave);
   await registrarAdminEvento("troca_senha");
-  redirect("/admin?ok=senha");
+  // O Better Auth apaga todas as sessões e grava um cookie novo. Só prometo "continua logado" se o cookie novo vale de fato.
+  const viva = await auth.api.getSession({ headers: new Headers({ cookie: (await cookies()).toString() }) });
+  redirect(viva ? "/admin?ok=senha" : "/admin/login?ok=senha");
 }

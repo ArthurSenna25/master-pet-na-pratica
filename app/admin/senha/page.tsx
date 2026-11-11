@@ -8,7 +8,7 @@ export default async function SenhaPage() {
   return (
     <main className="mx-auto max-w-md px-4 py-8">
       <h1 className="!m-0 !mb-1 font-[family-name:var(--font-display)] text-2xl font-semibold">Alterar senha</h1>
-      <p className="!m-0 !mb-6 text-sm text-(--mp-ink-muted)">Ao salvar, os outros aparelhos conectados saem do painel. Este continua.</p>
+      <p className="!m-0 !mb-6 text-sm text-(--mp-ink-muted)">Ao salvar, os outros aparelhos conectados saem do painel. Se este também sair, entre de novo com a nova senha.</p>
       <SenhaForm />
       <Link href="/admin" className={`mt-6 inline-flex min-h-11 items-center text-sm underline text-blue-700 ${FOCO}`}>Voltar ao painel</Link>
     </main>

@@ -15,6 +15,12 @@ export async function entrar(page: Page) {
   await page.waitForURL("**/admin");
 }
 
+/** Os downloads ficam no <details> "Exportar" do cabeçalho; abre se ainda estiver fechado. */
+export async function abrirExportar(page: Page) {
+  const d = page.locator("header details");
+  if ((await d.getAttribute("open")) === null) await d.locator("summary").click();
+}
+
 export async function criarLeads(
   itens: { nome: string; whatsapp: string; negocio?: string; status?: string }[],
 ): Promise<void> {

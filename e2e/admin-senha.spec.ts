@@ -1,9 +1,9 @@
 import { randomBytes } from "node:crypto";
-import { count, eq } from "drizzle-orm";
+import { count, eq, like } from "drizzle-orm";
 import { expect, test, type Page } from "@playwright/test";
 import { auth } from "../app/_lib/auth";
 import { getDb } from "../app/_lib/db";
-import { account, adminEvents, user } from "../app/_lib/db/schema";
+import { account, adminEvents, rateLimit, user } from "../app/_lib/db/schema";
 import { entrar } from "./admin-helpers";
 
 const SHOTS = process.env.SHOT_DIR ?? "test-results";
@@ -30,6 +30,8 @@ async function restaurarSenhaOriginal() {
 }
 
 test.describe("alterar senha", () => {
+  test.afterAll(async () => { await getDb().delete(rateLimit).where(like(rateLimit.key, "app:senha:%")); });
+
   test("sem sessão: redireciona ao login", async ({ page }) => {
     await page.goto("/admin/senha");
     await expect(page).toHaveURL(/\/admin\/login/);
@@ -66,6 +68,48 @@ test.describe("alterar senha", () => {
     await expect(page.getByRole("alert").filter({ hasText: "confirmação não é igual" })).toBeVisible();
     await preencher(page, ORIGINAL, ORIGINAL, ORIGINAL);
     await expect(page.getByRole("alert").filter({ hasText: "diferente da atual" })).toBeVisible();
+  });
+
+  test("erros aparecem junto do campo certo, ligados por aria", async ({ page }) => {
+    await entrar(page);
+    await preencher(page, ORIGINAL, "curta-123", "curta-123");
+    const nova = campo(page, "nova");
+    await expect(nova).toHaveAttribute("aria-invalid", "true");
+    const ids = ((await nova.getAttribute("aria-describedby")) ?? "").split(" ");
+    expect(ids).toHaveLength(2); // dica + erro
+    await expect(page.locator(`[id="${ids[1]}"]`)).toContainText("de 12 a 200");
+    await expect(campo(page, "atual")).not.toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByText("Mínimo de 12 caracteres.")).toBeVisible();
+  });
+
+  test("mostrar/ocultar: botão com aria-pressed alterna o tipo do campo", async ({ page }) => {
+    await entrar(page);
+    await page.goto("/admin/senha");
+    for (const [nome, rotulo] of [["atual", "senha atual"], ["nova", "nova senha"], ["confirmacao", "confirmar nova senha"]] as const) {
+      const b = page.getByRole("button", { name: `Mostrar ${rotulo}`, exact: true });
+      expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await expect(b).toHaveAttribute("aria-pressed", "false");
+      await b.click();
+      await expect(b).toHaveAttribute("aria-pressed", "true");
+      await expect(campo(page, nome)).toHaveAttribute("type", "text");
+      await b.click();
+      await expect(campo(page, nome)).toHaveAttribute("type", "password");
+    }
+  });
+
+  test("durante o envio o botão mostra 'Salvando…' e fica desabilitado", async ({ page }) => {
+    await entrar(page);
+    await page.goto("/admin/senha");
+    await page.route("**/admin/senha", async (r) => { if (r.request().method() === "POST") await new Promise((ok) => setTimeout(ok, 1200)); await r.continue(); });
+    await campo(page, "atual").fill("senha-errada-xyz");
+    await campo(page, "nova").fill("nova-senha-segura-1");
+    await campo(page, "confirmacao").fill("nova-senha-segura-1");
+    await page.getByRole("button", { name: "Salvar nova senha" }).click();
+    const b = page.getByRole("button", { name: "Salvando…" });
+    await expect(b).toBeVisible();
+    await expect(b).toBeDisabled();
+    await expect(page.getByRole("alert").filter({ hasText: "Senha atual incorreta." })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Salvar nova senha" })).toBeEnabled();
   });
 
   test("troca com sucesso, login com a nova funciona e a senha é restaurada", async ({ page }) => {
