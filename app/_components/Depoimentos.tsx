@@ -39,8 +39,8 @@ export function Depoimentos() {
         )}
         <DepoimentosFaixa>
           {cards.map((d, i) => (
-            <li key={i} className="lp-tc" role="group" aria-roledescription="slide" aria-label={`${i + 1} de ${cards.length}`}>
-              <figure className="lp-tc__in">
+            <li key={i} className="lp-tc">
+              <figure className="lp-tc__in" aria-roledescription="slide" aria-label={`${i + 1} de ${cards.length}`}>
                 <div className="lp-tc__top"><span className="lp-q-glyph" aria-hidden="true">“</span><Selo d={d} className="lp-tc__seal" /></div>
                 <blockquote><p>{d.quote}</p></blockquote>
                 <Quem d={d} />

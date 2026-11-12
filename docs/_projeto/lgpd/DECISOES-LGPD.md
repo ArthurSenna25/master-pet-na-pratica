@@ -103,6 +103,7 @@ Tabela `consent_events` (fonte **única** de consentimento; o lead não guarda c
 
 **5.17 Limite de tentativas do login e da troca de senha; recuperação de senha manual (implementado, F5c; a revisar se o /admin for divulgado).** *Achado (2026-11-10, medido):* o limitador do Better Auth só vale no handler HTTP; `auth.api.signInEmail` chamado de Server Action **não** passa por ele (8 logins errados seguidos deram 8 × 401). O "5 por minuto" descrito antes não estava valendo. *Adotado:* contador próprio na tabela `rate_limit_auth`, com chaves de prefixo `app:` (`app/_lib/admin/tentativas.ts`). **Login: 5 falhas por minuto por HMAC do IP** (chave `app:login:<HMAC>`; sem IP puro e sem e-mail; sem header de IP em produção, todos caem numa chave única `sem-ip`). **Troca de senha: 5 falhas em 10 minutos por usuário** (chave `app:senha:<id>`). Só falha conta; sucesso zera. Decisão **a revisar se o endereço do painel for divulgado** (por exemplo: limite por e-mail além do IP, ou espera crescente). *Retenção definida:* a cada falha registrada, as linhas `app:` com mais de 24 h são apagadas na mesma transação; as linhas do próprio Better Auth (`<IP>|<caminho>`, ver 5.2) seguem sem limpeza **[PENDENTE]**. *Recuperação de senha:* **manual**. Não há "esqueci a senha" nem e-mail de recuperação (menos superfície de ataque, uma só pessoa administradora). Se a senha for perdida, quem tem acesso ao banco/ao projeto roda `scripts/create-admin.mjs` ou redefine o hash; isso exige o `DATABASE_URL`. *Banco de produção em 0007 (2026-11-11):* a ação `troca_senha` é aceita em `admin_events`; nenhum dado pessoal foi gravado na migração. *Troca de senha:* exige sessão; ao trocar, as outras sessões são encerradas e a atual segue; registra `troca_senha` em `admin_events` só após sucesso, sem senha nem dado pessoal; erro único "Senha atual incorreta." para qualquer falha. *F5d:* após a troca a ação confere se o cookie novo é uma sessão válida; se for, volta a `/admin?ok=senha`, se não, vai a `/admin/login?ok=senha` com o aviso "Senha alterada. Entre com a nova senha." (nunca se promete sessão que não existe). Nada de dado pessoal novo.
 
+**5.18 Seção de depoimentos com conteúdo FICTÍCIO (implementado, F7).** *Adotado:* a landing tem a seção “Depoimentos” com um destaque e 6 cartões **fictícios**, todos marcados “exemplo” (cartões, destaque e placeholder de vídeo), sem nome de pessoa real, sem foto de pessoa e sem número ou resultado; serve só para a demonstração de venda à Camila. Dados estáticos em `app/_lib/depoimentos.ts` (campos do `CONTEUDO.md` do handoff); só publica o que tem `consent: true`, também para dados reais. Sem banco, rota ou admin: **nenhum dado pessoal novo é coletado**, então não há mudança de texto de política/termos nem de `LEGAL_VERSION`. *Antes de qualquer uso real:* trocar por depoimentos reais com **autorização por escrito de cada pessoa (nome, foto, texto), registrada fora do repositório**; resultados com números só se comprováveis; retirar a marca “exemplo” e o “texto provisório” da linha de transparência **apenas** com conteúdo real.
 ## 6. Operadores e transferência internacional (art. 33)
 
 | Operador | Função | Local | Situação |
@@ -181,6 +182,7 @@ Direitos previstos: confirmação do tratamento e acesso; correção; anonimiza�
 - Foro, responsável pelo site e titular das marcas/imagens (termos).
 - Opções reais dos campos do formulário (hoje provisórias) e textos finais do site.
 - Região e conta da hospedagem; criação do administrador no banco de produção.
+- **Depoimentos:** fornecer depoimentos reais (nome, negócio, cidade, foto opcional) com autorização por escrito de cada pessoa, guardada fora do repositório; resultados com números só se comprováveis (ver 5.18).
 
 **Para o advogado:**
 - Revisão dos textos `/politica-de-privacidade` e `/termos-de-uso` (hoje rascunho, sem revisão jurídica).
@@ -191,6 +193,7 @@ Direitos previstos: confirmação do tratamento e acesso; correção; anonimiza�
 - **Transferência internacional (art. 33):** existe? qual salvaguarda?
 - Necessidade de **RIPD/DPIA** e critérios do registro de operações e de incidentes (art. 48).
 - Regra de atendimento ao titular (prazos) e de exclusão × anonimização.
+- **Depoimentos reais:** modelo de autorização por escrito (uso de nome, imagem e texto; prazo e revogação) e se a marca “exemplo” pode sair (ver 5.18).
 
 **Técnicas, antes do deploy:** conferir o **locale do banco de produção** antes de migrar; conferir a **região da função** na Vercel; definir a URL de produção do sistema de login; revisar CSP; `npm audit`; criar o administrador de produção.
 
@@ -208,3 +211,4 @@ Direitos previstos: confirmação do tratamento e acesso; correção; anonimiza�
 - [ ] Canal de atendimento ao titular testado de ponta a ponta (recebimento, exportação, anonimização, exclusão).
 - [ ] Modelo de registro de operações e de incidentes preenchidos e guardados.
 - [ ] Suíte de testes (Vitest e Playwright) e verificação de desempenho passando no ambiente final.
+- [ ] Depoimentos: seção com conteúdo fictício “exemplo” só na demo; antes de uso real, trocar por depoimentos autorizados por escrito (guardados fora do repositório) e retirar os selos “exemplo” (5.18).
