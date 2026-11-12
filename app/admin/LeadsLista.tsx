@@ -12,7 +12,7 @@ const rotulo = (l: Linha) => (l.anonimizadoEm ? "Ver lead anonimizado" : `Ver le
 const nome = (l: Linha) => (l.anonimizadoEm ? "Anonimizado" : l.nome);
 const whats = (l: Linha) => (l.anonimizadoEm ? null : linkWhatsapp(l.whatsapp));
 
-function BotaoWhats({ href }: { href: string }) {
+export function BotaoWhats({ href }: { href: string }) {
   return <a href={href} target="_blank" rel="noopener noreferrer" className={`${BOTAO} relative z-10`}>Chamar no WhatsApp</a>;
 }
 
