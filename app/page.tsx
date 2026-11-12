@@ -1,4 +1,5 @@
 import { CamilaEmAcao } from "./_components/CamilaEmAcao";
+import { Depoimentos } from "./_components/Depoimentos";
 import { ComoFunciona } from "./_components/ComoFunciona";
 import { Destrava } from "./_components/Destrava";
 import { Diferenca } from "./_components/Diferenca";
@@ -24,6 +25,7 @@ export default function Page() {
         <ComoFunciona />
         <Destrava />
         <CamilaEmAcao />
+        <Depoimentos />
         <QuemE />
         <ParaQuem />
         <Faq />

@@ -60,3 +60,6 @@ html { scroll-padding-top: var(--hdr); }
 
 /* Sticky CTA em reduced-motion: aparece/some sem transição. */
 @media (prefers-reduced-motion: reduce) { .lp-sticky { transition: none; } }
+
+/* Depoimentos: o .lp-wrap vira grid (depoimentos.css) com coluna implícita `auto`, que cresce até o min-content da faixa/figura e vaza do viewport no celular. Coluna única que pode encolher. */
+.lp-dep .lp-wrap { grid-template-columns: minmax(0, 1fr); }

@@ -3,6 +3,7 @@ import { Playfair_Display, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import "./landing/styles.css";
 import "./landing/landing-v6.css";
+import "./landing/depoimentos.css";
 import "./landing/static-overrides.css";
 import "./landing/legal.css";
 
