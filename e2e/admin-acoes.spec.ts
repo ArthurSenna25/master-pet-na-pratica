@@ -66,7 +66,7 @@ test.describe("painel: status, observação, anonimizar, excluir", () => {
     expect(await idDe("Zz Apaga Teste")).toBe(idApaga); // ainda existe
     await p2.getByRole("link", { name: "Excluir…" }).click();
     await p2.getByRole("button", { name: "Sim, excluir" }).click();
-    await expect(p2).toHaveURL(/\/admin\?ok=excluido/);
+    await expect(p2).toHaveURL(/\/admin\/leads\?ok=excluido/);
     await expect(p2.getByText("Lead excluído.")).toBeVisible();
     expect(await idDe("Zz Apaga Teste")).toBeUndefined();
     await semJs.close();

@@ -29,7 +29,7 @@ test("cabeçalho: menu Exportar abre por teclado; foco e aviso legíveis; screen
   await entrar(page);
   for (const [nome, w, h] of TELAS) {
     await page.setViewportSize({ width: w, height: h });
-    await page.goto("/admin");
+    await page.goto("/admin/leads");
     expect(await semOverflowHorizontal(page)).toBe(true);
     await page.locator("header").screenshot({ path: `${SHOTS}/cab-fechado-${browserName}-${nome}.png`, mask: [email(page)] });
 

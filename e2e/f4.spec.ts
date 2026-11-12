@@ -269,7 +269,7 @@ test.describe("POST direto na action", () => {
 // ---------- admin ----------
 test.describe("admin", () => {
   test("/admin sem sessão redireciona ao login", async ({ page }) => {
-    await page.goto("/admin");
+    await page.goto("/admin/leads");
     await expect(page).toHaveURL(/\/admin\/login$/);
     await expect(page.getByRole("heading", { name: "Painel" })).toBeVisible();
   });

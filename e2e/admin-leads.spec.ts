@@ -39,6 +39,7 @@ test.describe("com sessão: CSV de leads e botão WhatsApp", () => {
     const link = page.getByRole("link", { name: "Baixar leads (CSV)" });
     await expect(link).toHaveAttribute("href", "/admin/leads.csv");
 
+    await page.goto("/admin/leads");
     // WhatsApp na lista: 1 botão para o ativo, nenhum para o anonimizado
     await page.getByLabel(/Buscar/).fill("zz-teste-");
     await page.getByRole("button", { name: "Filtrar" }).click();
@@ -60,7 +61,7 @@ test.describe("com sessão: CSV de leads e botão WhatsApp", () => {
     await expect(page.getByRole("link", { name: "Chamar no WhatsApp" })).toHaveCount(0);
 
     // download do CSV
-    await page.goto("/admin");
+    await page.goto("/admin/leads");
     await abrirExportar(page);
     const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Baixar leads (CSV)" }).click()]);
     expect(dl.suggestedFilename()).toMatch(/^leads-\d{4}-\d{2}-\d{2}\.csv$/);

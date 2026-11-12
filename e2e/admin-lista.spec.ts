@@ -15,7 +15,7 @@ test.describe("painel: lista, busca, filtro, resumo", () => {
   test.afterEach(async () => { await limparLeads(); });
 
   test("sem sessão redireciona ao login", async ({ page }) => {
-    await page.goto("/admin");
+    await page.goto("/admin/leads");
     await expect(page).toHaveURL(/\/admin\/login/);
   });
 
@@ -24,7 +24,7 @@ test.describe("painel: lista, busca, filtro, resumo", () => {
     await entrar(page);
     for (const [nome, w, h] of [["mobile", 390, 844], ["desktop", 1440, 900]] as const) {
       await page.setViewportSize({ width: w, height: h });
-      await page.goto("/admin");
+      await page.goto("/admin/leads");
       await expect(page.getByRole("link", { name: "Ver lead Zz Ana Teste" })).toBeVisible();
       expect(await semOverflowHorizontal(page)).toBe(true);
       // Estrutura: tabela só >= 900 px, cartões abaixo; sempre 1 link por lead no que está visível.
@@ -50,12 +50,12 @@ test.describe("painel: lista, busca, filtro, resumo", () => {
       await expect(page.getByRole("link", { name: "Ver lead Zz Caio Teste" })).toBeVisible();
 
       // filtro por status + estado vazio
-      await page.goto("/admin?status=convertido&q=zz-teste-Pet_Sub");
+      await page.goto("/admin/leads?status=convertido&q=zz-teste-Pet_Sub");
       await expect(page.getByText("Nenhum lead para este filtro")).toBeVisible();
       await page.screenshot({ path: `${SHOTS}/vazio-${nome}-${info.project.name}.png`, fullPage: true, mask: [page.locator("[data-admin-email]")] });
 
       // alvos de toque >= 44 px
-      await page.goto("/admin");
+      await page.goto("/admin/leads");
       for (const alvo of [page.getByRole("button", { name: "Filtrar" }), page.getByRole("button", { name: "Sair" }), page.getByLabel(/Buscar/)]) {
         expect((await alvo.boundingBox())!.height).toBeGreaterThanOrEqual(44);
       }
@@ -66,7 +66,7 @@ test.describe("painel: lista, busca, filtro, resumo", () => {
         const cel = (await page.getByRole("row", { name: /Zz Ana Teste/ }).getByRole("cell").nth(4).boundingBox())!;
         await page.mouse.click(cel.x + cel.width / 2, cel.y + cel.height / 2);
         await expect(page).toHaveURL(/\/admin\/lead\/[0-9a-f-]{36}$/);
-        await page.goto("/admin");
+        await page.goto("/admin/leads");
       }
     }
   });

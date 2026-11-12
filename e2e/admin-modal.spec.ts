@@ -24,7 +24,7 @@ test.beforeEach(async () => {
 test.afterEach(async () => { await limparLeads(); });
 test.use({ storageState: SESSAO });
 
-const abrir = async (page: import("@playwright/test").Page, url = "/admin?q=zz-teste&ordem=asc") => {
+const abrir = async (page: import("@playwright/test").Page, url = "/admin/leads?q=zz-teste&ordem=asc") => {
   await page.goto(url);
   const link = page.getByRole("link", { name: `Ver lead ${NOME}` });
   await link.focus();
@@ -49,7 +49,7 @@ test("abre em modal; Esc, Fechar e clique fora fecham; foco volta ao item; filtr
 
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
-  await expect(page).toHaveURL(/\/admin\?q=zz-teste&ordem=asc$/);
+  await expect(page).toHaveURL(/\/admin\/leads\?q=zz-teste&ordem=asc$/);
   await expect(link).toBeFocused();
 
   await link.press("Enter");
@@ -61,7 +61,7 @@ test("abre em modal; Esc, Fechar e clique fora fecham; foco volta ao item; filtr
   await expect(dialog).toBeVisible();
   await page.mouse.click(5, 5); // backdrop
   await expect(dialog).toHaveCount(0);
-  await expect(page).toHaveURL(/\/admin\?q=zz-teste&ordem=asc$/);
+  await expect(page).toHaveURL(/\/admin\/leads\?q=zz-teste&ordem=asc$/);
 });
 
 test("URL direta mostra a página (sem dialog) e no celular o modal ocupa a tela", async ({ page }) => {
@@ -98,7 +98,7 @@ test("actions dentro do modal: salvar, anonimizar e excluir em 2 passos", async 
 
   // fechar volta à lista com os filtros (history não foi empilhado pelas etapas)
   await page.getByRole("button", { name: "Fechar" }).click();
-  await expect(page).toHaveURL(/\/admin\?q=zz-teste&ordem=asc$/);
+  await expect(page).toHaveURL(/\/admin\/leads\?q=zz-teste&ordem=asc$/);
 
   await page.getByRole("link", { name: "Ver lead Zz Apaga Modal" }).click();
   const d2 = page.getByRole("dialog", { name: "Zz Apaga Modal" });
@@ -107,7 +107,7 @@ test("actions dentro do modal: salvar, anonimizar e excluir em 2 passos", async 
   await expect(d2.getByRole("alertdialog", { name: "Excluir este lead?" })).toBeVisible();
   expect(await existe("Zz Apaga Modal")).toBe(true);
   await d2.getByRole("button", { name: "Sim, excluir" }).click();
-  await expect(page).toHaveURL(/\/admin\?ok=excluido/);
+  await expect(page).toHaveURL(/\/admin\/leads\?ok=excluido/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   expect(await existe("Zz Apaga Modal")).toBe(false);
 });

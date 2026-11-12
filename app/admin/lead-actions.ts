@@ -18,7 +18,7 @@ export async function atualizarLeadAction(form: FormData): Promise<void> {
   if (!parsed.success) {
     const id = idSchema.safeParse({ id: form.get("id") });
     if (id.success) irAoDetalhe(id.data.id, "erro=dados");
-    redirect("/admin");
+    redirect("/admin/leads");
   }
   const { id, status, observacao } = parsed.data;
   const alterados = await getDb()
@@ -27,14 +27,14 @@ export async function atualizarLeadAction(form: FormData): Promise<void> {
     .where(and(eq(lead.id, id), isNull(lead.anonimizadoEm)))
     .returning({ id: lead.id });
   if (alterados.length) irAoDetalhe(id, "ok=salvo");
-  redirect("/admin");
+  redirect("/admin/leads");
 }
 
 /** RF-14. Só roda com confirmar=sim (campo do formulário do 2º passo). audit_log + DELETE na mesma transação. */
 export async function excluirLeadAction(form: FormData): Promise<void> {
   await requireSession();
   const parsed = confirmaSchema.safeParse({ id: form.get("id"), confirmar: form.get("confirmar") });
-  if (!parsed.success) redirect("/admin");
+  if (!parsed.success) redirect("/admin/leads");
   const { id } = parsed.data;
   const db = getDb();
   const [existe] = await db.select({ id: lead.id }).from(lead).where(eq(lead.id, id));
@@ -44,17 +44,17 @@ export async function excluirLeadAction(form: FormData): Promise<void> {
       db.delete(lead).where(eq(lead.id, id)), // consent_events saem por cascade
     ]);
   }
-  redirect("/admin?ok=excluido");
+  redirect("/admin/leads?ok=excluido");
 }
 
 /** RF-14. Zera dados pessoais e ip_hmac/user_agent dos eventos; mantém a prova do consentimento. */
 export async function anonimizarLeadAction(form: FormData): Promise<void> {
   await requireSession();
   const parsed = confirmaSchema.safeParse({ id: form.get("id"), confirmar: form.get("confirmar") });
-  if (!parsed.success) redirect("/admin");
+  if (!parsed.success) redirect("/admin/leads");
   const { id } = parsed.data;
   const [existe] = await getDb().select({ id: lead.id }).from(lead).where(eq(lead.id, id));
-  if (!existe) redirect("/admin");
+  if (!existe) redirect("/admin/leads");
   await anonimizarLead(id);
   irAoDetalhe(id, "ok=anonimizado");
 }
