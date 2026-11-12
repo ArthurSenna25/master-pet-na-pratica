@@ -1,4 +1,5 @@
 import { DEPOIMENTOS, DESTAQUE, iniciais, publicaveis, type Depoimento } from "../_lib/depoimentos";
+import { DepoimentosFaixa } from "./DepoimentosFaixa";
 import { vars } from "./vars";
 
 const Selo = ({ d, className = "" }: { d: Depoimento; className?: string }) =>
@@ -36,19 +37,17 @@ export function Depoimentos() {
             </div>
           </figure>
         )}
-        <div className="lp-tcs" role="region" aria-roledescription="carrossel" aria-label="Mais depoimentos (exemplos)">
-          <ul className="lp-tcs__track" aria-label="Depoimentos em faixa rolável. Use as setas do teclado para navegar.">
-            {cards.map((d, i) => (
-              <li key={i} className="lp-tc" role="group" aria-roledescription="slide" aria-label={`${i + 1} de ${cards.length}`}>
-                <figure className="lp-tc__in">
-                  <div className="lp-tc__top"><span className="lp-q-glyph" aria-hidden="true">“</span><Selo d={d} className="lp-tc__seal" /></div>
-                  <blockquote><p>{d.quote}</p></blockquote>
-                  <Quem d={d} />
-                </figure>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <DepoimentosFaixa>
+          {cards.map((d, i) => (
+            <li key={i} className="lp-tc" role="group" aria-roledescription="slide" aria-label={`${i + 1} de ${cards.length}`}>
+              <figure className="lp-tc__in">
+                <div className="lp-tc__top"><span className="lp-q-glyph" aria-hidden="true">“</span><Selo d={d} className="lp-tc__seal" /></div>
+                <blockquote><p>{d.quote}</p></blockquote>
+                <Quem d={d} />
+              </figure>
+            </li>
+          ))}
+        </DepoimentosFaixa>
         <figure className="lp-vid">
           <div className="lp-vid__f" aria-hidden="true">
             <span className="lp-prov lp-vid__seal">exemplo · vídeo opcional</span>

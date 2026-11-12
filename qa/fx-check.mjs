@@ -114,7 +114,7 @@ for (const [name, type, w, h] of cases) {
     if (name === "chromium" && !(w === 1366)) {
       await p.evaluate(() => scrollTo(0, 0)); await p.waitForTimeout(2800);
       await p.screenshot({ path: `qa/out/${w}-${rm}-hero.png` });
-      for (const id of ["problema", "como", "acao", "diferenca", "destrava", "quem", "para-quem", "faq"]) {
+      for (const id of ["problema", "como", "acao", "depoimentos", "diferenca", "destrava", "quem", "para-quem", "faq"]) {
         await p.locator(`#${id}`).scrollIntoViewIfNeeded(); await p.waitForTimeout(1600);
         await p.screenshot({ path: `qa/out/${w}-${rm}-${id}.png` });
         if (pinned && (id === "problema" || id === "como" || id === "acao")) {

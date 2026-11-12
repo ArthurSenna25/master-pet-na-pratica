@@ -63,3 +63,5 @@ html { scroll-padding-top: var(--hdr); }
 
 /* Depoimentos: o .lp-wrap vira grid (depoimentos.css) com coluna implícita `auto`, que cresce até o min-content da faixa/figura e vaza do viewport no celular. Coluna única que pode encolher. */
 .lp-dep .lp-wrap { grid-template-columns: minmax(0, 1fr); }
+/* Depoimentos: barra de setas só com JS. O protótipo usava .mp-js no <html> (o porte não liga); aqui a classe is-js é posta ao hidratar. Mesmos valores de depoimentos.css. */
+@media (max-width: 899px) { .lp-tcs.is-js .lp-tcs__bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 8px; } }

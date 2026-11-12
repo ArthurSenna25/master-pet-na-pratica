@@ -10,6 +10,7 @@ import { seguirHash } from "../_fx/hash";
 import { hero, heroLight } from "../_fx/hero";
 import { acao } from "../_fx/acao";
 import { como } from "../_fx/como";
+import { depoimentos, depoimentosHover } from "../_fx/depoimentos";
 import { problema } from "../_fx/problema";
 import { destrava, destravaHover, diferenca, quemEParaQuem, reveal } from "../_fx/secoes";
 import type { Cleanup } from "../_fx/util";
@@ -46,6 +47,7 @@ export function LandingFx() {
       diferenca();
       const stopComo = como();
       const stopAcao = acao();
+      const stopDepoimentos = depoimentos();
       destrava();
       quemEParaQuem();
       formEntrada();
@@ -53,10 +55,10 @@ export function LandingFx() {
       ScrollTrigger.sort();
       refresh = () => ScrollTrigger.refresh();
       hash.reaplicar();
-      return undo(cleanup, stopProblema, stopComo, stopAcao, () => { refresh = () => {}; });
+      return undo(cleanup, stopProblema, stopComo, stopAcao, stopDepoimentos, () => { refresh = () => {}; });
     });
 
-    mm.add(FINE, () => undo(heroLight(), magnet(), destravaHover()));
+    mm.add(FINE, () => undo(heroLight(), magnet(), destravaHover(), depoimentosHover()));
 
     return () => {
       vivo = false;
