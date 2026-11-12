@@ -1,0 +1,1 @@
+Nenhum token novo foi criado. A seção usa apenas tokens existentes de tokens/colors.css, effects.css, radii/shadows/motion da landing-v6.
