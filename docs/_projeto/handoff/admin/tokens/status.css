@@ -1,0 +1,12 @@
+/* NOVOS tokens do Painel (únicos criados; a landing não tem cores de status).
+   Pares texto/fundo ≥ 4,5:1; barra sobre bege-50/trilho ≥ 3:1 (ver ACESSIBILIDADE.md). */
+:root{
+  /* Status: fundo do selo / texto do selo / barra */
+  --st-novo-bg:#d6e7f6;--st-novo-fg:#10224f;--st-novo-bar:#1b3470;
+  --st-contato-bg:#f6e4b5;--st-contato-fg:#5a3d05;--st-contato-bar:#8f6200;
+  --st-conv-bg:#d8ead9;--st-conv-fg:#1b5230;--st-conv-bar:#2d7a4c;
+  --st-nao-bg:#f6dad4;--st-nao-fg:#842619;--st-nao-bar:#b0382a;
+  /* Perigo: preenchimento (texto branco) e texto/borda sobre claro */
+  --danger-fill:#a3281b;--danger-fill-hover:#842619;--danger-text:#a3281b;
+  --danger-bg:#fbeae6;
+}
