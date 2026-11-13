@@ -2,9 +2,10 @@ import Link from "next/link";
 import { haQuanto } from "../_lib/admin/visao-geral";
 import type { listarLeads } from "../_lib/admin/leads-query";
 import { linkWhatsapp } from "../_lib/admin/whatsapp";
+import { BotaoWhatsapp } from "./BotaoWhatsapp";
 import { Icone } from "./Icone";
 import { SeloStatus } from "./SeloStatus";
-import { data } from "./ui";
+import { dataCurta as data } from "../_lib/admin/formato";
 
 type Linha = Awaited<ReturnType<typeof listarLeads>>["linhas"][number];
 
@@ -16,12 +17,7 @@ const nome = (l: Linha) => (l.anonimizadoEm ? "Anonimizado" : l.nome);
 
 function Whatsapp({ l }: { l: Linha }) {
   const wa = l.anonimizadoEm ? null : linkWhatsapp(l.whatsapp);
-  if (!wa) return null;
-  return (
-    <a className="ad-btn ad-btn--wa ad-btn--sm" href={wa} target="_blank" rel="noopener noreferrer" aria-label={`Chamar ${l.nome} no WhatsApp`}>
-      <Icone nome="chat" /><span>WhatsApp</span>
-    </a>
-  );
+  return wa ? <BotaoWhatsapp href={wa} nome={l.nome} /> : null;
 }
 
 export function LeadsLista({ linhas, agora }: { linhas: Linha[]; agora: Date }) {

@@ -83,7 +83,7 @@ test("actions dentro do modal: salvar, anonimizar e excluir em 2 passos", async 
   await page.setViewportSize({ width: 1440, height: 900 });
   const { dialog } = await abrir(page);
 
-  await dialog.getByLabel("Status").selectOption("em_contato");
+  await dialog.getByRole("radio", { name: "Em contato" }).check(); // status agora são 4 radios (handoff), não um select
   await dialog.getByRole("button", { name: "Salvar" }).click();
   await expect(page).toHaveURL(/ok=salvo/);
   await expect(dialog).toBeVisible(); // continua modal após o redirect da action

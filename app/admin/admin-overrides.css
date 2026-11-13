@@ -32,3 +32,13 @@
 .ad td.ad-act > * { vertical-align: middle; }
 .ad td.ad-act > .ad-eye { display: inline-grid; }
 .ad td.ad-act > * + * { margin-left: 8px; }
+
+/* 9. Modal do lead: o handoff usa <div class="ad-ov"> própria; aqui o <dialog> nativo (foco preso, Esc) ocupa a tela e o .ad-ov (overlay + rolagem) fica dentro dele.
+   Os estilos do UA para <dialog> (margin auto, borda, fit-content) são zerados; o ::backdrop fica transparente porque o .ad-ov já escurece. */
+.ad dialog.ad-modal { position: fixed; inset: 0; margin: 0; padding: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: transparent; color: inherit; overflow: visible; }
+.ad dialog.ad-modal::backdrop { background: transparent; }
+/* No handoff o `.ad-ov{padding:0}` mora num @container que o próprio .ad-ov não consegue consultar (ele é o container): repetido por media query. */
+@media (max-width: 719px) { .ad-modal .ad-ov { padding: 0; } }
+/* Barra de salvar: confirmação (status + hora) à esquerda. */
+.ad .ad-savebar__msg { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ad .ad-saved__t { font-size: 15px; color: var(--text-2); white-space: nowrap; }

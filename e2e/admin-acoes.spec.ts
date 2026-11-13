@@ -34,11 +34,11 @@ test.describe("painel: status, observação, anonimizar, excluir", () => {
     await page.goto(`/admin/lead/${idEdita}`);
     expect(await semOverflowHorizontal(page)).toBe(true);
     await page.screenshot({ path: `${SHOTS}/detalhe-mobile-${info.project.name}.png`, fullPage: true });
-    await page.getByLabel("Status").selectOption("em_contato");
+    await page.getByRole("radio", { name: "Em contato" }).check(); // status agora são 4 radios (handoff), não um select
     await page.getByLabel(/Observação/).fill("Ligar amanhã às 10h");
     await page.getByRole("button", { name: "Salvar" }).click();
     await expect(page.getByRole("status")).toHaveText("Alterações salvas.");
-    await expect(page.getByLabel("Status")).toHaveValue("em_contato");
+    await expect(page.getByRole("radio", { name: "Em contato" })).toBeChecked();
     await expect(page.getByLabel(/Observação/)).toHaveValue("Ligar amanhã às 10h");
 
     // anonimizar: 1º passo não altera; Cancelar volta; 2º passo confirma

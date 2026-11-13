@@ -1,31 +1,33 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
+import { formatarWhatsapp, dataHora, soHora } from "../../../_lib/admin/formato";
+import { idSchema, OBSERVACAO_MAX } from "../../../_lib/admin/lead-edit";
+import { haQuanto } from "../../../_lib/admin/visao-geral";
+import { linkWhatsapp } from "../../../_lib/admin/whatsapp";
 import { getDb } from "../../../_lib/db";
 import { lead } from "../../../_lib/db/schema";
-import { idSchema, OBSERVACAO_MAX } from "../../../_lib/admin/lead-edit";
-import { STATUS, STATUS_ROTULO } from "../../../_lib/admin/status";
-import { linkWhatsapp } from "../../../_lib/admin/whatsapp";
-import { anonimizarLeadAction, atualizarLeadAction, excluirLeadAction } from "../../lead-actions";
-
-const FOCO = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700";
-const BOTAO = `inline-flex min-h-11 items-center justify-center rounded-md border border-slate-400 bg-white px-4 text-sm font-medium font-[inherit] no-underline text-slate-900 ${FOCO}`;
-const PERIGO = `inline-flex min-h-11 items-center justify-center rounded-md border border-red-700 bg-red-700 px-4 text-sm font-medium font-[inherit] text-white ${FOCO}`;
-const CAMPO = `box-border min-h-11 w-full rounded-md border border-slate-400 bg-white px-3 font-[inherit] text-slate-900 ${FOCO}`;
-const data = (d: Date) => d.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" });
-
-/** No modal: Link (soft nav, intercepta). Na página direta: <a>, senão a navegação suave abriria o modal por cima da página. */
-function Nav({ modal, href, children }: { modal: boolean; href: string; children: React.ReactNode }) {
-  return modal
-    ? <Link replace prefetch={false} href={href} className={BOTAO}>{children}</Link>
-    : <a href={href} className={BOTAO}>{children}</a>;
-}
+import { atualizarLeadAction } from "../../lead-actions";
+import { Aviso } from "../../Aviso";
+import { BotaoWhatsapp } from "../../BotaoWhatsapp";
+import { Cabecalho } from "../../Cabecalho";
+import { Icone } from "../../Icone";
+import { SeloStatus } from "../../SeloStatus";
+import { BarraSalvar } from "./BarraSalvar";
+import { BlocoLgpd } from "./BlocoLgpd";
+import { BotaoFechar } from "./BotaoFechar";
+import { CampoObservacao } from "./CampoObservacao";
+import { ConfirmacaoLgpd } from "./ConfirmacaoLgpd";
+import { SeletorStatus } from "./SeletorStatus";
 
 type Busca = Record<string, string | string[] | undefined>;
 const um = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-/** Conteúdo único do lead (página direta e modal). Quem chama faz requireSession() ANTES de renderizar isto. */
-export async function LeadDetalhe({ params, searchParams, modal = false }: { params: Promise<{ id: string }>; searchParams: Promise<Busca>; modal?: boolean }) {
+/**
+ * Conteúdo único do lead (página direta e modal; só muda o invólucro). Quem chama faz requireSession() ANTES de renderizar isto.
+ * `email` só é usado na página direta (cabeçalho). No modal, `modal` troca o título para h2 e o "voltar" por Fechar.
+ */
+export async function LeadDetalhe({ params, searchParams, modal = false, email }: { params: Promise<{ id: string }>; searchParams: Promise<Busca>; modal?: boolean; email?: string }) {
   const parsed = idSchema.safeParse(await params);
   if (!parsed.success) notFound();
   const [l] = await getDb().select().from(lead).where(eq(lead.id, parsed.data.id));
@@ -33,80 +35,103 @@ export async function LeadDetalhe({ params, searchParams, modal = false }: { par
   const q = await searchParams;
   const confirmar = um(q.confirmar);
   const anon = l.anonimizadoEm !== null;
-  const Titulo = modal ? "h2" : "h1";
+  const nome = anon ? "Lead anonimizado" : l.nome;
   const base = `/admin/lead/${l.id}`;
   const wa = anon ? null : linkWhatsapp(l.whatsapp); // montado no servidor; nunca para lead anonimizado
+  const tipoConfirmacao = confirmar === "excluir" ? "excluir" : confirmar === "anonimizar" && !anon ? "anonimizar" : null;
+  const Titulo = modal ? "h2" : "h1";
+  const agora = new Date();
+  const ok = um(q.ok);
 
+  // Mensagem de confirmação: um único role=status por vez. "Salvo" fica na barra de salvar (com a hora); as demais no topo.
+  const confirmacaoSalvo = ok === "salvo"
+    ? <><p role="status" className="ad-saved"><span><Icone nome="check" />Alterações salvas.</span></p><span className="ad-saved__t">às {soHora(l.atualizadoEm)}</span></>
+    : null;
+  const avisoTopo = (
+    <>
+      {ok === "anonimizado" && <Aviso tipo="ok">Dados pessoais anonimizados.</Aviso>}
+      {um(q.erro) && <Aviso tipo="erro">Não foi possível salvar. A observação pode ter até {OBSERVACAO_MAX} caracteres.</Aviso>}
+    </>
+  );
+
+  const cabecalhoLead = (
+    <div className="ad-dlg__hd">
+      <div>
+        <p className="ad-eyebrow">Lead</p>
+        <Titulo className="ad-dlg__t" id="lead-titulo">{nome}</Titulo>
+        <p className="ad-sub">Recebido em {dataHora(l.criadoEm)} · {haQuanto(l.criadoEm, agora)}</p>
+      </div>
+      <div className="ad-dlg__hr">
+        <SeloStatus status={l.status} />
+        {modal ? <BotaoFechar /> : <Link className="ad-link" href="/admin/leads" prefetch={false}>← Voltar para a lista</Link>}
+      </div>
+    </div>
+  );
+
+  const confirmacao = tipoConfirmacao ? <ConfirmacaoLgpd tipo={tipoConfirmacao} id={l.id} nome={nome} criadoEm={l.criadoEm} base={base} modal={modal} /> : null;
+  const corpo = confirmacao ? (
+    <div className="ad-lf__g">{confirmacao}</div>
+  ) : anon ? (
+    <>
+      <div className="ad-lf__g"><div>{avisoTopo}<p className="ad-sub">Os dados pessoais deste lead foram apagados. Não há o que editar nem a quem chamar; ele segue contando nos números.</p></div></div>
+      <BlocoLgpd base={base} modal={modal} anonimizado />
+    </>
+  ) : (
+    <form className="ad-lf" action={atualizarLeadAction}>
+      <input type="hidden" name="id" value={l.id} />
+      <div className="ad-lf__g">
+        <div className="ad-lf__l">
+          {avisoTopo}
+          <h3 className="ad-h3">Dados</h3>
+          <dl className="ad-dl">
+            {([
+              ["Negócio", l.negocio], ["Cidade/UF", l.cidadeUf], ["WhatsApp", formatarWhatsapp(l.whatsapp)], ["Tempo de funcionamento", l.tempoFuncionamento],
+              ["Pessoas na equipe", l.pessoas], ["Maior desafio", l.maiorDesafio], ["Já fez mentoria?", l.jaFezMentoria ? "Sim" : "Não"],
+            ] as const).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
+          </dl>
+          {l.mensagem && <div className="ad-msg"><p className="ad-msg__l">Mensagem</p><blockquote>{l.mensagem}</blockquote></div>}
+          <div className="ad-orig"><span>Origem</span> {l.origem}</div>
+        </div>
+        <div className="ad-lf__r">
+          {wa && <BotaoWhatsapp href={wa} nome={l.nome} grande />}
+          <SeletorStatus atual={l.status} />
+          <CampoObservacao inicial={l.observacao ?? ""} />
+        </div>
+      </div>
+      <BlocoLgpd base={base} modal={modal} anonimizado={false} />
+      <BarraSalvar confirmacao={confirmacaoSalvo} />
+    </form>
+  );
+
+  if (modal) {
+    return (
+      <div className="ad-dlg">
+        {cabecalhoLead}
+        {corpo}
+      </div>
+    );
+  }
+  // Página direta: confirmação em tela estreita (como no handoff); o resto em página cheia, sem role=dialog.
+  if (confirmacao) {
+    return (
+      <>
+        {email && <Cabecalho email={email} ativa="leads" />}
+        <main className="ad-main ad-main--narrow">
+          <p className="ad-crumb"><Link href={base} prefetch={false}>← Voltar para {nome}</Link></p>
+          {confirmacao}
+        </main>
+      </>
+    );
+  }
   return (
     <>
-      <Titulo id="lead-titulo" className="m-0 break-words text-2xl font-semibold">{anon ? "Lead anonimizado" : l.nome}</Titulo>
-      <p className="m-0 mt-1 text-sm text-slate-600">Recebido em {data(l.criadoEm)}</p>
-
-      {um(q.ok) === "salvo" && <p role="status" className="mt-4 rounded-md bg-green-100 p-3">Alterações salvas.</p>}
-      {um(q.ok) === "anonimizado" && <p role="status" className="mt-4 rounded-md bg-green-100 p-3">Dados pessoais anonimizados.</p>}
-      {um(q.erro) && <p role="alert" className="mt-4 rounded-md bg-red-100 p-3">Não foi possível salvar. A observação pode ter até {OBSERVACAO_MAX} caracteres.</p>}
-
-      {!anon && (
-        <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-          {([
-            ["Negócio", l.negocio], ["Cidade", l.cidadeUf], ["WhatsApp", l.whatsapp], ["Tempo de funcionamento", l.tempoFuncionamento],
-            ["Pessoas na equipe", l.pessoas], ["Maior desafio", l.maiorDesafio], ["Já fez mentoria", l.jaFezMentoria ? "Sim" : "Não"],
-          ] as const).map(([k, v]) => (
-            <div key={k}><dt className="text-slate-600">{k}</dt><dd className="m-0 break-words font-medium">{v}</dd></div>
-          ))}
-          {l.mensagem && <div className="sm:col-span-2"><dt className="text-slate-600">Mensagem</dt><dd className="m-0 whitespace-pre-wrap break-words">{l.mensagem}</dd></div>}
-        </dl>
-      )}
-
-      {wa && <p className="m-0 mt-6 flex"><a href={wa} target="_blank" rel="noopener noreferrer" className={BOTAO}>Chamar no WhatsApp</a></p>}
-
-      {!anon && (
-        <form action={atualizarLeadAction} className="mt-8 grid gap-4">
-          <input type="hidden" name="id" value={l.id} />
-          <label className="grid gap-1 text-sm">Status
-            <select name="status" defaultValue={l.status} className={CAMPO}>
-              {STATUS.map((s) => <option key={s} value={s}>{STATUS_ROTULO[s]}</option>)}
-            </select>
-          </label>
-          <label className="grid gap-1 text-sm">Observação (até {OBSERVACAO_MAX} caracteres)
-            <textarea name="observacao" defaultValue={l.observacao ?? ""} maxLength={OBSERVACAO_MAX} rows={5} className={`${CAMPO} py-2`} />
-          </label>
-          <div className="flex"><button type="submit" className={`${BOTAO} !bg-slate-900 !text-white`}>Salvar</button></div>
-        </form>
-      )}
-
-      <div role="region" aria-labelledby="zona" className="mt-10 border-t border-slate-300 pt-6">
-        <h2 id="zona" className="m-0 text-lg font-semibold">Privacidade (LGPD)</h2>
-
-        {confirmar === "anonimizar" && !anon ? (
-          <div role="alertdialog" aria-labelledby="t-anon" aria-describedby="d-anon" className="mt-4 rounded-md border border-red-700 bg-white p-4">
-            <h3 id="t-anon" className="m-0 text-base font-semibold">Anonimizar este lead?</h3>
-            <p id="d-anon" className="mt-2">Nome, WhatsApp, negócio, mensagem e observação serão apagados e não podem ser recuperados. O registro do consentimento é mantido, sem IP e sem navegador.</p>
-            <form action={anonimizarLeadAction} className="flex flex-wrap gap-3">
-              <input type="hidden" name="id" value={l.id} />
-              <input type="hidden" name="confirmar" value="sim" />
-              <button type="submit" className={PERIGO}>Sim, anonimizar</button>
-              <Nav modal={modal} href={base}>Cancelar</Nav>
-            </form>
-          </div>
-        ) : confirmar === "excluir" ? (
-          <div role="alertdialog" aria-labelledby="t-del" aria-describedby="d-del" className="mt-4 rounded-md border border-red-700 bg-white p-4">
-            <h3 id="t-del" className="m-0 text-base font-semibold">Excluir este lead?</h3>
-            <p id="d-del" className="mt-2">O lead e o registro do consentimento serão apagados para sempre. Fica só uma linha na auditoria, sem dado pessoal.</p>
-            <form action={excluirLeadAction} className="flex flex-wrap gap-3">
-              <input type="hidden" name="id" value={l.id} />
-              <input type="hidden" name="confirmar" value="sim" />
-              <button type="submit" className={PERIGO}>Sim, excluir</button>
-              <Nav modal={modal} href={base}>Cancelar</Nav>
-            </form>
-          </div>
-        ) : (
-          <div className="mt-4 flex flex-wrap gap-3">
-            {!anon && <Nav modal={modal} href={`${base}?confirmar=anonimizar`}>Anonimizar…</Nav>}
-            <Nav modal={modal} href={`${base}?confirmar=excluir`}>Excluir…</Nav>
-          </div>
-        )}
-      </div>
+      {email && <Cabecalho email={email} ativa="leads" />}
+      <main className="ad-main ad-main--lead">
+        <article className="ad-dlg ad-dlg--page" aria-labelledby="lead-titulo">
+          {cabecalhoLead}
+          {corpo}
+        </article>
+      </main>
     </>
   );
 }
