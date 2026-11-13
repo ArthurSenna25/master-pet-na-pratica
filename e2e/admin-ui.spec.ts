@@ -1,6 +1,6 @@
 // F8 c1: cabeçalho novo (menu por teclado, Esc devolve o foco), override do CSS da landing no admin e login sem overflow.
 import { expect, test } from "@playwright/test";
-import { abrirExportar, entrar, semOverflowHorizontal } from "./admin-helpers";
+import { abrirExportar, criarLeads, entrar, limparLeads, semOverflowHorizontal } from "./admin-helpers";
 
 for (const [nome, w, h] of [["390", 390, 844], ["1440", 1440, 900]] as const) {
   test.describe(`cabeçalho ${nome}`, () => {
@@ -58,3 +58,42 @@ test("login: tela com marca e formulário, sem overflow em 390", async ({ page }
   await expect(page.getByRole("heading", { name: "Entrar no painel" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Entrar" })).toBeVisible();
 });
+
+// F8 c3: lista de leads — 3º vazamento da landing, WhatsApp acima do link esticado, 2º foco, alvos >= 44 px.
+
+for (const [nome, w, h] of [["390", 390, 844], ["1440", 1440, 900]] as const) {
+  test.describe(`lista de leads ${nome}`, () => {
+    test.use({ viewport: { width: w, height: h } });
+    test.beforeEach(async () => { await limparLeads(); await criarLeads([{ nome: "Zz Lista Um", whatsapp: "67999990071" }, { nome: "Zz Lista Dois", whatsapp: "67999990072", status: "convertido" }]); });
+    test.afterEach(async () => { await limparLeads(); });
+
+    test("sem vazamento da landing; WhatsApp acima do link esticado; WhatsApp é o 2º foco; alvos >= 44 px", async ({ page, browserName }) => {
+      await entrar(page);
+      await page.goto("/admin/leads?q=Zz%20Lista&status=novo");
+      const est = await page.evaluate(() => {
+        const g = (s: string) => { const e = document.querySelector(s); if (!e) return null; const c = getComputedStyle(e); return { margem: c.marginTop, raio: parseFloat(c.borderTopLeftRadius), pos: c.position, disp: c.display }; };
+        return { main: g("main.ad-main"), lista: g(".ad-list"), pills: g(".ad-pills"), act: g("td.ad-act") };
+      });
+      expect(est.main?.margem).toBe("0px");
+      expect(est.lista?.raio).toBeLessThan(30);
+      expect(est.pills?.margem).toBe("0px");
+      if (w >= 900) expect(est.act?.disp).toBe("table-cell"); // a borda da linha cobre a coluna de ações
+
+      const link = page.getByRole("link", { name: "Ver lead Zz Lista Um" });
+      await expect(link).toHaveCount(1); // um único link por lead (o olho é aria-hidden e fora do Tab)
+      const wa = page.getByRole("link", { name: "Chamar Zz Lista Um no WhatsApp" });
+      const c = (await wa.boundingBox())!;
+      // hit-test real: no centro do botão quem recebe o clique é o WhatsApp, não o link esticado da linha/cartão
+      const alvo = await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest("a")?.getAttribute("aria-label"), [c.x + c.width / 2, c.y + c.height / 2]);
+      expect(alvo).toBe("Chamar Zz Lista Um no WhatsApp");
+      if (browserName !== "webkit") { // Safari não dá Tab em links
+        await link.focus();
+        await page.keyboard.press("Tab");
+        await expect(wa).toBeFocused();
+      }
+      for (const el of [wa, page.getByRole("link", { name: /^Remover filtro: Status/ }), page.getByRole("link", { name: "Limpar filtros" }), page.getByRole("link", { name: /^Novo/ })])
+        expect((await el.boundingBox())!.height, await el.innerText()).toBeGreaterThanOrEqual(44);
+      expect(await semOverflowHorizontal(page)).toBe(true);
+    });
+  });
+}

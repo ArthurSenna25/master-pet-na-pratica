@@ -56,6 +56,7 @@ test.describe("painel: lista, busca, filtro, resumo", () => {
 
       // alvos de toque >= 44 px
       await page.goto("/admin/leads");
+      if (w < 1000) await page.locator("header details").filter({ visible: true }).locator("summary").click(); // abaixo de 1000 px o Sair fica dentro de "Menu"
       for (const alvo of [page.getByRole("button", { name: "Filtrar" }), page.getByRole("button", { name: "Sair" }), page.getByLabel(/Buscar/)]) {
         expect((await alvo.boundingBox())!.height).toBeGreaterThanOrEqual(44);
       }
@@ -63,7 +64,7 @@ test.describe("painel: lista, busca, filtro, resumo", () => {
       // Tabela: clicar na célula de data (longe do nome) abre o mesmo lead, pelo link único da linha.
       if (w >= 900) {
         // mouse.click = hit-test real; locator.click() recusa porque o ::after do link "intercepta" a célula (é o desenho).
-        const cel = (await page.getByRole("row", { name: /Zz Ana Teste/ }).getByRole("cell").nth(4).boundingBox())!;
+        const cel = (await page.getByRole("row", { name: /Zz Ana Teste/ }).getByRole("cell").nth(3).boundingBox())!; // o nome agora é rowheader (th scope=row): "Recebido em" passa a ser a 4ª cell
         await page.mouse.click(cel.x + cel.width / 2, cel.y + cel.height / 2);
         await expect(page).toHaveURL(/\/admin\/lead\/[0-9a-f-]{36}$/);
         await page.goto("/admin/leads");

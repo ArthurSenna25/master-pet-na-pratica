@@ -23,3 +23,12 @@
 /* 6. Funil: cada linha é um link para a lista filtrada (o handoff desenha só barras). Alvo >= 44 px, sem sublinhado, foco navy. */
 .ad .ad-fn__a { display: block; min-height: 44px; padding: 6px 8px; margin: -6px -8px; border-radius: var(--radius-md); color: inherit; text-decoration: none; }
 .ad .ad-fn__a:hover { background: var(--mp-blue-100); color: inherit; }
+
+/* 7. Paginação (Anterior / Página N de M / Próxima): o handoff não a desenha; usa só componentes dele (.ad-btn--secondary). */
+.ad .ad-pager { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 4px; }
+
+/* 8. td.ad-act com display:flex (handoff) deixa de ser célula de tabela: a borda da linha não cobre a coluna. Mantém table-cell e alinha os filhos em linha. */
+.ad td.ad-act { display: table-cell; text-align: right; white-space: nowrap; }
+.ad td.ad-act > * { vertical-align: middle; }
+.ad td.ad-act > .ad-eye { display: inline-grid; }
+.ad td.ad-act > * + * { margin-left: 8px; }

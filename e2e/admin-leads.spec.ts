@@ -35,7 +35,7 @@ test.describe("com sessão: CSV de leads e botão WhatsApp", () => {
 
     // aviso + link comum (sem prefetch), dentro do menu Exportar
     await abrirExportar(page);
-    await expect(page.getByText("contém dados pessoais; guarde o arquivo com cuidado")).toBeVisible();
+    await expect(page.getByText("contém dados pessoais; guarde o arquivo com cuidado").filter({ visible: true })).toBeVisible();
     const link = page.getByRole("link", { name: "Baixar leads (CSV)" });
     await expect(link).toHaveAttribute("href", "/admin/leads.csv");
 
@@ -43,7 +43,7 @@ test.describe("com sessão: CSV de leads e botão WhatsApp", () => {
     // WhatsApp na lista: 1 botão para o ativo, nenhum para o anonimizado
     await page.getByLabel(/Buscar/).fill("zz-teste-");
     await page.getByRole("button", { name: "Filtrar" }).click();
-    const wa = page.getByRole("link", { name: "Chamar no WhatsApp" });
+    const wa = page.getByRole("link", { name: /^Chamar (.+ )?no WhatsApp$/ });
     await expect(wa).toHaveCount(1);
     const href = (await wa.getAttribute("href"))!;
     expect(href).toMatch(/^https:\/\/wa\.me\/5567999990041\?text=/);
@@ -55,10 +55,10 @@ test.describe("com sessão: CSV de leads e botão WhatsApp", () => {
     const db = getDb();
     const [ativo] = await db.select({ id: lead.id }).from(lead).where(eq(lead.nome, "Zz Wa Ativo"));
     await page.goto(`/admin/lead/${ativo.id}`);
-    await expect(page.getByRole("link", { name: "Chamar no WhatsApp" })).toHaveAttribute("href", /wa\.me\/5567999990041/);
+    await expect(page.getByRole("link", { name: /^Chamar (.+ )?no WhatsApp$/ })).toHaveAttribute("href", /wa\.me\/5567999990041/);
     await page.goto(`/admin/lead/${ids[0]}`);
     await expect(page.getByRole("heading", { name: "Lead anonimizado" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Chamar no WhatsApp" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /^Chamar (.+ )?no WhatsApp$/ })).toHaveCount(0);
 
     // download do CSV
     await page.goto("/admin/leads");

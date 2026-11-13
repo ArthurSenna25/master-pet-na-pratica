@@ -1,6 +1,6 @@
 // Leads FICTÍCIOS só para ver o painel (screenshots, demonstração). Uso: `node scripts/seed-demo.mjs` (cria) · `node scripts/seed-demo.mjs --remover` (apaga).
 // Só roda no branch de TESTE: usa SOMENTE o DATABASE_URL do .env.local (nunca o do ambiente) e aborta se houver qualquer lead que não seja deste seed
-// ou se o host for o de produção (HOST_PRODUCAO). Marca: negócio "zz-teste-…" e origem "zz-demo-teste-…". Nada disso entra no código do app.
+// ou se o host coincidir com o de DATABASE_URL_PROD (variável do ambiente, lida ao rodar). Marca: negócio "zz-teste-…" e origem "zz-demo-teste-…". Nada disso entra no código do app.
 import { existsSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { neon } from "@neondatabase/serverless";
@@ -16,8 +16,15 @@ process.loadEnvFile(".env.local");
 const url = process.env.DATABASE_URL;
 if (!url) falhar("DATABASE_URL ausente no .env.local.");
 const host = new URL(url).hostname;
-const hostProducao = (process.env.HOST_PRODUCAO ?? "").trim();
-if (hostProducao && host === hostProducao) falhar("o host do .env.local é o de produção.");
+// Host de produção: lido do AMBIENTE ao rodar (DATABASE_URL_PROD, nunca escrito no repositório nem impresso). Sem ela a trava de host não vale (as outras seguem).
+const urlProd = process.env.DATABASE_URL_PROD;
+if (urlProd) {
+  let hostProd;
+  try { hostProd = new URL(urlProd).hostname; } catch { falhar("DATABASE_URL_PROD inválida."); }
+  if (hostProd === host) falhar("o host do .env.local é o de produção (DATABASE_URL_PROD).");
+} else {
+  console.warn("Aviso: DATABASE_URL_PROD não definida; a trava de host de produção não foi aplicada.");
+}
 // Defesa extra: se o .env.local aponta para um banco com leads reais, não mexe. (Origem http://localhost… = formulário local, só existe em teste; não é apagada.)
 const sql = neon(url);
 
