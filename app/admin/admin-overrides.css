@@ -3,6 +3,9 @@
 /* 1. landing-v6.css:231 `main section:not(.lp-hero)` (margem -48px, raio 48px, filete dourado ::after) vazou para as <section> do painel.
    Especificidade 0,2,2 > 0,1,2 da landing; o raio volta ao do cartão. */
 .ad main section:not(.lp-hero) { margin-top: 0; border-radius: var(--radius-lg); }
+/* 1b. landing-v6.css:234/250 `main>section:not(:last-child){padding-bottom:~176px}` e :233 (z-index por posição) também vazavam: o cartão ganhava 156 px de vão embaixo. */
+.ad main > section:not(:last-child) { padding-bottom: 20px; }
+.ad main > section { z-index: auto; }
 .ad main section:not(.lp-hero)::after { content: none; }
 
 /* 2. Botão de ação dentro do menu (Sair é <form>+<button>, o handoff usa <a>): mesma aparência de .ad-mi. */
@@ -16,3 +19,7 @@
 
 /* 5. O painel dos menus é claro, mas o anel dourado do cabeçalho (.ad-hd :focus-visible) valia dentro dele (2,0:1 sobre bege). Aqui volta o anel navy (8,6:1). */
 .ad .ad-dd__p :focus-visible { outline-color: var(--focus-ring); }
+
+/* 6. Funil: cada linha é um link para a lista filtrada (o handoff desenha só barras). Alvo >= 44 px, sem sublinhado, foco navy. */
+.ad .ad-fn__a { display: block; min-height: 44px; padding: 6px 8px; margin: -6px -8px; border-radius: var(--radius-md); color: inherit; text-decoration: none; }
+.ad .ad-fn__a:hover { background: var(--mp-blue-100); color: inherit; }

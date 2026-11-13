@@ -1,48 +1,46 @@
-import { rotuloDia, type Semana } from "../../_lib/admin/visao-geral";
+import { vars } from "../../_components/vars";
+import { rotuloDia, rotuloDiaCompleto, topoEixo, type Semana } from "../../_lib/admin/visao-geral";
 
-// Gráfico de barras horizontais em SVG gerado no servidor (sem JS). Horizontal de propósito: 12 rótulos legíveis em 390 px.
-// Barras navy-700 (#1b3470) sobre branco ≈ 11:1 (mínimo 3:1); texto slate-900 ≈ 17:1. O valor está escrito em cada linha (não só cor).
-const L = 360, LINHA = 28, ESQ = 56, DIR = 36, ALTURA_BARRA = 18;
-
+/** Colunas em HTML/CSS no servidor (sem JS). Semana em andamento listrada (não só cor). Texto alternativo lista todas as semanas; "Ver dados" traz a tabela. */
 export function GraficoSemanas({ semanas }: { semanas: Semana[] }) {
-  const max = Math.max(1, ...semanas.map((s) => s.n));
+  const topo = topoEixo(Math.max(0, ...semanas.map((s) => s.n)));
   const total = semanas.reduce((a, s) => a + s.n, 0);
-  const topo = semanas.reduce((a, s) => (s.n > a.n ? s : a), semanas[0]);
-  const h = semanas.length * LINHA + 4;
-  const area = L - ESQ - DIR;
-  const resumo = `Leads por semana, de ${rotuloDia(semanas[0].semana)} a ${rotuloDia(semanas[semanas.length - 1].semana)}. Total no período: ${total}.` +
-    (total > 0 ? ` Semana com mais leads: ${rotuloDia(topo.semana)}, com ${topo.n}.` : "");
+  const topoSemana = semanas.reduce((a, s) => (s.n > a.n ? s : a), semanas[0]);
+  const resumo = `Total no período: ${total}.` + (total > 0 ? ` Semana com mais leads: ${rotuloDia(topoSemana.semana)}, com ${topoSemana.n}.` : "");
+  const alt = `Leads por semana: gráfico de colunas, últimas ${semanas.length} semanas. ` + semanas.map((s) => `semana de ${rotuloDia(s.semana)}: ${s.n}`).join("; ") + ".";
   return (
-    <div>
-      <svg role="img" aria-labelledby="graf-titulo" aria-describedby="graf-desc" viewBox={`0 0 ${L} ${h}`} className="block h-auto w-full max-w-xl">
-        <title id="graf-titulo">Leads por semana (últimas {semanas.length} semanas)</title>
-        <desc id="graf-desc">{resumo}</desc>
-        <line x1={ESQ} x2={ESQ} y1={0} y2={h} stroke="#475569" strokeWidth={1} />
-        {semanas.map((s, i) => {
-          const y = i * LINHA + 2;
-          const w = (s.n / max) * area;
-          return (
-            <g key={s.semana}>
-              <text x={ESQ - 6} y={y + LINHA / 2} textAnchor="end" dominantBaseline="middle" fontSize={13} fill="#0f172a">{rotuloDia(s.semana)}</text>
-              {s.n > 0 && <rect x={ESQ} y={y + (LINHA - ALTURA_BARRA) / 2} width={w} height={ALTURA_BARRA} rx={2} fill="var(--mp-navy-700)" />}
-              <text x={ESQ + w + 6} y={y + LINHA / 2} dominantBaseline="middle" fontSize={13} fontWeight={700} fill="#0f172a">{s.n}</text>
-            </g>
-          );
-        })}
-      </svg>
-      <p className="m-0 mt-2 text-sm text-(--mp-ink-muted)">Cada linha é uma semana (começa na segunda-feira). A última é a semana em andamento.</p>
-      <details className="mt-2">
-        <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm font-medium underline text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Ver dados</summary>
-        <table className="mt-2 w-full max-w-xs border-collapse text-left text-sm">
-          <caption className="sr-only">Leads por semana</caption>
-          <thead><tr><th scope="col" className="border-b border-slate-300 px-2 py-1">Semana de</th><th scope="col" className="border-b border-slate-300 px-2 py-1 text-right">Leads</th></tr></thead>
+    <>
+      <div className="ad-chart" role="img" aria-label={alt} aria-describedby="graf-desc">
+        <div className="ad-chart__y" aria-hidden="true"><span>{topo}</span><span>{topo / 2}</span><span>0</span></div>
+        <ol className="ad-wks" style={vars({ "--c": semanas.length })}>
+          {semanas.map((s, k) => {
+            const atual = k === semanas.length - 1;
+            return (
+              <li key={s.semana} className={`ad-wk${atual ? " is-cur" : ""}`}>
+                <div className="ad-wk__plot">
+                  <span className={`ad-wk__v${s.n === 0 ? " ad-wk__v--0" : ""}`}>{s.n}</span>
+                  <span className="ad-wk__bar" style={vars({ "--h": s.n / topo })} />
+                </div>
+                <span className="ad-wk__l">{rotuloDia(s.semana)}{atual && <em>esta semana</em>}</span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+      <p id="graf-desc" className="ad-vh">{resumo}</p>
+      <p className="ad-hint">Cada coluna é uma semana (começa na segunda-feira). A listrada é a semana em andamento.</p>
+      <details className="ad-data">
+        <summary>Ver dados</summary>
+        <table className="ad-tb-s">
+          <caption className="ad-vh">Leads por semana</caption>
+          <thead><tr><th scope="col">Semana (segunda-feira)</th><th scope="col">Leads</th></tr></thead>
           <tbody>
-            {semanas.map((s) => (
-              <tr key={s.semana}><th scope="row" className="border-b border-slate-200 px-2 py-1 font-normal">{rotuloDia(s.semana)}</th><td className="border-b border-slate-200 px-2 py-1 text-right">{s.n}</td></tr>
+            {semanas.map((s, k) => (
+              <tr key={s.semana}><th scope="row">{rotuloDiaCompleto(s.semana)}{k === semanas.length - 1 ? " (em andamento)" : ""}</th><td>{s.n}</td></tr>
             ))}
           </tbody>
         </table>
       </details>
-    </div>
+    </>
   );
 }

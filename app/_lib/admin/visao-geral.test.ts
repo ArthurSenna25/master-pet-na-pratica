@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { amostraPequena, diaSP, haQuanto, meiaNoiteSP, preencherSemanas, rotuloDia, segundaDaSemanaSP, semanasRecentes, taxaConversao } from "./visao-geral";
+import { amostraPequena, diaSP, esteVsPassada, janelaGrafico, topoEixo, haQuanto, meiaNoiteSP, preencherSemanas, rotuloDia, segundaDaSemanaSP, semanasRecentes, taxaConversao } from "./visao-geral";
 
 describe("fuso de São Paulo (UTC-3)", () => {
   it("virada domingo -> segunda: 02:59:59Z de segunda ainda é domingo; 03:00:00Z já é a nova semana", () => {
@@ -64,5 +64,22 @@ describe("há quanto tempo e amostra", () => {
   it("amostra pequena só entre 1 e 9 leads; rótulo dd/mm", () => {
     expect([0, 1, 9, 10].map(amostraPequena)).toEqual([false, true, true, false]);
     expect(rotuloDia("2026-11-09")).toBe("09/11");
+  });
+});
+
+describe("gráfico semanal (handoff: 4 a 8 semanas a partir da primeira com lead)", () => {
+  const doze = (ns: number[]) => ns.map((n, i) => ({ semana: `s${i}`, n }));
+  it("lead só nesta semana = 4 semanas; lead há 5 semanas = 6; mais antigo = 8; sem lead = 4", () => {
+    expect(janelaGrafico(doze([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]), 3)).toHaveLength(4);
+    expect(janelaGrafico(doze([0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3]), 4)).toHaveLength(6);
+    expect(janelaGrafico(doze([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]), 4)).toHaveLength(8);
+    expect(janelaGrafico(doze([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 7)).toHaveLength(8); // lead só fora da janela de 12
+    expect(janelaGrafico(doze([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 0)).toHaveLength(4);
+  });
+  it("a janela termina na semana em andamento; eixo: máx(4, maior) par; esta × passada", () => {
+    const w = janelaGrafico(doze([0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 5]), 10);
+    expect(w.at(-1)?.semana).toBe("s11");
+    expect([0, 3, 4, 5, 6].map(topoEixo)).toEqual([4, 4, 4, 6, 6]);
+    expect(esteVsPassada(w)).toEqual({ atual: 5, passada: 2, delta: 3 });
   });
 });

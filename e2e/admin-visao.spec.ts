@@ -23,13 +23,13 @@ test.describe("Visão geral", () => {
       await expect(grafico).toBeVisible();
       await expect(grafico).toHaveAccessibleDescription(/Total no período/);
       await page.getByText("Ver dados").click();
-      await expect(page.getByRole("table", { name: "Leads por semana" }).getByRole("row")).toHaveCount(13);
+      await expect(page.getByRole("table", { name: "Leads por semana" }).getByRole("row")).toHaveCount(5);
       await expect(page.getByRole("region", { name: "Para chamar agora" })).toBeVisible();
       await expect(page.getByRole("region", { name: "Leads por status" }).getByRole("link")).toHaveCount(4);
       expect(await semOverflowHorizontal(page)).toBe(true);
 
       const card = page.getByRole("link", { name: /Aguardando contato/ });
-      const n = Number((await card.locator("span").nth(1).innerText()).trim());
+      const n = Number((await card.locator(".ad-kpi__n").innerText()).trim());
       await card.click();
       await expect(page).toHaveURL(/\/admin\/leads\?status=novo&ordem=asc$/);
       await expect(page.getByRole("status").filter({ hasText: /leads? no filtro/ })).toHaveText(new RegExp(`^${n} leads? no filtro`));

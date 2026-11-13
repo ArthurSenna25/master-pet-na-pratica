@@ -39,11 +39,16 @@ test("o CSS da landing não vaza para o admin: <section> do painel sem margem ne
   await page.goto("/admin/senha");
   const s = await page.locator("main section.ad-card").evaluate((e) => {
     const c = getComputedStyle(e);
-    return { margem: c.marginTop, raio: c.borderTopLeftRadius, filete: getComputedStyle(e, "::after").content };
+    return { margem: c.marginTop, raio: c.borderTopLeftRadius, filete: getComputedStyle(e, "::after").content, base: c.paddingBottom, topo: c.paddingTop };
   });
   expect(s.margem).toBe("0px");
   expect(parseFloat(s.raio)).toBeLessThan(30);
   expect(s.filete).toBe("none");
+  expect(s.base).toBe(s.topo); // sem o vão de ~176 px de `main>section:not(:last-child)` da landing
+  // na Visão geral os cartões <section> não são o último filho: lá valia `main>section:not(:last-child){padding-bottom:~176px}`
+  await page.goto("/admin");
+  const v = await page.locator("main section.ad-card").first().evaluate((e) => { const c = getComputedStyle(e); return { base: c.paddingBottom, topo: c.paddingTop }; });
+  expect(v.base).toBe(v.topo);
 });
 
 test("login: tela com marca e formulário, sem overflow em 390", async ({ page }) => {

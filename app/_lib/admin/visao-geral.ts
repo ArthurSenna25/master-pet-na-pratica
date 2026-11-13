@@ -65,3 +65,25 @@ export function haQuanto(de: Date, agora: Date): string {
 
 /** "AAAA-MM-DD" -> "dd/mm". */
 export const rotuloDia = (dia: string) => `${dia.slice(8, 10)}/${dia.slice(5, 7)}`;
+
+export const SEMANAS_MIN = 4;
+export const SEMANAS_MAX = 8;
+/** Handoff: o gráfico mostra de 4 a 8 semanas, a partir da primeira semana com lead (até a atual). Lead só fora da janela = 8; sem lead = 4. */
+export function janelaGrafico(semanas: Semana[], total: number): Semana[] {
+  const i = semanas.findIndex((s) => s.n > 0);
+  const desde = i >= 0 ? semanas.length - i : total > 0 ? SEMANAS_MAX : SEMANAS_MIN;
+  return semanas.slice(-Math.min(SEMANAS_MAX, Math.max(SEMANAS_MIN, desde)));
+}
+
+/** Topo do eixo: máx(4, maior valor), par (o meio do eixo cai em número inteiro). */
+export const topoEixo = (maior: number) => { const t = Math.max(4, maior); return t + (t % 2); };
+
+/** "Esta semana × semana passada" a partir das mesmas contagens do gráfico (a última é a semana em andamento). */
+export function esteVsPassada(semanas: Semana[]): { atual: number; passada: number; delta: number } {
+  const atual = semanas.at(-1)?.n ?? 0;
+  const passada = semanas.at(-2)?.n ?? 0;
+  return { atual, passada, delta: atual - passada };
+}
+
+/** "AAAA-MM-DD" -> "dd/mm/aaaa". */
+export const rotuloDiaCompleto = (dia: string) => `${dia.slice(8, 10)}/${dia.slice(5, 7)}/${dia.slice(0, 4)}`;
