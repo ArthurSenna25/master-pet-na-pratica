@@ -121,12 +121,12 @@ test.describe("alterar senha", () => {
       await page.waitForURL("**/admin?ok=senha");
       await expect(page.getByRole("status").filter({ hasText: "Senha alterada" })).toBeVisible();
       expect(await eventos()).toBe(antes + 1);
-      await expect(page.getByRole("heading", { name: "Painel" })).toBeVisible(); // a sessão atual seguiu válida
+      await expect(page.getByRole("link", { name: "Painel — início" })).toBeVisible(); // a sessão atual seguiu válida
 
       await page.getByRole("button", { name: "Sair" }).click();
       await page.goto("/admin/login");
       await page.getByLabel("E-mail").fill(process.env.ADMIN_EMAIL ?? "");
-      await page.getByLabel("Senha").fill(nova);
+      await page.getByLabel("Senha", { exact: true }).fill(nova);
       await page.getByRole("button", { name: "Entrar" }).click();
       await page.waitForURL("**/admin");
 

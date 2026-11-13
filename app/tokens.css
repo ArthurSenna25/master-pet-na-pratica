@@ -185,3 +185,15 @@ a { color: var(--text-link); text-decoration-thickness: 1px; text-underline-offs
 a:hover { color: var(--mp-navy-800); }
 ::selection { background: var(--mp-blue-200); color: var(--mp-navy-900); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; } }
+
+/* Painel (F8): tokens NOVOS de status e perigo do handoff do admin; a landing não tem cores de status (justificativa: 4 estados de lead + ação destrutiva). */
+:root{
+  /* Status: fundo do selo / texto do selo / barra */
+  --st-novo-bg:#d6e7f6;--st-novo-fg:#10224f;--st-novo-bar:#1b3470;
+  --st-contato-bg:#f6e4b5;--st-contato-fg:#5a3d05;--st-contato-bar:#8f6200;
+  --st-conv-bg:#d8ead9;--st-conv-fg:#1b5230;--st-conv-bar:#2d7a4c;
+  --st-nao-bg:#f6dad4;--st-nao-fg:#842619;--st-nao-bar:#b0382a;
+  /* Perigo: preenchimento (texto branco) e texto/borda sobre claro */
+  --danger-fill:#a3281b;--danger-fill-hover:#842619;--danger-text:#a3281b;
+  --danger-bg:#fbeae6;
+}

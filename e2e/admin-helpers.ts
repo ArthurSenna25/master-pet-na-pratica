@@ -10,14 +10,14 @@ export const PRE = "zz-teste-";
 export async function entrar(page: Page) {
   await page.goto("/admin/login");
   await page.getByLabel("E-mail").fill(process.env.ADMIN_EMAIL ?? "");
-  await page.getByLabel("Senha").fill(process.env.ADMIN_PASSWORD ?? "");
+  await page.getByLabel("Senha", { exact: true }).fill(process.env.ADMIN_PASSWORD ?? "");
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL("**/admin");
 }
 
 /** Os downloads ficam no <details> "Exportar" do cabeçalho; abre se ainda estiver fechado. */
 export async function abrirExportar(page: Page) {
-  const d = page.locator("header details");
+  const d = page.locator("header details").filter({ visible: true }); // ≥ 1000 px: "Exportar"; abaixo: "Menu"
   if ((await d.getAttribute("open")) === null) await d.locator("summary").click();
 }
 

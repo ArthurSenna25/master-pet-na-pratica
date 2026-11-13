@@ -17,7 +17,7 @@ test.describe("login em 3 camadas", () => {
     await page.goto("/admin/login");
     await expect(page.getByLabel("E-mail")).toHaveAttribute("type", "email");
     await page.getByLabel("E-mail").fill("nao-e-email");
-    await page.getByLabel("Senha").fill("qualquer-senha-1");
+    await page.getByLabel("Senha", { exact: true }).fill("qualquer-senha-1");
     await page.getByRole("button", { name: "Entrar" }).click();
     await expect(page).toHaveURL(/\/admin\/login/);
     await expect(page.locator("form").getByRole("alert")).toHaveCount(0);
@@ -31,7 +31,7 @@ test.describe("login em 3 camadas", () => {
       ["alguem-inexistente@exemplo.com", "senha-errada-123"],
     ]) {
       await page.getByLabel("E-mail").fill(email);
-      await page.getByLabel("Senha").fill(senha);
+      await page.getByLabel("Senha", { exact: true }).fill(senha);
       await page.getByRole("button", { name: "Entrar" }).click();
       const alerta = page.locator("form").getByRole("alert");
       await expect(alerta).toBeVisible();
@@ -45,7 +45,7 @@ test.describe("login em 3 camadas", () => {
   test("durante o envio: 'Entrando…' desabilitado; depois o erro aparece em alert e o botão volta", async ({ page }) => {
     await page.route("**/admin/login", async (r) => { if (r.request().method() === "POST") await new Promise((ok) => setTimeout(ok, 1000)); await r.continue(); });
     await page.getByLabel("E-mail").fill("alguem@exemplo.com");
-    await page.getByLabel("Senha").fill("");
+    await page.getByLabel("Senha", { exact: true }).fill("");
     await page.getByRole("button", { name: "Entrar" }).click();
     const b = page.getByRole("button", { name: "Entrando…" });
     await expect(b).toBeVisible();
@@ -54,11 +54,11 @@ test.describe("login em 3 camadas", () => {
     await expect(page.getByRole("button", { name: "Entrar", exact: true })).toBeEnabled();
   });
 
-  test("layout: cartão com título Painel, alvos >= 44 px e sem overflow em 390", async ({ page }) => {
+  test("layout: título Entrar no painel, alvos >= 44 px e sem overflow em 390", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/admin/login");
-    await expect(page.getByRole("heading", { name: "Painel" })).toBeVisible();
-    for (const el of [page.getByLabel("E-mail"), page.getByLabel("Senha"), page.getByRole("button", { name: "Entrar" })])
+    await expect(page.getByRole("heading", { name: "Entrar no painel" })).toBeVisible();
+    for (const el of [page.getByLabel("E-mail"), page.getByLabel("Senha", { exact: true }), page.getByRole("button", { name: "Entrar" })])
       expect((await el.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   });
@@ -75,7 +75,7 @@ test.describe("login em 3 camadas", () => {
       let ultima = "";
       for (let i = 0; i < 6; i++) {
         await page.getByLabel("E-mail").fill("alguem-inexistente@exemplo.com");
-        await page.getByLabel("Senha").fill("senha-errada-123");
+        await page.getByLabel("Senha", { exact: true }).fill("senha-errada-123");
         await page.getByRole("button", { name: "Entrar" }).click();
         await expect(page.locator("form").getByRole("alert")).toBeVisible();
         ultima = (await page.locator("form").getByRole("alert").textContent()) ?? "";

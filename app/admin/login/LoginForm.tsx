@@ -1,22 +1,24 @@
 "use client";
 import { useActionState } from "react";
 import { loginAction, type LoginState } from "../actions";
-import { BOTAO_PRIMARIO, CAMPO } from "../ui";
+import { Aviso } from "../Aviso";
+import { Campo } from "../Campo";
+import { CampoSenha } from "../CampoSenha";
 
 const initial: LoginState = {};
 
-export function LoginForm() {
+export function LoginForm({ okSenha }: { okSenha: boolean }) {
   const [state, action, pending] = useActionState(loginAction, initial);
   return (
-    <form action={action} className="grid gap-4">
-      <label className="grid gap-1 text-sm">E-mail
-        <input name="email" type="email" autoComplete="username" required maxLength={254} className={`${CAMPO} box-border w-full`} />
-      </label>
-      <label className="grid gap-1 text-sm">Senha
-        <input name="password" type="password" autoComplete="current-password" required maxLength={200} className={`${CAMPO} box-border w-full`} />
-      </label>
-      {state.error && <p role="alert" className="m-0 rounded-md bg-(--mp-danger-bg) p-3 text-sm text-(--mp-danger)">{state.error}</p>}
-      <button type="submit" disabled={pending} className={BOTAO_PRIMARIO}>{pending ? "Entrando…" : "Entrar"}</button>
+    <form action={action} className="ad-lg" aria-labelledby="lg-h">
+      <p className="ad-eyebrow">Acesso restrito</p>
+      <h1 id="lg-h">Entrar no painel</h1>
+      {okSenha && <Aviso tipo="ok" entrada>Senha alterada. Entre com a nova senha.</Aviso>}
+      {state.error && <Aviso tipo="erro">{state.error}</Aviso>}
+      <Campo id="lg-email" rotulo="E-mail" name="email" type="email" autoComplete="username" required maxLength={254} />
+      <CampoSenha name="password" rotulo="Senha" autoComplete="current-password" />
+      <button type="submit" className="ad-btn ad-btn--primary ad-btn--lg ad-btn--block" aria-disabled={pending || undefined}
+        onClick={(e) => { if (pending) e.preventDefault(); }}>{pending ? "Entrando…" : "Entrar"}</button>
     </form>
   );
 }

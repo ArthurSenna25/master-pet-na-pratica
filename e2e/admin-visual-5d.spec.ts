@@ -33,14 +33,14 @@ test("cabeçalho: menu Exportar abre por teclado; foco e aviso legíveis; screen
     expect(await semOverflowHorizontal(page)).toBe(true);
     await page.locator("header").screenshot({ path: `${SHOTS}/cab-fechado-${browserName}-${nome}.png`, mask: [email(page)] });
 
-    const resumo = page.locator("header details summary");
+    const resumo = page.locator("header details").filter({ visible: true }).locator("summary");
     await resumo.focus();
-    const anelSummary = await page.evaluate(() => getComputedStyle(document.querySelector("header details summary") as HTMLElement).outlineColor);
+    const anelSummary = await page.evaluate(() => getComputedStyle(document.activeElement as HTMLElement).outlineColor);
     const fundoCab = await page.evaluate(() => getComputedStyle(document.querySelector("header") as HTMLElement).backgroundColor);
     expect(razao(anelSummary, fundoCab), "foco do summary").toBeGreaterThanOrEqual(3);
 
     await page.keyboard.press("Enter"); // abre por teclado
-    await expect(page.locator("header details")).toHaveAttribute("open", "");
+    await expect(page.locator("header details").filter({ visible: true })).toHaveAttribute("open", "");
     const item = page.getByRole("link", { name: "Baixar leads (CSV)" });
     if (browserName === "webkit") await item.focus(); // Safari não dá Tab em links (já anotado no PROGRESS)
     else await page.keyboard.press("Tab");
@@ -50,14 +50,14 @@ test("cabeçalho: menu Exportar abre por teclado; foco e aviso legíveis; screen
     const c = await page.evaluate(() => {
       const a = document.querySelector("header details a:focus-visible") as HTMLElement;
       const menu = a.parentElement as HTMLElement;
-      const aviso = menu.querySelector("p") as HTMLElement;
+      const aviso = menu.querySelector(".ad-mw") as HTMLElement;
       return { anel: getComputedStyle(a).outlineColor, estilo: getComputedStyle(a).outlineStyle, menu: getComputedStyle(menu).backgroundColor, aviso: getComputedStyle(aviso).color, link: getComputedStyle(a).color };
     });
     expect(c.estilo).not.toBe("none");
     expect(razao(c.anel, c.menu), "anel de foco no menu").toBeGreaterThanOrEqual(3);
     expect(razao(c.aviso, c.menu), "aviso no menu").toBeGreaterThanOrEqual(4.5);
     expect(razao(c.link, c.menu), "link no menu").toBeGreaterThanOrEqual(4.5);
-    await expect(page.getByText("contém dados pessoais; guarde o arquivo com cuidado")).toBeVisible();
+    await expect(page.getByText("contém dados pessoais; guarde o arquivo com cuidado").filter({ visible: true })).toBeVisible();
     await page.screenshot({ path: `${SHOTS}/cab-aberto-${browserName}-${nome}.png`, mask: [email(page)], clip: { x: 0, y: 0, width: w, height: 420 } });
   }
 });

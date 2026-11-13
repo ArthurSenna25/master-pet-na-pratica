@@ -1,0 +1,18 @@
+/* Overrides do admin sobre CSS global (admin.css fica com os valores do handoff). Registrados no PROGRESS (F8). */
+
+/* 1. landing-v6.css:231 `main section:not(.lp-hero)` (margem -48px, raio 48px, filete dourado ::after) vazou para as <section> do painel.
+   Especificidade 0,2,2 > 0,1,2 da landing; o raio volta ao do cartão. */
+.ad main section:not(.lp-hero) { margin-top: 0; border-radius: var(--radius-lg); }
+.ad main section:not(.lp-hero)::after { content: none; }
+
+/* 2. Botão de ação dentro do menu (Sair é <form>+<button>, o handoff usa <a>): mesma aparência de .ad-mi. */
+.ad button.ad-mi { width: 100%; text-align: left; background: none; border: 0; cursor: pointer; font: inherit; font-weight: 600; }
+
+/* 3. Alternar senha: o ícone troca (olho / olho cortado), o texto do botão fica fixo (o nome acessível não muda com aria-pressed). */
+.ad .ad-pw__b[aria-pressed="true"] { background: var(--mp-blue-100); }
+
+/* 4. Marca do cabeçalho é link: alvo de toque >= 44 px (no handoff a altura vem só do texto, ~37 px). */
+.ad .ad-brand { min-height: 44px; align-content: center; }
+
+/* 5. O painel dos menus é claro, mas o anel dourado do cabeçalho (.ad-hd :focus-visible) valia dentro dele (2,0:1 sobre bege). Aqui volta o anel navy (8,6:1). */
+.ad .ad-dd__p :focus-visible { outline-color: var(--focus-ring); }
