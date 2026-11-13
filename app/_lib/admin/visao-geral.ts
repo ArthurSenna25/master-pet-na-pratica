@@ -51,7 +51,8 @@ export function taxaConversao(convertidos: number, naoConvertidos: number): Taxa
   return { decididos, pct: decididos >= MIN_DECIDIDOS ? Math.round((convertidos / decididos) * 100) : null };
 }
 
-export const amostraPequena = (totalLeads: number) => totalLeads > 0 && totalLeads < AMOSTRA_MIN;
+/** Aviso "poucos leads": vale também com 0 leads (a tela mostra tudo zerado). */
+export const poucosLeads = (totalLeads: number) => totalLeads < AMOSTRA_MIN;
 
 /** "há 3 dias", "há 1 hora", "há 12 minutos"; menos de 1 minuto = "agora há pouco". */
 export function haQuanto(de: Date, agora: Date): string {

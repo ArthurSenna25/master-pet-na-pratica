@@ -1,4 +1,2 @@
-/* Tailwind sem preflight (só admin; a LP usa o CSS do protótipo) */
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
+/* O admin não usa mais Tailwind (F8: CSS do handoff em app/admin/admin.css); os imports de utilities/theme foram removidos. A LP usa o CSS do protótipo. */
 @import "./tokens.css";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { amostraPequena, diaSP, esteVsPassada, janelaGrafico, topoEixo, haQuanto, meiaNoiteSP, preencherSemanas, rotuloDia, segundaDaSemanaSP, semanasRecentes, taxaConversao } from "./visao-geral";
+import { poucosLeads, diaSP, esteVsPassada, janelaGrafico, topoEixo, haQuanto, meiaNoiteSP, preencherSemanas, rotuloDia, segundaDaSemanaSP, semanasRecentes, taxaConversao } from "./visao-geral";
 
 describe("fuso de São Paulo (UTC-3)", () => {
   it("virada domingo -> segunda: 02:59:59Z de segunda ainda é domingo; 03:00:00Z já é a nova semana", () => {
@@ -61,8 +61,8 @@ describe("há quanto tempo e amostra", () => {
     expect(haQuanto(antes(3 * 86_400_000 + 3_600_000), agora)).toBe("há 3 dias");
     expect(haQuanto(new Date(agora.getTime() + 5000), agora)).toBe("agora há pouco");
   });
-  it("amostra pequena só entre 1 e 9 leads; rótulo dd/mm", () => {
-    expect([0, 1, 9, 10].map(amostraPequena)).toEqual([false, true, true, false]);
+  it("aviso de poucos leads até 9 (inclui 0); rótulo dd/mm", () => {
+    expect([0, 1, 9, 10].map(poucosLeads)).toEqual([true, true, true, false]);
     expect(rotuloDia("2026-11-09")).toBe("09/11");
   });
 });

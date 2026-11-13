@@ -1,5 +1,5 @@
 import type { GrupoPerfil } from "../../_lib/admin/perfil";
-import { AMOSTRA_MIN, esteVsPassada, janelaGrafico, taxaConversao } from "../../_lib/admin/visao-geral";
+import { esteVsPassada, janelaGrafico, poucosLeads, taxaConversao } from "../../_lib/admin/visao-geral";
 import type { VisaoGeral } from "../../_lib/admin/visao-geral-query";
 import { vars } from "../../_components/vars";
 import { Aviso } from "../Aviso";
@@ -23,7 +23,7 @@ export function VisaoGeralView({ dados, perfil = [], agora, ok }: { dados: Visao
     <main className="ad-main">
       {ok === "senha" && <Aviso tipo="ok"><b>Senha alterada.</b> Os outros aparelhos foram desconectados.</Aviso>}
       <div className="ad-pg-hd"><h1>Visão geral</h1></div>
-      {total < AMOSTRA_MIN && <p className="ad-note"><Icone nome="info" />Com poucos leads, as tendências ainda não são confiáveis.</p>}
+      {poucosLeads(total) && <p className="ad-note"><Icone nome="info" />Com poucos leads, as tendências ainda não são confiáveis.</p>}
 
       <div className="ad-kpis">
         <Kpi i={0} rotulo="Novos hoje" numero={hoje} sub="desde a meia-noite" />

@@ -6,8 +6,8 @@ import { NavLead } from "./NavLead";
 const TEXTOS = {
   anonimizar: {
     titulo: "Anonimizar este lead?", passo: "Anonimizar", icone: "shield", cor: "ad-conf__ic--w", acao: anonimizarLeadAction, botao: "Sim, anonimizar",
-    apagado: ["Nome e negócio", "WhatsApp", "Mensagem e observação"],
-    mantido: ["Cidade/UF, tempo de funcionamento, equipe, desafio e mentoria", "Status e datas", "O registro do consentimento, sem IP e sem navegador", "O lead segue contando nos números"],
+    apagado: ["Nome e negócio", "WhatsApp", "Mensagem e observação", "IP (em hash) e navegador guardados no consentimento"],
+    mantido: ["Cidade/UF, tempo de funcionamento, equipe, desafio e mentoria", "Status e datas", "Origem (endereço da página) do lead e do consentimento", "Prova do consentimento: versão e hash do texto aceito e a data", "O lead segue contando nos números"],
   },
   excluir: {
     titulo: "Excluir este lead?", passo: "Excluir", icone: "trash", cor: "ad-conf__ic--d", acao: excluirLeadAction, botao: "Sim, excluir para sempre",
