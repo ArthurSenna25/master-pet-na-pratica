@@ -274,15 +274,17 @@ test.describe("admin", () => {
     await expect(page.getByRole("heading", { name: "Painel" })).toBeVisible();
   });
 
-  test("sign-up inacessível e nenhum usuário criado", async ({ request, browserName }) => {
+  test("rota /api/auth removida: sign-up e sign-in respondem 404 e nenhum usuário é criado", async ({ request, browserName }) => {
     test.skip(browserName !== "chromium", "roda uma vez");
     const antes = Number((await sql`select count(*)::int c from "user"`)[0].c);
-    const res = await request.post("/api/auth/sign-up/email", {
-      headers: { origin: "http://localhost:3000", "x-forwarded-for": novoIp() },
-      data: { email: `${PREFIXO}x@example.test`, password: "senha-bem-longa-123", name: `${PREFIXO}x` },
-    });
-    expect(res.status()).toBeGreaterThanOrEqual(400);
-    expect(res.status()).toBeLessThan(500);
+    for (const caminho of ["sign-up/email", "sign-in/email"]) {
+      const res = await request.post(`/api/auth/${caminho}`, {
+        headers: { origin: "http://localhost:3000", "x-forwarded-for": novoIp() },
+        data: { email: `${PREFIXO}x@example.test`, password: "senha-bem-longa-123", name: `${PREFIXO}x` },
+      });
+      expect(res.status()).toBe(404);
+    }
     expect(Number((await sql`select count(*)::int c from "user"`)[0].c)).toBe(antes);
   });
+
 });

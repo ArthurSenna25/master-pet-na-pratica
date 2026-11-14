@@ -15,10 +15,12 @@ async function esperarNoAlvo(page: Page, alvo: string) {
   await expect.poll(() => folga(page, alvo), { timeout: 3000 }).toBeGreaterThanOrEqual(-2);
 }
 
+// WebKit avisa que a CSP Report-Only não tem report-to (por desenho: só mede, ver SEGURANCA.md).
+const RO = /report-only mode/;
 function coletarErros(page: Page): string[] {
   const erros: string[] = [];
   page.on("pageerror", (e) => erros.push(String(e)));
-  page.on("console", (m) => m.type() === "error" && erros.push(m.text()));
+  page.on("console", (m) => m.type() === "error" && !RO.test(m.text()) && erros.push(m.text()));
   return erros;
 }
 

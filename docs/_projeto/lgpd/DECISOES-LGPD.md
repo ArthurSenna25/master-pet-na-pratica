@@ -85,7 +85,7 @@ Tabela `consent_events` (fonte **única** de consentimento; o lead não guarda c
 
 **5.8 Sem analytics, pixels nem banner.** *Adotado:* nenhum rastreador; fontes servidas pelo próprio site; logs do servidor sem dado pessoal (só nome/código de erro). *Descartada:* analytics de terceiros e banner de cookies. Se isso mudar, a política e o consentimento precisam ser revistos antes.
 
-**5.9 Cookie de sessão do painel.** *Adotado:* um único cookie, essencial, `httpOnly`, restrito ao caminho `/admin`, só depois do login. A página pública e o formulário não definem cookies. *Descartada:* sessão com escopo no site inteiro.
+**5.9 Cookie de sessão do painel.** *Adotado:* um único cookie, essencial, `httpOnly`, restrito ao caminho `/admin`, só depois do login (em produção com prefixo `__Secure-` e atributo Secure, desde que `BETTER_AUTH_URL` seja https). A página pública e o formulário não definem cookies. *Descartada:* sessão com escopo no site inteiro.
 
 **5.10 Administrador único, criado por script.** *Adotado:* cadastro público **desligado**; o script local cria o único usuário (ou redefine a senha dele) e recusa criar um segundo; não há rota de cadastro. *Descartada:* cadastro com aprovação manual. Login limitado a 5 tentativas por minuto.
 
@@ -169,7 +169,8 @@ Direitos previstos: confirmação do tratamento e acesso; correção; anonimiza�
 - Cookie de sessão `httpOnly`, restrito a `/admin`; painel fora dos mecanismos de indexação (`noindex`).
 - **Sem dado pessoal em logs** da aplicação (erros registram só nome e código).
 - Segredos **fora do git** (arquivo local ignorado; só um modelo sem valores é versionado); busca automática por segredos antes de cada commit.
-- Cabeçalhos: `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `X-Frame-Options`. **Não há CSP** (decisão de escopo; reavaliar antes do deploy final). HTTPS depende da hospedagem: **a confirmar no deploy**.
+- Cabeçalhos: `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `X-Frame-Options`, `Strict-Transport-Security` (sem preload), `Cross-Origin-Opener-Policy` e **CSP apenas em Report-Only, sem `report-uri`** (só mede; bloqueio depois da LP de Natal). HTTPS depende da hospedagem: **a confirmar no deploy**.
+- **Rota `/api/auth` removida**: login, logout e troca de senha só por Server Action, com limite próprio. Teto global de 60 envios/h no formulário (pode barrar lead real durante ataque). Detalhes e riscos aceitos: `docs/_projeto/SEGURANCA.md`.
 - Testes automatizados (unidade, banco e navegador) cobrem validação, imutabilidade do consentimento, honeypot, limite de envio, login e cadastro fechado, sempre com dados fictícios identificáveis e removidos ao fim.
 - **Limites conhecidos:** nenhuma medida elimina todos os riscos; sem revisão externa de segurança; `npm audit` executado em 2026-11-10: 11 avisos moderados, nenhum alto/crítico, todos em ferramentas de desenvolvimento (drizzle-kit/esbuild, typescript-eslint/minimatch); a correção exigiria atualização major do drizzle-kit e não foi aplicada. Busca por segredos no histórico do git, em `.next/static` e neste documento: nada encontrado.
 
@@ -195,7 +196,7 @@ Direitos previstos: confirmação do tratamento e acesso; correção; anonimiza�
 - Regra de atendimento ao titular (prazos) e de exclusão × anonimização.
 - **Depoimentos reais:** modelo de autorização por escrito (uso de nome, imagem e texto; prazo e revogação) e se a marca “exemplo” pode sair (ver 5.18).
 
-**Técnicas, antes do deploy:** conferir o **locale do banco de produção** antes de migrar; conferir a **região da função** na Vercel; definir a URL de produção do sistema de login; revisar CSP; `npm audit`; criar o administrador de produção.
+**Técnicas, antes do deploy:** conferir o **locale do banco de produção** antes de migrar; conferir a **região da função** na Vercel; definir a URL de produção do sistema de login (https); decidir quando a CSP sai de Report-Only; `npm audit`; criar o administrador de produção.
 
 ## 11. Checklist antes de qualquer lead real
 

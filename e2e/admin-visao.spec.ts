@@ -12,7 +12,7 @@ test.describe("Visão geral", () => {
   for (const [nome, w, h] of [["390", 390, 844], ["1440", 1440, 900]] as const) {
     test(`com dados em ${nome}: cartões, gráfico acessível, funil, sem overflow, console limpo; "aguardando" bate com a lista`, async ({ page }) => {
       const erros: string[] = [];
-      page.on("console", (m) => { if (m.type() === "error") erros.push(m.text()); });
+      page.on("console", (m) => { if (m.type() === "error" && !/report-only mode/.test(m.text())) erros.push(m.text()); });
       page.on("pageerror", (e) => erros.push(e.message));
       await page.setViewportSize({ width: w, height: h });
       await entrar(page);
