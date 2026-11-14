@@ -88,3 +88,36 @@ describe("com sessão", () => {
     }
   });
 });
+
+describe("as 3 rotas GET que gravam registro: origem", () => {
+  const rotas = { "leads.csv": leadsCsv, "auditoria.csv": auditoria, "decisoes-lgpd": documento };
+  const reqUrl = (h: Record<string, string>) => new Request("http://localhost:3000/admin/x", { headers: h });
+  const negados: Record<string, Record<string, string>> = {
+    "Sec-Fetch-Site cross-site": { "sec-fetch-site": "cross-site" },
+    "Sec-Fetch-Site same-site (subdomínio)": { "sec-fetch-site": "same-site" },
+    "Origin de outro site": { origin: "https://atacante.example" },
+    "Origin com outra porta": { origin: "http://localhost:4000" },
+    "Origin ilegível": { origin: "isto-nao-e-url" },
+  };
+  const aceitos: Record<string, Record<string, string>> = {
+    "sem cabeçalhos (curl/navegador antigo)": {},
+    "same-origin (clique no link)": { "sec-fetch-site": "same-origin" },
+    "none (URL digitada)": { "sec-fetch-site": "none" },
+    "Origin igual ao host": { origin: "http://localhost:3000", "sec-fetch-site": "same-origin" },
+  };
+  for (const [nome, rota] of Object.entries(rotas)) {
+    it(`${nome}: recusa (403) as origens estranhas e não grava`, async () => {
+      sessao = { user: {} };
+      const antes = await eventos();
+      for (const [caso, h] of Object.entries(negados)) expect((await rota(reqUrl(h))).status, caso).toBe(403);
+      expect(await eventos()).toBe(antes);
+    });
+    it(`${nome}: aceita as origens legítimas`, async () => {
+      sessao = { user: {} };
+      for (const [caso, h] of Object.entries(aceitos)) expect((await rota(reqUrl(h))).status, caso).toBe(200);
+    });
+    it(`${nome}: sem sessão é 401 mesmo com origem estranha (sessão primeiro)`, async () => {
+      expect((await rota(reqUrl({ "sec-fetch-site": "cross-site" }))).status).toBe(401);
+    });
+  }
+});
