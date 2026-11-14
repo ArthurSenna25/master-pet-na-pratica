@@ -1,5 +1,5 @@
 // Testes contra o branch "teste" do Neon. Tudo que criam tem prefixo "zz-teste-" e é removido em finally/afterEach.
-import { eq, like, inArray } from "drizzle-orm";
+import { count, eq, gt, like, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -147,6 +147,22 @@ describe("enviarLead", () => {
     expect(await contarLeads()).toBe(5);
     novoIp(); // outro IP não é afetado
     expect((await enviarLead({}, form())).ok).toBe(true);
+  });
+
+  it("teto global: ao atingir, resposta honesta (sem ok:true) e nada gravado; outro IP também barrado", async () => {
+    const [{ n }] = await db.select({ n: count() }).from(rateLimitEnvio).where(gt(rateLimitEnvio.criadoEm, new Date(Date.now() - 3600_000)));
+    process.env.TETO_GLOBAL_TESTE = String(n + 1);
+    try {
+      expect((await enviarLead({}, form())).ok).toBe(true); // n < teto
+      const antes = await contarLeads();
+      novoIp();
+      const r = await enviarLead({}, form());
+      expect(r.ok).toBeUndefined();
+      expect(r.message).toBe("Muitos envios em pouco tempo. Aguarde alguns minutos e tente de novo.");
+      expect(await contarLeads()).toBe(antes);
+    } finally {
+      delete process.env.TETO_GLOBAL_TESTE;
+    }
   });
 
   it("apaga linhas de rate_limit com mais de 24 h a cada novo envio", async () => {
