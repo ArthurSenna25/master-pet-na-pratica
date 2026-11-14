@@ -1,3 +1,4 @@
+import "server-only";
 import { getDb } from "../db";
 import { ADMIN_ACOES, adminEvents, auditLog } from "../db/schema";
 

@@ -1,3 +1,4 @@
+import "server-only";
 import { and, eq, like, lt, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { rateLimit } from "../db/schema";

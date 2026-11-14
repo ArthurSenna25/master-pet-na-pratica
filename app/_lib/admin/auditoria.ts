@@ -1,3 +1,4 @@
+import "server-only";
 import { asc } from "drizzle-orm";
 import { getDb } from "../db";
 import { adminEvents, auditLog, consentEvents } from "../db/schema";

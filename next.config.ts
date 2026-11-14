@@ -18,6 +18,8 @@ const CSP = [
 const nextConfig: NextConfig = {
   // O documento fica fora de app/: sem isto a função serverless da Vercel não o empacota.
   outputFileTracingIncludes: { "/admin/decisoes-lgpd": ["./docs/_projeto/lgpd/DECISOES-LGPD.md"] },
+  // Corpo máximo de Server Action (padrão do Next: 1 MB). O formulário tem poucas centenas de bytes.
+  experimental: { serverActions: { bodySizeLimit: "100kb" } },
   turbopack: {
     rules: {
       "*.css": {

@@ -1,4 +1,5 @@
 "use server";
+import "server-only";
 import { and, count, eq, gt, lt } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
@@ -6,7 +7,7 @@ import { getDb } from "./db";
 import { consentEvents, lead, rateLimitEnvio } from "./db/schema";
 import { CONSENT_TEXT, LEGAL_TEXT_VERSION } from "./legal-version";
 import { errosPorCampo, leadSchema, type LeadField } from "./lead-schema";
-import { corteRetencao, inicioJanela, isLimited } from "./rate-limit";
+import { corteRetencao, inicioJanela, inicioJanelaGlobal, isLimited, isTetoGlobal } from "./rate-limit";
 import { getClientIp, ipHmac, sha256Hex } from "./seguranca";
 
 export interface LeadState {
@@ -51,6 +52,13 @@ export async function enviarLead(_prev: LeadState, form: FormData): Promise<Lead
       .from(rateLimitEnvio)
       .where(and(eq(rateLimitEnvio.ipHmac, hmac), gt(rateLimitEnvio.criadoEm, inicioJanela(agora))));
     if (isLimited(n)) return { message: ERRO_LIMITE };
+
+    // 4b. teto global/hora (qualquer IP). Resposta honesta (não ok:true); log só com o nome do evento, sem dado pessoal.
+    const [{ total }] = await db.select({ total: count() }).from(rateLimitEnvio).where(gt(rateLimitEnvio.criadoEm, inicioJanelaGlobal(agora)));
+    if (isTetoGlobal(total)) {
+      console.warn("lead_teto_global_atingido");
+      return { message: ERRO_LIMITE };
+    }
 
     // 5. tudo na MESMA transação (db.batch): retenção do limite, registro do limite, lead, consentimento
     const leadId = randomUUID();
