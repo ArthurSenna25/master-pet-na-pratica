@@ -18,14 +18,14 @@ for (const w of [390, 1440]) {
   });
 }
 
-test("/mentoria: noindex, h1 e formulário em 'Em breve' sem campos que gravem", async ({ page }) => {
+test("/mentoria: noindex, h1 e formulário de 2 passos (servidor de teste com MENTORIA_FORM_ATIVO=1; o estado desligado é coberto em app/(mentoria)/pagina.test.ts)", async ({ page }) => {
   await page.goto("/mentoria");
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
   await expect(page.locator("h1")).toContainText("sem depender de você");
   const form = page.locator("#nm-form");
-  await expect(form).toContainText("Em breve");
+  await expect(form).toContainText("Entrar na lista da turma");
   await expect(form).toContainText("demonstração: use dados fictícios");
-  expect(await page.locator("form, input, textarea").count()).toBe(0); // o formulário real vem no c5
+  expect(await page.locator("form").count()).toBe(1);
   await expect(page.locator(".nm-seal--ex, .nm-seal").first()).toBeVisible(); // selos "exemplo"/"provisório" mantidos
 });
 

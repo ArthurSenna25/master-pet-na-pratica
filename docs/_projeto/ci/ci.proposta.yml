@@ -1,0 +1,28 @@
+# PROPOSTA — NÃO ATIVA. Para ativar: copiar para .github/workflows/ci.yml (só depois da aprovação do dono).
+# Sem segredos, sem `secrets.*`, sem variáveis falsas: só roda o que passa sem DATABASE_URL e sem .env.local (vitest.ci.config.mts).
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # LayoutProps/PageProps são tipos globais gerados pelo Next: sem isto o tsc falha num clone limpo (provado).
+      - run: npx next typegen
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npx vitest run --config vitest.ci.config.mts

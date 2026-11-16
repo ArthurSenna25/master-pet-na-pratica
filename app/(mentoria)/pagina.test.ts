@@ -24,6 +24,22 @@ describe("página /mentoria x MENTORIA_FORM_ATIVO", () => {
     expect(t).toContain("demonstração: use dados fictícios");
   });
 
+  it("DESLIGADO: nenhum <form>, <input> nem botão de envio na página (nada pode gravar)", () => {
+    process.env.VERCEL_ENV = "production";
+    delete process.env.MENTORIA_FORM_ATIVO;
+    const html = renderToStaticMarkup(createElement(Page));
+    expect(html).not.toMatch(/<form|<input|<textarea|type="submit"|name="consentimento"/);
+  });
+
+  it("LIGADO: o formulário de 2 passos existe, com consentimento desmarcado e campo oculto de origem", () => {
+    process.env.VERCEL_ENV = "preview";
+    const html = renderToStaticMarkup(createElement(Page));
+    expect(html).toMatch(/<form/);
+    expect(html).toMatch(/name="consentimento"/);
+    expect(html).not.toMatch(/name="consentimento"[^>]*checked/);
+    expect(html).toMatch(/name="origem_campanha"/);
+  });
+
   it("LIGADO (preview/local): textos do handoff", () => {
     process.env.VERCEL_ENV = "preview";
     const t = render();

@@ -1,15 +1,14 @@
 import { formMentoriaAtivo } from "../_lib/mentoria-flag";
+import { FormMentoria } from "./FormMentoria";
 
-// Commit 4: só o estado "Em breve". O formulário de 2 passos (nome/WhatsApp; cidade, negócio, tempo, equipe, desafio, consentimento) entra no c5.
-// Desativado (produção): "Em breve" e a action não grava nada. Ativo (preview/local): mesma tela, com a marca de prévia.
+// Desativado (produção, por padrão): "Em breve" e NENHUM campo; a action também recusa sem gravar. Ativo (preview/local): formulário de 2 passos.
 export function FormularioMentoria() {
-  const ativo = formMentoriaAtivo();
+  if (formMentoriaAtivo()) return <FormMentoria />;
   return (
-    <div className="nm-form" id="nm-form" role="region" aria-labelledby="h-form" data-form-ativo={ativo ? "1" : "0"}>
-      <div className="nm-form__head"><h3 id="h-form">{ativo ? "Entrar na lista da turma" : "Lista da turma"}</h3></div>
+    <div className="nm-form" id="nm-form" role="region" aria-labelledby="h-form" data-form-ativo="0">
+      <div className="nm-form__head"><h3 id="h-form">Lista da turma</h3></div>
       <p className="nm-lead">Em breve.</p>
       <p className="nm-form__nota">A lista da turma ainda não abriu. Quando abrir, é por aqui.</p>
-      {ativo && <p className="nm-form__nota" data-previa>Prévia: o formulário entra na próxima etapa desta implementação.</p>}
       <p className="nm-demo-warn">
         <svg className="nm-ico" aria-hidden="true" focusable="false"><use href="#nm-alert" /></svg>
         <span>demonstração: use dados fictícios</span>

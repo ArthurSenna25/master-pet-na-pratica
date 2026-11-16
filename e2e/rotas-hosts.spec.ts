@@ -14,7 +14,7 @@ test.describe("host da campanha mentoria", () => {
       expect(r.status(), p).toBe(200);
       const html = await r.text();
       expect(html).toContain("sem depender de você");
-      expect(html).toContain("Em breve");
+      expect(html).toContain("Entrar na lista da turma"); // servidor de teste com MENTORIA_FORM_ATIVO=1
       expect(html).toMatch(/name="robots" content="noindex, nofollow"/);
       expect(html).toContain(`rel="canonical" href="https://${MENTORIA}/"`);
     }
