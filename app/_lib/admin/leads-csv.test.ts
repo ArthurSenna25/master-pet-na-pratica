@@ -29,6 +29,7 @@ afterAll(async () => {
 describe("gerarCsvLeads", () => {
   it("registra export_leads (sem lead_id), neutraliza fórmula, e anonimizado sai sem dado pessoal; sem ip/ua/consent", async () => {
     await novo("Zz Leads Ativo", { observacao: "=1+1", mensagem: "@cmd" });
+    await novo("Zz Leads Mentoria", { campanha: "mentoria", jaFezMentoria: null });
     const idAnon = await novo("Zz Leads Anonimo", { observacao: "segredo-obs", mensagem: "segredo-msg" });
     await anonimizarLead(idAnon);
 
@@ -52,6 +53,10 @@ describe("gerarCsvLeads", () => {
     expect(ativo).toContain("'=1+1");
     expect(ativo).toContain("'@cmd");
     expect(ativo).not.toMatch(/(^|,)[=@]/);
+
+    const col = CABECALHO_LEADS.indexOf("ja_fez_mentoria");
+    expect(linhas.find((l) => l.includes("Zz Leads Mentoria"))!.split(",")[col]).toBe("nao_perguntado");
+    expect(ativo.split(",")[col]).toBe("false");
 
     const anon = linhas.find((l) => l.startsWith(idAnon))!;
     expect(anon).toBeDefined();

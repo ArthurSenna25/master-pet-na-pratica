@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LegalPage, Pendente } from "../_components/LegalPage";
+import { LegalPage, Pendente } from "../../_components/LegalPage";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade (rascunho) — Master Pet na Prática",

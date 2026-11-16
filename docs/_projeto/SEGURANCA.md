@@ -27,6 +27,7 @@ Fora do modelo: atacante com acesso ao banco ou aos painéis da Vercel/Neon (ver
 | Cadastro desligado; admin criado por script | `app/_lib/auth.ts` (`disableSignUp`), `scripts/create-admin.mjs` |
 | **Rota `/api/auth` removida**; login/logout/troca só por Server Action via `auth.api` | `app/admin/actions.ts`; `e2e/f4.spec.ts` (sign-up/sign-in → 404) |
 | Limite de login (5 falhas/min por HMAC do IP) e de troca de senha (5/10 min) | `app/_lib/admin/tentativas.ts`, `tentativas.test.ts` |
+| Painel só no domínio principal: `/admin/**` no host da campanha mentoria é reescrito para 404 (`host-sem-admin`); root layout próprio do painel (sem CSS/GSAP da LP) | `next.config.ts` (rewrites), `app/(bloqueado)/`, `e2e/rotas-hosts.spec.ts`, `app/isolamento.test.ts`, `e2e/css-escopo.spec.ts` |
 | Sessão checada em toda página, rota e action do admin | `app/_lib/session.ts`, `acesso-sem-sessao.test.ts` (glob) |
 | Rotas GET que gravam: recusam Sec-Fetch-Site/Origin de outro site (403) | `app/_lib/admin/rota-protegida.ts`, `rotas-admin.test.ts` |
 | Cookie `httpOnly`, `Lax`, path `/admin`; em produção `__Secure-` + Secure | `auth.ts`, `sessao-cookie.test.ts` |
@@ -38,6 +39,7 @@ Fora do modelo: atacante com acesso ao banco ou aos painéis da Vercel/Neon (ver
 
 ## 3. Riscos aceitos (decisões registradas)
 
+- **404 sem JS do painel (Next 16.4.6):** `notFound()` em página dinâmica devolve status 404 com corpo vazio sem JavaScript (shell de erro do Next; reproduzido em app mínimo). Nada do painel vaza; sem `globalNotFound` (flag experimental não usada): URL sem rota recebe o 404 padrão do Next.
 - **Login só por Server Action**, com limite próprio. A rota `/api/auth/[...all]` do Better Auth foi removida: não era usada pelo app e seu limite (5/min) era diferente do de `tentativas.ts`.
 - **`frame-ancestors` é ignorado em CSP Report-Only** (limitação do navegador). A proteção atual contra iframe é `X-Frame-Options: DENY`.
 - **CSP sem `report-uri`**: serve só para medir no console do navegador. O bloqueio (enforce) fica para depois da LP de Natal; exige `'unsafe-inline'` enquanto o Next injetar scripts/estilos inline.

@@ -15,7 +15,22 @@ const CSP = [
   "form-action 'self'",
 ].join("; ");
 
+// Host da campanha mentoria (mesmo projeto Vercel). Só este host exato casa: URLs de preview (*-git-*.vercel.app) e o domínio principal não.
+const HOST_MENTORIA = "mentoria-master-pet.vercel.app";
+
 const nextConfig: NextConfig = {
+  async rewrites() {
+    const host = [{ type: "host" as const, value: HOST_MENTORIA }];
+    return {
+      beforeFiles: [
+        { source: "/", has: host, destination: "/mentoria" },
+        // O painel só existe no domínio principal (BETTER_AUTH_URL e cookie valem para um host): aqui é 404 explícito.
+        { source: "/admin/:path*", has: host, destination: "/host-sem-admin" },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
   // O documento fica fora de app/: sem isto a função serverless da Vercel não o empacota.
   outputFileTracingIncludes: { "/admin/decisoes-lgpd": ["./docs/_projeto/lgpd/DECISOES-LGPD.md"] },
   // Corpo máximo de Server Action (padrão do Next: 1 MB). O formulário tem poucas centenas de bytes.

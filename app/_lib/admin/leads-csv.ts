@@ -5,7 +5,7 @@ import { lead } from "../db/schema";
 import { montarCsv } from "./csv";
 import { registrarExportacao } from "./events";
 
-// ja_fez_mentoria vazio = não perguntado (campanha mentoria). SAÍDA DE DADO PESSOAL. Fora: ip_hmac, user_agent e todo consent_events (isso é a auditoria). Quem chamar DEVE ter checado a sessão.
+// ja_fez_mentoria: true/false, ou "nao_perguntado" (campanha mentoria; nulo no banco); vazio só em lead anonimizado. SAÍDA DE DADO PESSOAL. Fora: ip_hmac, user_agent e todo consent_events (isso é a auditoria). Quem chamar DEVE ter checado a sessão.
 export const CABECALHO_LEADS = [
   "id", "nome", "whatsapp", "cidade_uf", "negocio", "tempo_funcionamento", "pessoas", "maior_desafio",
   "ja_fez_mentoria", "mensagem", "status", "observacao", "origem", "criado_em_utc", "atualizado_em_utc", "anonimizado_em_utc",
@@ -26,7 +26,7 @@ export async function gerarCsvLeads(db = getDb()): Promise<string> {
       const p = <T>(v: T) => (anon ? "" : v); // pessoal: vazio se anonimizado
       return [
         l.id, p(l.nome), p(l.whatsapp), p(l.cidadeUf), p(l.negocio), p(l.tempoFuncionamento), p(l.pessoas), p(l.maiorDesafio),
-        p(l.jaFezMentoria), p(l.mensagem), l.status, p(l.observacao), p(l.origem), l.criadoEm, l.atualizadoEm, l.anonimizadoEm,
+        p(l.jaFezMentoria ?? "nao_perguntado"), p(l.mensagem), l.status, p(l.observacao), p(l.origem), l.criadoEm, l.atualizadoEm, l.anonimizadoEm,
       ];
     }),
   );

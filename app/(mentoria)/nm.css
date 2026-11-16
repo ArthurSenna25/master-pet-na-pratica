@@ -1,0 +1,3 @@
+/* Campanha mentoria (F10): prefixo nm-*; variáveis só sob .nm (nada em :root). Casca do commit 3; o visual vem no commit 4. */
+.nm { font-family: system-ui, sans-serif; padding: 48px 24px; max-width: 40rem; margin: 0 auto; }
+.nm-aviso { color: #46536f; }
