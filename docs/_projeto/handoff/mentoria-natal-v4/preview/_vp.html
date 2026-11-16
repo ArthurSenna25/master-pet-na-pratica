@@ -1,0 +1,38 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>harness de viewport (DEMO: não portar)</title>
+<link rel="stylesheet" href="../../tokens/fonts.css">
+<style>html,body{margin:0;background:#222;overflow:hidden}#w{position:absolute;left:0;top:0;transform-origin:0 0}#f{border:0;display:block;background:#fff}
+#snap{position:absolute;left:0;top:0;overflow:hidden;transform-origin:0 0;background:#060f26;z-index:5;display:none}#snap .nm{position:absolute;left:0;top:0}</style></head>
+<body><div id="w"><iframe id="f" title="página"></iframe></div><div id="snap"></div>
+<script>
+/* Simula um navegador de w×h px com zoom z: o iframe tem (w/z)×(h/z) px CSS → media queries, vw/svh e JS veem o viewport real.
+   snapshot(): como a captura não enxerga iframe, reconstrói o quadro visível no DOM do harness copiando os estilos computados (sem pseudo-elementos). */
+var F=document.getElementById('f'),S=document.getElementById('snap'),cur={w:1440,h:900,z:1};
+window.setVP=function(w,h,z){cur={w:w,h:h,z:z};var W=w/z,H=h/z;F.style.width=W+'px';F.style.height=H+'px';var s=Math.min(905/W,535/H);document.getElementById('w').style.transform='scale('+s+')';S.style.width=W+'px';S.style.height=H+'px';S.style.transform='scale('+s+')';S.style.display='none';return [W,H,+s.toFixed(3)]};
+window.go=function(sel,frac){var w=F.contentWindow,d=F.contentDocument,el=d.querySelector(sel),st=w.ScrollTrigger&&w.ScrollTrigger.getAll().find(function(s){return s.trigger===el&&s.pin});var y=st?st.start+(st.end-st.start)*(frac||0):el.getBoundingClientRect().top+w.scrollY-(frac==null?70:frac);w.scrollTo(0,Math.max(0,y));return Math.round(y)};
+window.snapshot=function(){var w=F.contentWindow,d=F.contentDocument,sy=w.scrollY,body=d.body,root=d.querySelector('.nm');
+ var c=root.cloneNode(true),O=[root].concat([].slice.call(root.querySelectorAll('*'))),C=[c].concat([].slice.call(c.querySelectorAll('*')));
+ for(var i=0;i<O.length;i++){var o=O[i],n=C[i],cs=w.getComputedStyle(o),t='';if(o.tagName==='SCRIPT'){n.remove&&n.remove();continue}
+  for(var k=0;k<cs.length;k++){var p=cs[k];t+=p+':'+cs.getPropertyValue(p)+';'}
+  if(cs.position==='fixed'){var r=o.getBoundingClientRect(),P=o.parentElement;while(P&&P!==root&&w.getComputedStyle(P).position==='static')P=P.parentElement;if(!P||P===root)P=root;var q=P.getBoundingClientRect();t+='position:absolute;left:'+(r.left-q.left)+'px;top:'+(r.top-q.top)+'px;width:'+r.width+'px;height:'+r.height+'px;margin:0;transform:none;';}
+  n.style.cssText=t;n.removeAttribute('class');if(o.tagName==='IMG'){n.src=o.currentSrc||o.src;n.removeAttribute('srcset')}}
+ var h=d.documentElement.scrollHeight;c.style.cssText+=';position:absolute;left:0;top:'+(-sy)+'px;width:'+(F.clientWidth)+'px;height:'+h+'px;overflow:visible';
+ S.innerHTML='';S.appendChild(c);S.style.display='block';return {sy:sy,h:h}};
+window.qa=function(){var w=F.contentWindow,d=F.contentDocument,W=w.innerWidth,H=w.innerHeight,out=[],root=d.querySelector('.nm');
+ if(d.documentElement.scrollWidth>W+1)out.push('overflow-x doc '+d.documentElement.scrollWidth+'>'+W);
+ root.querySelectorAll('section').forEach(function(s){var r=s.getBoundingClientRect();if(r.width>W+1)out.push('section wider '+s.id)});
+ var vis=[].slice.call(root.querySelectorAll('h1,h2,h3,p,li,a,button,figure,img,.nm-pc,.nm-st,.nm-pick,.nm-diag,.nm-form')).filter(function(e){var r=e.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(e).visibility!=='hidden'});
+ vis.forEach(function(e){var r=e.getBoundingClientRect();if(r.right>W+2||r.left<-2){if(!e.closest('.nm-hp,.nm-sr,.nm-skip,.nm-hero__photo,.nm-dia__face,.nm-trilha__amb,.nm-end__bg,.nm-pc,.nm-ribbon'))out.push('fora-x '+(e.id||e.className||e.tagName)+' '+Math.round(r.left)+'..'+Math.round(r.right))}});
+ [].slice.call(root.querySelectorAll('.is-pinned')).forEach(function(s){var r=s.getBoundingClientRect(),inner=s.querySelector('[class$="__pin"]');if(inner&&inner.scrollHeight>inner.clientHeight+2)out.push('pin '+s.id+' conteúdo '+inner.scrollHeight+'>'+inner.clientHeight);
+  s.querySelectorAll('h2,h3,p,li,a,button,.nm-pick,.nm-clock,.nm-diag,.nm-st,.nm-tag,nav').forEach(function(e){var q=e.getBoundingClientRect(),cs=getComputedStyle(e);if(q.width&&cs.visibility!=='hidden'&&+cs.opacity>.05&&(q.bottom>r.bottom+2||q.top<r.top-2))out.push('pin-fora '+s.id+' '+(e.className||e.tagName)+' '+Math.round(q.top)+'..'+Math.round(q.bottom)+' / '+Math.round(r.top)+'..'+Math.round(r.bottom))})});
+ function ov(a,b){var x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return x.width&&y.width&&x.left<y.right-2&&y.left<x.right-2&&x.top<y.bottom-2&&y.top<x.bottom-2}
+ [['.nm-hero__copy','.nm-hero__photo img'],['.nm-cam__txt','.nm-cam__s1'],['.nm-cam__txt','.nm-cam__s2'],['.nm-cam__big','.nm-cam__txt'],['.nm-cam__s1','.nm-cam__s2'],['.nm-como__l','.nm-arch']].forEach(function(p){var a=root.querySelector(p[0]),b=root.querySelector(p[1]);if(a&&b&&ov(a,b)&&p[1]!=='.nm-hero__photo img')out.push('sobrepõe '+p.join(' x '))});
+ var hc=root.querySelector('.nm-hero__copy').getBoundingClientRect(),hp=root.querySelector('.nm-hero__photo').getBoundingClientRect();
+ return {vp:W+'x'+H,docH:d.documentElement.scrollHeight,screens:+(d.documentElement.scrollHeight/H).toFixed(1),pinned:[].slice.call(root.querySelectorAll('.is-pinned')).map(function(e){return e.id}),heroCopyR:Math.round(hc.right),heroPhotoL:Math.round(hp.left),issues:out}};
+window.setVP(1440,900,1);
+/* cache: força versão atual dos arquivos antes de carregar */
+Promise.all(['mentoria.css','mentoria.js','mentoria.html'].map(function(f){return fetch('../'+f,{cache:'reload'})})).then(function(){F.src='../mentoria.html#demo=s1'});
+window.sc=function(n){var d=F.contentDocument,P=function(id){return d.getElementById(id).classList.contains('is-pinned')};S.style.display='none';
+ var m={1:function(){go('#abertura',null)},2:function(){P('dia')?go('#dia',0.3):go('#dia',null)},3:function(){P('dia')?go('#dia',1):go('#diag',null)},4:function(){P('trilha')?go('#trilha',0.5):go('#trilha',null)},5:function(){go('#processo',null)},6:function(){go('#camila',null)},7:function(){go('#como',null)},8:function(){go('#lista',null)}};
+ m[n]();setTimeout(snapshot,n==1?1200:1900)};
+window.vp=function(w,h,z){setVP(w,h,z);setTimeout(function(){sc(1)},900)};
+</script></body></html>
