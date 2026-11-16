@@ -82,6 +82,31 @@ test("envio em 2 passos: lead da campanha mentoria; consentimento com hash e ver
   expect(e.origem).toBe("localhost:3000/mentoria");
 });
 
+test("botão de envio desabilita durante o envio; duplo clique e dois submits na mesma tarefa criam UM lead", async ({ page }) => {
+  for (const modo of ["dblclick", "requestSubmit"] as const) {
+    const negocio = `${PREFIXO}${sufixo()}`;
+    await page.goto("/mentoria");
+    await passo1(page, `${PREFIXO}${sufixo()}`);
+    await passo2(page, negocio);
+    const botao = page.locator("button[type=submit]");
+    if (modo === "dblclick") await botao.dblclick();
+    else await page.locator("#nm-form").evaluate((f: HTMLFormElement) => { f.requestSubmit(); f.requestSubmit(); });
+    await expect(page.getByRole("heading", { name: "Pronto, você está na lista!" })).toBeVisible();
+    expect((await leads()).filter((l) => l.negocio === negocio)).toHaveLength(1);
+  }
+});
+
+test("durante o envio o botão fica desabilitado e o form aria-busy", async ({ page }) => {
+  await page.route("**/mentoria", async (r) => { if (r.request().method() === "POST") await new Promise((ok) => setTimeout(ok, 1200)); await r.continue(); });
+  await page.goto("/mentoria");
+  await passo1(page, `${PREFIXO}${sufixo()}`);
+  await passo2(page, `${PREFIXO}${sufixo()}`);
+  await page.locator("button[type=submit]").click();
+  await expect(page.locator("button[type=submit]")).toBeDisabled();
+  await expect(page.locator("#nm-form")).toHaveAttribute("aria-busy", "true");
+  await expect(page.getByRole("heading", { name: "Pronto, você está na lista!" })).toBeVisible();
+});
+
 test("passo 1 inválido: mostra o erro e não avança", async ({ page }) => {
   await page.goto("/mentoria");
   await page.getByRole("button", { name: "Continuar" }).click();

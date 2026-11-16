@@ -87,6 +87,7 @@ export function FormMentoria() {
   const [preSel, setPreSel] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const okRef = useRef<HTMLHeadingElement>(null);
+  const enviando = useRef(false); // trava síncrona: `disabled` só vale após o re-render e o React enfileira ações; sem isto, 2 cliques = 2 leads
   const v = state.values ?? {};
   const ok = state.ok === true;
   const erros: Erros = { ...state.errors, ...erroCli };
@@ -107,6 +108,7 @@ export function FormMentoria() {
   }, []);
 
   useEffect(() => { if (ok) okRef.current?.focus(); }, [ok]);
+  useEffect(() => { if (!pending) enviando.current = false; }, [pending]);
 
   const mostrarPasso1 = !js || passo === 1 || erroPasso1;
   const mostrarPasso2 = !js || (passo === 2 && !erroPasso1);
@@ -124,13 +126,15 @@ export function FormMentoria() {
   };
 
   const aoEnviar = (ev: FormEvent<HTMLFormElement>) => {
+    if (enviando.current) { ev.preventDefault(); return; }
     if (!js) return;
     const fd = new FormData(ev.currentTarget);
     if (passo === 1 && !erroPasso1) { ev.preventDefault(); continuar(fd); return; }
     const e = validarPasso2(fd);
     setErroCli(e);
     const primeiro = Object.keys(e).find((k) => e[k]);
-    if (primeiro) { ev.preventDefault(); focar(primeiro); }
+    if (primeiro) { ev.preventDefault(); focar(primeiro); return; }
+    enviando.current = true;
   };
 
   const mascara = (ev: FormEvent<HTMLInputElement>) => { ev.currentTarget.value = formatarTelefone(ev.currentTarget.value); limpar("whatsapp"); };
