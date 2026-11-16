@@ -158,7 +158,7 @@ describe("enviarLead", () => {
       novoIp();
       const r = await enviarLead({}, form());
       expect(r.ok).toBeUndefined();
-      expect(r.message).toBe("Muitos envios em pouco tempo. Aguarde alguns minutos e tente de novo.");
+      expect(r.message).toBe("Muitos envios no momento. Tente de novo em cerca de uma hora.");
       expect(await contarLeads()).toBe(antes);
     } finally {
       delete process.env.TETO_GLOBAL_TESTE;

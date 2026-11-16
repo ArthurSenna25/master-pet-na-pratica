@@ -100,6 +100,31 @@ describe("campanha fixada no servidor", () => {
   });
 });
 
+describe("formulário da mentoria desativado (MENTORIA_FORM_ATIVO)", () => {
+  it("desativado: recusa com mensagem e NÃO grava lead, consentimento nem contador de limite; o presencial segue funcionando", async () => {
+    process.env.MENTORIA_FORM_ATIVO = "0";
+    try {
+      const nRate = async () => (await db.select({ n: count() }).from(rateLimitEnvio).where(eq(rateLimitEnvio.ipHmac, ipHmac(ipAtual))))[0].n;
+      const r = await enviarLeadMentoria({}, mentoria());
+      expect(r).toEqual({ message: "As pré-inscrições ainda não abriram." });
+      expect((await db.select().from(lead).where(like(lead.negocio, `${PREFIXO}%`))).length).toBe(0);
+      expect(await nRate()).toBe(0);
+      expect(await enviarLeadPresencial({}, presencial())).toEqual({ ok: true });
+    } finally {
+      delete process.env.MENTORIA_FORM_ATIVO;
+    }
+  });
+
+  it("ativado (=1) volta a gravar", async () => {
+    process.env.MENTORIA_FORM_ATIVO = "1";
+    try {
+      expect(await enviarLeadMentoria({}, mentoria())).toEqual({ ok: true });
+    } finally {
+      delete process.env.MENTORIA_FORM_ATIVO;
+    }
+  });
+});
+
 describe("origem", () => {
   it("lead.origem e consent_events.origem guardam só host e caminho (sem query nem fragmento)", async () => {
     refererAtual = "https://mentoria-master-pet.vercel.app/mentoria?origem=natal&email=a@b.c#form";
@@ -131,7 +156,7 @@ describe("teto global por campanha", () => {
       await db.insert(rateLimitEnvio).values(Array.from({ length: teto - nM }, (_, i) => ({ ipHmac: `${FILLER}${i}`, campanha: "mentoria" })));
       const bloqueada = await enviarLeadMentoria({}, mentoria());
       expect(bloqueada.ok).toBeUndefined();
-      expect(bloqueada.message).toMatch(/Muitos envios/);
+      expect(bloqueada.message).toBe("Muitos envios no momento. Tente de novo em cerca de uma hora.");
       expect((await db.select().from(lead).where(like(lead.negocio, `${PREFIXO}%`))).length).toBe(0);
       novoIp();
       expect(await enviarLeadPresencial({}, presencial())).toEqual({ ok: true });
@@ -146,6 +171,6 @@ describe("teto global por campanha", () => {
     for (let i = 0; i < 2; i++) expect((await enviarLeadMentoria({}, mentoria())).ok).toBe(true);
     const sexto = await enviarLeadMentoria({}, mentoria());
     expect(sexto.ok).toBeUndefined();
-    expect(sexto.message).toMatch(/Muitos envios/);
+    expect(sexto.message).toBe("Muitos envios em pouco tempo. Aguarde alguns minutos e tente de novo.");
   });
 });

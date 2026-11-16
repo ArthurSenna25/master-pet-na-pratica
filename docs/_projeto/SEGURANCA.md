@@ -39,6 +39,7 @@ Fora do modelo: atacante com acesso ao banco ou aos painéis da Vercel/Neon (ver
 
 ## 3. Riscos aceitos (decisões registradas)
 
+- **Formulário da mentoria desativado em produção por padrão** (`MENTORIA_FORM_ATIVO`, `app/_lib/mentoria-flag.ts`): o servidor recusa sem gravar nada; ligar em produção é decisão do dono (variável `=1` + novo deploy para a tela).
 - **404 sem JS do painel (Next 16.4.6):** `notFound()` em página dinâmica devolve status 404 com corpo vazio sem JavaScript (shell de erro do Next; reproduzido em app mínimo). Nada do painel vaza; sem `globalNotFound` (flag experimental não usada): URL sem rota recebe o 404 padrão do Next.
 - **Login só por Server Action**, com limite próprio. A rota `/api/auth/[...all]` do Better Auth foi removida: não era usada pelo app e seu limite (5/min) era diferente do de `tentativas.ts`.
 - **`frame-ancestors` é ignorado em CSP Report-Only** (limitação do navegador). A proteção atual contra iframe é `X-Frame-Options: DENY`.

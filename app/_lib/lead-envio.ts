@@ -8,6 +8,7 @@ import { CONSENTIMENTOS, LEGAL_TEXT_VERSION } from "./legal-version";
 import { errosPorCampo, leadSchema } from "./lead-schema";
 import { leadMentoriaSchema } from "./lead-schema-mentoria";
 import { origemCampanha, origemSegura } from "./lead-origem";
+import { formMentoriaAtivo } from "./mentoria-flag";
 import { corteRetencao, inicioJanela, inicioJanelaGlobal, isLimited, isTetoGlobal } from "./rate-limit";
 import { getClientIp, ipHmac, sha256Hex } from "./seguranca";
 
@@ -20,7 +21,10 @@ export interface LeadState {
 }
 
 const ERRO_GENERICO = "Não foi possível enviar agora. Tente de novo em instantes.";
-const ERRO_LIMITE = "Muitos envios em pouco tempo. Aguarde alguns minutos e tente de novo.";
+const ERRO_LIMITE = "Muitos envios em pouco tempo. Aguarde alguns minutos e tente de novo."; // limite por IP
+// Teto global (janela de 1 h). [PENDENTE: canal alternativo para quem for barrado, ex. contato da Camila; não inventar número]
+const ERRO_TETO = "Muitos envios no momento. Tente de novo em cerca de uma hora.";
+const ERRO_FORM_FECHADO = "As pré-inscrições ainda não abriram.";
 const MAX_UA = 400;
 
 /** Campos que o servidor grava por campanha, já validados. `mensagem`/`curso` só existem no presencial. */
@@ -49,6 +53,9 @@ function ler(campanha: Campanha, raw: Record<string, string>): Leitura {
  * Limite por IP é compartilhado entre campanhas; o teto global é por campanha (um pico numa não trava a outra).
  */
 export async function processarEnvio(campanha: Campanha, form: FormData): Promise<LeadState> {
+  // 0. formulário da mentoria desativado (produção, por padrão): recusa antes de ler/gravar qualquer coisa
+  if (campanha === "mentoria" && !formMentoriaAtivo()) return { message: ERRO_FORM_FECHADO };
+
   // 1. honeypot: preenchido = descarta e responde sucesso genérico (não revela o filtro)
   if (String(form.get("site") ?? "").trim() !== "") return { ok: true };
 
@@ -85,7 +92,7 @@ export async function processarEnvio(campanha: Campanha, form: FormData): Promis
       .where(and(eq(rateLimitEnvio.campanha, campanha), gt(rateLimitEnvio.criadoEm, inicioJanelaGlobal(agora))));
     if (isTetoGlobal(total)) {
       console.warn("lead_teto_global_atingido");
-      return { message: ERRO_LIMITE };
+      return { message: ERRO_TETO };
     }
 
     // 5. tudo na MESMA transação (db.batch): retenção do limite, registro do limite, lead, consentimento

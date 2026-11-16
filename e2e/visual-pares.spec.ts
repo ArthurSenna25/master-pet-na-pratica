@@ -15,6 +15,7 @@ const PAGINAS = [
   { nome: "admin", url: "/admin", admin: true },
   { nome: "politica", url: "/politica-de-privacidade", admin: false },
   { nome: "termos", url: "/termos-de-uso", admin: false },
+  { nome: "mentoria", url: "/mentoria", admin: false },
 ] as const;
 
 test.skip(!DIR, "defina SHOT_DIR");

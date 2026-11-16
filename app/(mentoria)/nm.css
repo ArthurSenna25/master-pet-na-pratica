@@ -1,3 +1,4 @@
-/* Campanha mentoria (F10): prefixo nm-*; variáveis só sob .nm (nada em :root). Casca do commit 3; o visual vem no commit 4. */
-.nm { font-family: system-ui, sans-serif; padding: 48px 24px; max-width: 40rem; margin: 0 auto; }
-.nm-aviso { color: #46536f; }
+/* Base da campanha mentoria (F10 c4). O resto vem de nm-tokens.css (tokens escopados em .nm) e mentoria.css (cópia do handoff, prefixo nm-*).
+   html/body: só o que o protótipo fazia como "demo" (fundo escuro no overscroll) e a suavização de fonte; sem reset global. */
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; background: #060f26; }
+body.nm-root { margin: 0; background: #060f26; }

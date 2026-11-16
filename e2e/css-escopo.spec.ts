@@ -9,18 +9,18 @@ const PREFIXOS: Record<Escopo, RegExp> = {
   ad: /\.ad(?:-[\w-]+)?(?![\w-])/,
 };
 
-async function seletores(page: Page): Promise<{ regras: string[]; css: string }> {
+async function seletores(page: Page): Promise<{ regras: string[]; pares: { sel: string; texto: string }[] }> {
   return page.evaluate(() => {
     const regras: string[] = [];
-    let css = "";
+    const pares: { sel: string; texto: string }[] = [];
     const visita = (rs: CSSRuleList) => {
       for (const r of Array.from(rs)) {
-        if ("selectorText" in r) { regras.push((r as CSSStyleRule).selectorText); css += r.cssText + "\n"; }
+        if ("selectorText" in r) { regras.push((r as CSSStyleRule).selectorText); pares.push({ sel: (r as CSSStyleRule).selectorText, texto: r.cssText }); }
         else if ("cssRules" in r) visita((r as CSSGroupingRule).cssRules);
       }
     };
     for (const s of Array.from(document.styleSheets)) { try { visita(s.cssRules); } catch { /* folha de outra origem */ } }
-    return { regras, css };
+    return { regras, pares };
   });
 }
 
@@ -35,10 +35,14 @@ const ROTAS: { url: string; proprio: Escopo; proibidos: Escopo[] }[] = [
 for (const r of ROTAS) {
   test(`folhas de estilo de ${r.url}: só o escopo "${r.proprio}"`, async ({ page }) => {
     await page.goto(r.url);
-    const { regras, css } = await seletores(page);
+    const { regras, pares } = await seletores(page);
     expect(regras.length, "a página carregou alguma folha").toBeGreaterThan(0);
     expect(regras.some((s) => PREFIXOS[r.proprio].test(s)), `guarda não-vazia: há seletor ${r.proprio}`).toBe(true);
     for (const p of r.proibidos) expect(regras.filter((s) => PREFIXOS[p].test(s)).slice(0, 5), `seletores ${p} em ${r.url}`).toEqual([]);
-    if (r.url === "/mentoria") expect(css, "tokens da marca presencial não entram na mentoria").not.toMatch(/--mp-|--font-display|--font-body/);
+    if (r.url === "/mentoria") {
+      // tokens da campanha só sob .nm: nenhuma regra fora de .nm define variável da marca (--mp-*), nem em :root/html/body
+      const fora = pares.filter((x) => /--mp-[a-z0-9-]+\s*:/.test(x.texto) && !/^\.nm(?![\w-])/.test(x.sel)).map((x) => x.sel);
+      expect(fora, "variáveis --mp- fora de .nm").toEqual([]);
+    }
   });
 }

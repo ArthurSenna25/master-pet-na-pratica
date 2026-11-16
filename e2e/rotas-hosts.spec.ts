@@ -13,7 +13,8 @@ test.describe("host da campanha mentoria", () => {
       const r = await get(request, p, MENTORIA);
       expect(r.status(), p).toBe(200);
       const html = await r.text();
-      expect(html).toContain("<h1>Mentoria Master Pet</h1>");
+      expect(html).toContain("sem depender de você");
+      expect(html).toContain("Em breve");
       expect(html).toMatch(/name="robots" content="noindex, nofollow"/);
       expect(html).toContain(`rel="canonical" href="https://${MENTORIA}/"`);
     }
@@ -39,7 +40,7 @@ test.describe("domínio principal e URL de preview NÃO são reescritos", () => 
     test(`host ${host ?? "padrão"}: / é a LP presencial, /admin/login é o painel`, async ({ request }) => {
       const home = await (await get(request, "/", host)).text();
       expect(home).toContain("lp-");
-      expect(home).not.toContain("Mentoria Master Pet</h1>");
+      expect(home).not.toContain("sem depender de você");
       const login = await get(request, "/admin/login", host);
       expect(login.status()).toBe(200);
       expect(await login.text()).toContain("Entrar no painel");
