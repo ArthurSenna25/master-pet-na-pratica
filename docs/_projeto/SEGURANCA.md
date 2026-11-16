@@ -22,7 +22,7 @@ Fora do modelo: atacante com acesso ao banco ou aos painéis da Vercel/Neon (ver
 |---|---|
 | Validação Zod no servidor + CHECKs/triggers | `app/_lib/lead-schema.ts`, `lead-rules.ts`, `db-constraints.test.ts` |
 | Honeypot → Zod → limite por IP (HMAC, 5/10 min) | `app/_lib/lead-action.ts`, `rate-limit.ts` |
-| Teto global 60/h no formulário | `app/_lib/seguranca.ts`, `db.test.ts` |
+| Teto global 60/h POR CAMPANHA no formulário (pode barrar leads reais) | `app/_lib/rate-limit.ts`, `lead-envio.ts`, `lead-envio.test.ts` |
 | Corpo de Server Action ≤ 100 kb | `next.config.ts` (`bodySizeLimit`) |
 | Cadastro desligado; admin criado por script | `app/_lib/auth.ts` (`disableSignUp`), `scripts/create-admin.mjs` |
 | **Rota `/api/auth` removida**; login/logout/troca só por Server Action via `auth.api` | `app/admin/actions.ts`; `e2e/f4.spec.ts` (sign-up/sign-in → 404) |

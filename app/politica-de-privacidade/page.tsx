@@ -122,7 +122,34 @@ export default function Page() {
         pessoa realmente leu.
       </p>
 
-      <h2>13. Contato</h2>
+      <h2>13. Pré-inscrição da Mentoria (rascunho)</h2>
+      <p>
+        <strong>Rascunho a validar pelo advogado.</strong> A página da Mentoria Master Pet tem um formulário de pré-inscrição próprio, sem
+        pagamento. Ele pede nome e WhatsApp e, em seguida, cidade/UF, nome do negócio, tempo de funcionamento, número de pessoas na
+        equipe e maior desafio. Não pede se a pessoa já fez mentoria nem mensagem livre.
+      </p>
+      <ul>
+        <li>
+          Finalidade: avisar sobre a abertura da turma, por contato individual no WhatsApp, e conhecer o momento do negócio.{" "}
+          <Pendente>advogado: confirmar se a finalidade descrita basta e se outras comunicações exigem consentimento próprio</Pendente>.
+        </li>
+        <li>O consentimento tem texto próprio, registrado com a data, a versão destes documentos e o hash do texto exibido.</li>
+        <li>
+          A página aceita um parâmetro opcional <code>origem</code> no endereço (texto curto, só letras minúsculas, números, hífen e
+          sublinhado), gravado como origem da campanha. Não há analytics nem pixel. O endereço de origem do envio é guardado só com
+          domínio e caminho, sem os parâmetros.
+        </li>
+        <li>
+          Na confirmação pode haver um convite opcional para um grupo de WhatsApp; ninguém é adicionado sem pedir.{" "}
+          <Pendente>descrever o grupo (quem vê os números dos participantes) e tratar o WhatsApp como serviço de terceiro</Pendente>.
+        </li>
+        <li>
+          Retenção dos dados desta campanha: <Pendente>prazo, junto com o das demais campanhas</Pendente>.
+        </li>
+      </ul>
+      <p>As demais regras desta política (direitos do titular, segurança, cookies, incidentes) valem para as duas campanhas.</p>
+
+      <h2>14. Contato</h2>
       <p>
         Dúvidas sobre esta política: <Pendente>e-mail do canal do titular</Pendente>.
       </p>

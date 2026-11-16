@@ -9,3 +9,14 @@ export const MAIOR_DESAFIO = [
   "Tudo isso junto",
 ] as const;
 export const JA_FEZ_MENTORIA = ["Sim", "Não"] as const;
+
+// Campanha mentoria (F10): os códigos do formulário viram os MESMOS rótulos acima, para o painel e o perfil agregarem as duas campanhas.
+export const TEMPO_MENTORIA = { "menos-1": "Menos de 1 ano", "1-3": "1 a 3 anos", "3-5": "3 a 5 anos", "mais-5": "Mais de 5 anos" } as const;
+export const EQUIPE_MENTORIA = { "so-eu": "Só eu", "2-3": "2 a 3", "4-mais": "4 ou mais" } as const;
+export const DESAFIO_MENTORIA = {
+  processos: "Organização e processos",
+  preco: "Precificação e financeiro",
+  equipe: "Equipe",
+  atendimento: "Atendimento e clientes",
+  tudo: "Tudo isso junto",
+} as const;

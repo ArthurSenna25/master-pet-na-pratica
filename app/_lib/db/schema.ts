@@ -6,8 +6,6 @@ import {
 /** Campanhas (F10). Novo valor = nova migração que troca o CHECK lead_campanha_ck. */
 export const CAMPANHAS = ["presencial", "mentoria"] as const;
 export type Campanha = (typeof CAMPANHAS)[number];
-/** ?origem= da campanha: texto curto, minúsculo. Mesma regra no Zod (F10 c5) e no CHECK. */
-export const ORIGEM_CAMPANHA_MAX = 40;
 
 const agora = () => timestamp("criado_em", { withTimezone: true }).notNull().defaultNow();
 

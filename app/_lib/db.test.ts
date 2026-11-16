@@ -11,7 +11,7 @@ vi.mock("next/headers", () => ({
 import { anonimizarLead } from "./anonimizar";
 import { getDb } from "./db";
 import { auditLog, consentEvents, lead, rateLimitEnvio } from "./db/schema";
-import { enviarLead } from "./lead-action";
+import { enviarLeadPresencial as enviarLead } from "./lead-action";
 import { CONSENT_TEXT, LEGAL_TEXT_VERSION } from "./legal-version";
 import { ipHmac, sha256Hex } from "./seguranca";
 

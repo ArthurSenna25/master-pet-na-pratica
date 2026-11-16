@@ -63,7 +63,14 @@ export default function Page() {
       <h2>9. Alterações</h2>
       <p>Estes termos podem mudar. Cada versão tem número e data, exibidos no topo da página.</p>
 
-      <h2>10. Contato</h2>
+      <h2>10. Pré-inscrição da Mentoria (rascunho)</h2>
+      <p>
+        <strong>Rascunho a validar pelo advogado.</strong> A pré-inscrição na lista da turma é gratuita e serve para receber o aviso da
+        abertura. Ela não é compra, não reserva vaga e não obriga nenhuma das partes. Preço, data, formato e condições serão informados na
+        abertura. <Pendente>advogado: texto definitivo, inclusive sobre o que é prometido a quem entra na lista</Pendente>.
+      </p>
+
+      <h2>11. Contato</h2>
       <p>
         Dúvidas sobre estes termos: <Pendente>e-mail de contato</Pendente>.
       </p>
