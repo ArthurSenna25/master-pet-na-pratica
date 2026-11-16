@@ -3,6 +3,12 @@ import {
   bigint, boolean, check, index, integer, pgTable, text, timestamp, uuid,
 } from "drizzle-orm/pg-core";
 
+/** Campanhas (F10). Novo valor = nova migração que troca o CHECK lead_campanha_ck. */
+export const CAMPANHAS = ["presencial", "mentoria"] as const;
+export type Campanha = (typeof CAMPANHAS)[number];
+/** ?origem= da campanha: texto curto, minúsculo. Mesma regra no Zod (F10 c5) e no CHECK. */
+export const ORIGEM_CAMPANHA_MAX = 40;
+
 const agora = () => timestamp("criado_em", { withTimezone: true }).notNull().defaultNow();
 
 export const lead = pgTable(
@@ -16,7 +22,9 @@ export const lead = pgTable(
     tempoFuncionamento: text("tempo_funcionamento").notNull(),
     pessoas: text("pessoas").notNull(),
     maiorDesafio: text("maior_desafio").notNull(),
-    jaFezMentoria: boolean("ja_fez_mentoria").notNull(),
+    jaFezMentoria: boolean("ja_fez_mentoria"), // nulo = não perguntado (só campanha mentoria; CHECK lead_ja_fez_ck)
+    campanha: text("campanha").notNull().default("presencial"),
+    origemCampanha: text("origem_campanha"),
     mensagem: text("mensagem"),
     status: text("status").notNull().default("novo"),
     observacao: text("observacao"),
@@ -41,6 +49,9 @@ export const lead = pgTable(
       check("lead_mensagem_ck", sql`${t.mensagem} is null or char_length(${t.mensagem}) <= 1000`),
       check("lead_observacao_ck", sql`${t.observacao} is null or char_length(${t.observacao}) <= 2000`),
       check("lead_origem_ck", sql`char_length(${t.origem}) <= 300`),
+      check("lead_campanha_ck", sql`${t.campanha} in ('presencial','mentoria')`),
+      check("lead_origem_campanha_ck", sql`${t.origemCampanha} is null or (char_length(${t.origemCampanha}) <= 40 and ${t.origemCampanha} ~ '^[a-z0-9][a-z0-9_-]*$')`),
+      check("lead_ja_fez_ck", sql`${t.campanha} = 'mentoria' or ${t.jaFezMentoria} is not null`),
     ];
   },
 );
@@ -70,6 +81,7 @@ export const rateLimitEnvio = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     ipHmac: text("ip_hmac").notNull(),
+    campanha: text("campanha").notNull().default("presencial"), // teto global é por campanha; limite por IP não filtra
     criadoEm: agora(),
   },
   (t) => [index("rate_limit_ip_idx").on(t.ipHmac, t.criadoEm)],

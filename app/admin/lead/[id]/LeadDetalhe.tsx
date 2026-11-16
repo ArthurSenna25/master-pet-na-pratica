@@ -86,7 +86,7 @@ export async function LeadDetalhe({ params, searchParams, modal = false, email }
           <dl className="ad-dl">
             {([
               ["Negócio", l.negocio], ["Cidade/UF", l.cidadeUf], ["WhatsApp", formatarWhatsapp(l.whatsapp)], ["Tempo de funcionamento", l.tempoFuncionamento],
-              ["Pessoas na equipe", l.pessoas], ["Maior desafio", l.maiorDesafio], ["Já fez mentoria?", l.jaFezMentoria ? "Sim" : "Não"],
+              ["Pessoas na equipe", l.pessoas], ["Maior desafio", l.maiorDesafio], ["Já fez mentoria?", l.jaFezMentoria === null ? "Não perguntado" : l.jaFezMentoria ? "Sim" : "Não"],
             ] as const).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
           </dl>
           {l.mensagem && <div className="ad-msg"><p className="ad-msg__l">Mensagem</p><blockquote>{l.mensagem}</blockquote></div>}

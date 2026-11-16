@@ -5,7 +5,7 @@ import { lead } from "../db/schema";
 import { montarCsv } from "./csv";
 import { registrarExportacao } from "./events";
 
-// SAÍDA DE DADO PESSOAL. Fora: ip_hmac, user_agent e todo consent_events (isso é a auditoria). Quem chamar DEVE ter checado a sessão.
+// ja_fez_mentoria vazio = não perguntado (campanha mentoria). SAÍDA DE DADO PESSOAL. Fora: ip_hmac, user_agent e todo consent_events (isso é a auditoria). Quem chamar DEVE ter checado a sessão.
 export const CABECALHO_LEADS = [
   "id", "nome", "whatsapp", "cidade_uf", "negocio", "tempo_funcionamento", "pessoas", "maior_desafio",
   "ja_fez_mentoria", "mensagem", "status", "observacao", "origem", "criado_em_utc", "atualizado_em_utc", "anonimizado_em_utc",

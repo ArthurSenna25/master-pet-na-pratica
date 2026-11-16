@@ -5,12 +5,12 @@ import { afterEach, describe, expect, it } from "vitest";
 const sql = neon(process.env.DATABASE_URL ?? "");
 const NEG = "zz-teste-constraints";
 
-interface Over { nome?: string; whatsapp?: string; cidade_uf?: string; negocio?: string; status?: string; mensagem?: string | null }
+interface Over { nome?: string; whatsapp?: string; cidade_uf?: string; negocio?: string; status?: string; mensagem?: string | null; campanha?: string; origem_campanha?: string | null; ja_fez?: boolean | null }
 
 async function inserir(o: Over = {}): Promise<string> {
-  const v = { nome: "Maria", whatsapp: "14999990001", cidade_uf: "Lins/SP", negocio: NEG, status: "novo", mensagem: null, ...o };
-  const [r] = await sql`insert into lead (nome, whatsapp, cidade_uf, negocio, tempo_funcionamento, pessoas, maior_desafio, ja_fez_mentoria, status, mensagem, origem)
-    values (${v.nome}, ${v.whatsapp}, ${v.cidade_uf}, ${v.negocio}, 't', 'p', 'd', true, ${v.status}, ${v.mensagem}, 'http://localhost/zz-teste') returning id`;
+  const v = { nome: "Maria", whatsapp: "14999990001", cidade_uf: "Lins/SP", negocio: NEG, status: "novo", mensagem: null, campanha: "presencial", origem_campanha: null, ja_fez: true as boolean | null, ...o };
+  const [r] = await sql`insert into lead (nome, whatsapp, cidade_uf, negocio, tempo_funcionamento, pessoas, maior_desafio, ja_fez_mentoria, status, mensagem, origem, campanha, origem_campanha)
+    values (${v.nome}, ${v.whatsapp}, ${v.cidade_uf}, ${v.negocio}, 't', 'p', 'd', ${v.ja_fez}, ${v.status}, ${v.mensagem}, 'http://localhost/zz-teste', ${v.campanha}, ${v.origem_campanha}) returning id`;
   return r.id as string;
 }
 
@@ -20,6 +20,39 @@ async function rejeita(o: Over, constraint: string) {
 
 afterEach(async () => {
   await sql`delete from lead where negocio like ${NEG + "%"}`;
+});
+
+describe("campanha (F10, migração 0008)", () => {
+  it("lead sem campanha informada fica 'presencial' (DEFAULT)", async () => {
+    const [r] = await sql`insert into lead (nome, whatsapp, cidade_uf, negocio, tempo_funcionamento, pessoas, maior_desafio, ja_fez_mentoria, origem)
+      values ('Maria', '14999990001', 'Lins/SP', ${NEG}, 't', 'p', 'd', true, 'http://localhost/zz-teste') returning campanha, origem_campanha`;
+    expect(r).toEqual({ campanha: "presencial", origem_campanha: null });
+  });
+
+  it("aceita presencial e mentoria; rejeita outra campanha", async () => {
+    expect(await inserir({ campanha: "mentoria", ja_fez: null })).toBeTruthy();
+    await rejeita({ campanha: "cafezao" }, "lead_campanha_ck");
+    await rejeita({ campanha: "" }, "lead_campanha_ck");
+  });
+
+  it("ja_fez_mentoria nulo só na mentoria", async () => {
+    await rejeita({ campanha: "presencial", ja_fez: null }, "lead_ja_fez_ck");
+    expect(await inserir({ campanha: "mentoria", ja_fez: false })).toBeTruthy();
+  });
+
+  it.each(["natal", "a", "ig_bio", "2026-11", "x".repeat(40)])("aceita origem_campanha %j", async (origem_campanha) => {
+    expect(await inserir({ campanha: "mentoria", ja_fez: null, origem_campanha })).toBeTruthy();
+  });
+
+  it.each([[""], ["Natal"], ["-x"], ["_x"], ["a b"], ["a/b"], ["x".repeat(41)], ["açaí"], ["a\nb"]])("rejeita origem_campanha %j", async (origem_campanha) => {
+    await rejeita({ campanha: "mentoria", ja_fez: null, origem_campanha }, "lead_origem_campanha_ck");
+  });
+
+  it("rate_limit.campanha tem DEFAULT 'presencial'", async () => {
+    const [r] = await sql`insert into rate_limit (ip_hmac) values ('zz-teste-constraints') returning campanha, id`;
+    expect(r.campanha).toBe("presencial");
+    await sql`delete from rate_limit where ip_hmac = 'zz-teste-constraints'`;
+  });
 });
 
 describe("CHECKs de lead", () => {

@@ -57,6 +57,13 @@
       "when": 1794307835990,
       "tag": "0007_f5c_troca_senha",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794821841480,
+      "tag": "0008_f10_campanha",
+      "breakpoints": true
     }
   ]
 }
