@@ -2,3 +2,6 @@
    html/body: só o que o protótipo fazia como "demo" (fundo escuro no overscroll) e a suavização de fonte; sem reset global. */
 html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; background: #060f26; }
 body.nm-root { margin: 0; background: #060f26; }
+
+/* Notas dentro do cartão escuro do formulário (o .nm-muted do handoff é para fundo claro: contraste insuficiente aqui). */
+.nm-form__nota { color: var(--text-on-navy-2); font-size: 16px; line-height: 1.5; margin-top: var(--space-2); }

@@ -1,6 +1,8 @@
+import { textos } from "../textos";
 import Image from "next/image";
 
 export function Dia() {
+  const t = textos();
   return (
     <section className="nm-dia" id="dia" aria-labelledby="h-dia" data-screen-label="02 Um dia na bancada">
       <figure className="nm-dia__face" aria-hidden="true">
@@ -176,7 +178,7 @@ export function Dia() {
               </li>
             </ol>
             <a className="nm-btn" href="#lista">
-              Entrar na lista da turma{" "}
+              {t.cta}{" "}
               <svg className="nm-ico" aria-hidden="true" focusable="false">
                 <use href="#nm-arrow" />
               </svg>

@@ -3,7 +3,7 @@ export function Rodape() {
   return (
     <footer className="nm-footer">
       <div className="nm-wrap">
-        <a className="nm-wordmark" href="#abertura" role="img" aria-label="Master Pet — topo">
+        <a className="nm-wordmark" href="#abertura" aria-label="Master Pet — topo">
           <b>
             MASTER
           </b>

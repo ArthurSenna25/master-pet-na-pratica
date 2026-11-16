@@ -17,6 +17,9 @@ import { Rodape } from "../_secoes/Rodape";
 
 // Campanha mentoria (F10 c4): seções estáticas do handoff mentoria-natal-v4, SEM JavaScript de movimento (tudo visível; as classes de estado
 // .nm-js/.is-* do protótipo não são ligadas). Interações (diagnóstico, trilha, faixa, FAQ ativa) e o formulário de 2 passos vêm depois.
+// Dinâmica: o flag MENTORIA_FORM_ATIVO é lido a cada pedido, igual à action (sem divergência tela x servidor).
+export const dynamic = "force-dynamic";
+
 export default function Page() {
   return (
     <div className="nm" id="nm">

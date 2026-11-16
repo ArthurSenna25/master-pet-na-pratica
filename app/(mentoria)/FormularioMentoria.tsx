@@ -6,10 +6,10 @@ export function FormularioMentoria() {
   const ativo = formMentoriaAtivo();
   return (
     <div className="nm-form" id="nm-form" role="region" aria-labelledby="h-form" data-form-ativo={ativo ? "1" : "0"}>
-      <div className="nm-form__head"><h3 id="h-form">Entrar na lista da turma</h3></div>
+      <div className="nm-form__head"><h3 id="h-form">{ativo ? "Entrar na lista da turma" : "Lista da turma"}</h3></div>
       <p className="nm-lead">Em breve.</p>
-      <p className="nm-muted">A lista da turma ainda não abriu. Quando abrir, é por aqui.</p>
-      {ativo && <p className="nm-muted" data-previa>Prévia: o formulário entra na próxima etapa desta implementação.</p>}
+      <p className="nm-form__nota">A lista da turma ainda não abriu. Quando abrir, é por aqui.</p>
+      {ativo && <p className="nm-form__nota" data-previa>Prévia: o formulário entra na próxima etapa desta implementação.</p>}
       <p className="nm-demo-warn">
         <svg className="nm-ico" aria-hidden="true" focusable="false"><use href="#nm-alert" /></svg>
         <span>demonstração: use dados fictícios</span>

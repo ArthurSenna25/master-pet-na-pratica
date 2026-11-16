@@ -41,7 +41,7 @@ for (const r of ROTAS) {
     for (const p of r.proibidos) expect(regras.filter((s) => PREFIXOS[p].test(s)).slice(0, 5), `seletores ${p} em ${r.url}`).toEqual([]);
     if (r.url === "/mentoria") {
       // tokens da campanha só sob .nm: nenhuma regra fora de .nm define variável da marca (--mp-*), nem em :root/html/body
-      const fora = pares.filter((x) => /--mp-[a-z0-9-]+\s*:/.test(x.texto) && !/^\.nm(?![\w-])/.test(x.sel)).map((x) => x.sel);
+      const fora = pares.filter((x) => /--mp-[a-z0-9-]+\s*:/.test(x.texto) && x.sel.split(",").some((s) => !/^\s*\.nm(?![\w-])/.test(s))).map((x) => x.sel);
       expect(fora, "variáveis --mp- fora de .nm").toEqual([]);
     }
   });

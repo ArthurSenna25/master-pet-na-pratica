@@ -1,12 +1,13 @@
 // GUARDA DE CI (F10 c3): grafo de imports por campanha/escopo. A landing já vazou no painel três vezes; isto falha o `npm test` se um escopo
 // passar a importar (direto ou por transitivo) CSS, cenas GSAP ou código de outro escopo. Só lê arquivos; não precisa de banco nem de build.
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const APP = resolve(__dirname);
 const EXT = [".ts", ".tsx", ".css", ".mjs", ".js"];
-const IMPORT = /(?:import|export)\s+(?:[^'"]*?\sfrom\s+)?["']([^"']+)["']|import\(\s*["']([^"']+)["']\s*\)|@import\s+["']([^"']+)["']/g;
+const RAIZ = resolve(__dirname, "..");
+const IMPORT = /(?:import|export)\s+(?:[^'"]*?\sfrom\s+)?["']([^"']+)["']|import\(\s*["']([^"']+)["']\s*\)|@import\s+["']([^"']+)["']|require\(\s*["']([^"']+)["']\s*\)/g;
 
 const rel = (f: string) => relative(APP, f).split(sep).join("/");
 
@@ -19,7 +20,7 @@ function arquivos(dir: string): string[] {
 }
 
 function resolver(de: string, alvo: string): string | null {
-  const base = resolve(dirname(de), alvo);
+  const base = alvo.startsWith("@/") ? resolve(RAIZ, alvo.slice(2)) : resolve(dirname(de), alvo);
   for (const c of [base, ...EXT.map((e) => base + e), ...EXT.map((e) => join(base, "index" + e))]) {
     if (existsSync(c) && statSync(c).isFile()) return c;
   }
@@ -36,8 +37,8 @@ function alcance(raizes: string[]): { arquivos: Set<string>; pacotes: Set<string
     if (vistos.has(f)) continue;
     vistos.add(f);
     for (const m of readFileSync(f, "utf8").matchAll(IMPORT)) {
-      const alvo = m[1] ?? m[2] ?? m[3];
-      if (alvo.startsWith(".")) {
+      const alvo = m[1] ?? m[2] ?? m[3] ?? m[4];
+      if (alvo.startsWith(".") || alvo.startsWith("@/")) {
         const r = resolver(f, alvo);
         if (r && r.startsWith(APP)) fila.push(r);
       } else pacotes.add(alvo.startsWith("@") ? alvo.split("/").slice(0, 2).join("/") : alvo.split("/")[0]);
@@ -46,12 +47,30 @@ function alcance(raizes: string[]): { arquivos: Set<string>; pacotes: Set<string
   return { arquivos: new Set([...vistos].map(rel)), pacotes };
 }
 
+// Bibliotecas de animação: nenhuma entra em mentoria/admin/legal por import novo (GSAP da mentoria só no commit de cenas, com este guarda ajustado de propósito).
+const ANIMACAO = ["gsap", "@gsap/react", "lenis", "motion", "framer-motion", "three"];
 const ESCOPOS: { nome: string; pastas: string[]; proibidoArquivo: RegExp; proibidoPacote: string[] }[] = [
-  { nome: "mentoria", pastas: ["(mentoria)"], proibidoArquivo: /^(landing\/|_fx\/|admin\/|_components\/(LandingFx|LeadForm|Hero|Faq|Depoimentos))/, proibidoPacote: ["gsap", "@gsap/react"] },
-  { nome: "admin", pastas: ["admin"], proibidoArquivo: /^(landing\/|_fx\/|\(mentoria\)\/|_components\/LandingFx)/, proibidoPacote: ["gsap", "@gsap/react"] },
+  { nome: "mentoria", pastas: ["(mentoria)"], proibidoArquivo: /^(landing\/|_fx\/|admin\/|_components\/(LandingFx|LeadForm|Hero|Faq|Depoimentos))/, proibidoPacote: ANIMACAO },
+  { nome: "admin", pastas: ["admin"], proibidoArquivo: /^(landing\/|_fx\/|\(mentoria\)\/|_components\/LandingFx)/, proibidoPacote: ANIMACAO },
   { nome: "presencial", pastas: ["(presencial)"], proibidoArquivo: /^(admin\/|\(mentoria\)\/)/, proibidoPacote: [] },
-  { nome: "legal", pastas: ["(legal)"], proibidoArquivo: /^(admin\/|\(mentoria\)\/|_fx\/|_components\/LandingFx)/, proibidoPacote: ["gsap", "@gsap/react"] },
+  { nome: "legal", pastas: ["(legal)"], proibidoArquivo: /^(admin\/|\(mentoria\)\/|_fx\/|_components\/LandingFx)/, proibidoPacote: ANIMACAO },
 ];
+
+describe("o scanner enxerga as formas de import que poderiam burlá-lo", () => {
+  it("alias @/, import dinâmico e require alcançam _fx e gsap", () => {
+    const dir = join(APP, "__tmp_isolamento__");
+    mkdirSync(dir, { recursive: true });
+    try {
+      for (const [nome, linha] of [["alias.ts", 'import "@/app/_fx/hero";'], ["dinamico.ts", 'export const x = () => import("../_fx/hero");'], ["req.ts", 'const g = require("gsap");']] as const) {
+        writeFileSync(join(dir, nome), `${linha}\n`);
+        const a = alcance([join(dir, nome)]);
+        expect(a.arquivos.has("_fx/hero.ts") || a.pacotes.has("gsap"), nome).toBe(true);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
 
 describe("isolamento entre escopos (grafo de imports)", () => {
   it("a descoberta funciona: cada escopo tem arquivos e a landing alcança o GSAP", () => {

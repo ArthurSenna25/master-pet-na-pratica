@@ -1,5 +1,7 @@
+import { textos } from "../textos";
 
 export function Processo() {
+  const t = textos();
   return (
     <section className="nm-proc" id="processo" aria-labelledby="h-proc" data-screen-label="04 Improviso ao processo">
       <div className="nm-wrap">
@@ -133,14 +135,14 @@ export function Processo() {
         <div className="nm-cta">
           <a className="nm-btn nm-btn--lg" href="#lista" data-nm-magnet>
             <span>
-              Entrar na lista da turma
+              {t.cta}
             </span>
             <svg className="nm-ico" aria-hidden="true" focusable="false">
               <use href="#nm-arrow" />
             </svg>
           </a>
           <p className="nm-micro">
-            Gratuito. Você só recebe o aviso da abertura.
+            {t.micro}
           </p>
         </div>
       </div>

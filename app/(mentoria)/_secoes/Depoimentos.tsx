@@ -1,3 +1,4 @@
+import { FaixaDepoimentos } from "../FaixaDepoimentos";
 
 export function Depoimentos() {
   return (
@@ -68,7 +69,7 @@ export function Depoimentos() {
           </figure>
         </div>
         <div className="nm-dep__car" role="region" aria-roledescription="carrossel" aria-label="Mais depoimentos (exemplos)">
-          <ul className="nm-dep__track" tabIndex={0} aria-label="Depoimentos em faixa rolável. Use as setas do teclado para navegar.">
+          <FaixaDepoimentos>
             <li className="nm-dep__c" role="group" aria-roledescription="slide" aria-label="1 de 6">
               <figure>
                 <div className="nm-dep__top2">
@@ -237,7 +238,7 @@ export function Depoimentos() {
                 </figcaption>
               </figure>
             </li>
-          </ul>
+          </FaixaDepoimentos>
           <div className="nm-dep__bar">
             <span className="nm-dep__ct" data-nm-dep-ct>
               1 / 6

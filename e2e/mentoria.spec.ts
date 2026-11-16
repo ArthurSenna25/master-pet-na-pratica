@@ -28,3 +28,40 @@ test("/mentoria: noindex, h1 e formulário em 'Em breve' sem campos que gravem",
   expect(await page.locator("form, input, textarea").count()).toBe(0); // o formulário real vem no c5
   await expect(page.locator(".nm-seal--ex, .nm-seal").first()).toBeVisible(); // selos "exemplo"/"provisório" mantidos
 });
+
+test("faixa de depoimentos: tabindex só abaixo de 900 px e reage à mudança de largura", async ({ page }) => {
+  const faixa = page.locator("ul.nm-dep__track");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/mentoria");
+  await expect(faixa).not.toHaveAttribute("tabindex", /.*/);
+  await page.setViewportSize({ width: 600, height: 900 });
+  await expect(faixa).toHaveAttribute("tabindex", "0");
+  await page.setViewportSize({ width: 1200, height: 900 });
+  await expect(faixa).not.toHaveAttribute("tabindex", /.*/);
+});
+
+test("faixa de depoimentos a 390 px já nasce focável depois da hidratação; a 1440 não é tab stop", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/mentoria");
+  await expect(page.locator("ul.nm-dep__track")).toHaveAttribute("tabindex", "0");
+});
+
+test.describe("sem JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("a trilha (6 estações) e a FAQ (6 respostas) ficam legíveis", async ({ page }) => {
+    await page.goto("/mentoria");
+    const estacoes = page.locator("li.nm-st");
+    await expect(estacoes).toHaveCount(6);
+    for (const titulo of ["Raio-X do negócio", "Gargalos", "Equipe", "Precificação", "Padrões", "Organização e métodos"]) {
+      await expect(page.locator("li.nm-st").filter({ hasText: titulo }).first()).toBeVisible();
+    }
+    const respostas = page.locator(".nm-faq__a");
+    await expect(respostas).toHaveCount(6);
+    for (let i = 0; i < 6; i++) {
+      const r = respostas.nth(i);
+      await expect(r).toBeVisible();
+      expect(((await r.innerText()) ?? "").trim().length).toBeGreaterThan(10);
+    }
+  });
+});

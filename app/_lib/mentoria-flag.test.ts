@@ -6,7 +6,11 @@ describe("formMentoriaAtivo", () => {
     [{ VERCEL_ENV: "production" }, false], // produção: desligado por padrão
     [{ VERCEL_ENV: "preview" }, true],
     [{ VERCEL_ENV: "development" }, true],
-    [{}, true], // local (sem VERCEL_ENV)
+    [{}, true], // local (sem VERCEL_ENV e sem NODE_ENV=production: next dev)
+    [{ NODE_ENV: "production" }, false], // next start / Docker / VPS: FALHA FECHADA
+    [{ NODE_ENV: "development" }, true],
+    [{ VERCEL_ENV: "staging" }, false], // valor desconhecido: desligado
+    [{ NODE_ENV: "production", MENTORIA_FORM_ATIVO: "1" }, true],
     [{ VERCEL_ENV: "production", MENTORIA_FORM_ATIVO: "1" }, true], // dono liga em produção
     [{ VERCEL_ENV: "preview", MENTORIA_FORM_ATIVO: "0" }, false],
     [{ VERCEL_ENV: "production", MENTORIA_FORM_ATIVO: "true" }, false], // só "1" liga

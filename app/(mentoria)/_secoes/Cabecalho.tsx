@@ -1,8 +1,10 @@
+import { textos } from "../textos";
 
 export function Cabecalho() {
+  const t = textos();
   return (
     <header className="nm-header">
-      <a className="nm-wordmark" href="#abertura" role="img" aria-label="Master Pet — início">
+      <a className="nm-wordmark" href="#abertura" aria-label="Master Pet — início">
         <b>
           MASTER
         </b>
@@ -11,7 +13,7 @@ export function Cabecalho() {
         </span>
       </a>
       <a className="nm-btn nm-btn--sm" href="#lista">
-        Entrar na lista da turma
+        {t.cta}
       </a>
     </header>
   );

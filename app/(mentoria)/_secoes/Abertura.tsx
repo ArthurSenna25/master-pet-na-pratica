@@ -1,6 +1,8 @@
+import { textos } from "../textos";
 import Image from "next/image";
 
 export function Abertura() {
+  const t = textos();
   return (
     <section className="nm-hero" id="abertura" aria-labelledby="h-hero" data-screen-label="01 Abertura">
       <div className="nm-hero__bg" aria-hidden="true"></div>
@@ -13,7 +15,7 @@ export function Abertura() {
         <div className="nm-hero__copy">
           <span className="nm-seal nm-seal--open">
             <i aria-hidden="true"></i>
-            Pré-inscrição aberta
+            {t.selo}
           </span>
           <h1 className="nm-h1" id="h-hero" data-nm-lines>
             Um banho e tosa que funciona{" "}
@@ -23,19 +25,19 @@ export function Abertura() {
             {" "}na bancada.
           </h1>
           <p className="nm-lead">
-            Mentoria online e individual com a Camila Becari. A turma abre no ano que vem. Entre na lista agora e receba o aviso em primeira mão, sem pagar nada.
+            {t.leadAbertura}
           </p>
           <div className="nm-hero__cta">
             <a className="nm-btn nm-btn--lg" href="#lista" data-nm-magnet>
               <span>
-                Entrar na lista da turma
+                {t.cta}
               </span>
               <svg className="nm-ico" aria-hidden="true" focusable="false">
                 <use href="#nm-arrow" />
               </svg>
             </a>
             <span className="nm-note">
-              Gratuito. Você só recebe o aviso da abertura.
+              {t.micro}
             </span>
           </div>
           <ul className="nm-facts">

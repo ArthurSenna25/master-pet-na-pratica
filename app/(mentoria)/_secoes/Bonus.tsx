@@ -1,6 +1,8 @@
+import { textos } from "../textos";
 import Image from "next/image";
 
 export function Bonus() {
+  const t = textos();
   return (
     <section className="nm-sec nm-paper" id="bonus" aria-labelledby="h-bonus" data-screen-label="08 Bônus">
       <div className="nm-wrap nm-bonus__grid">
@@ -37,7 +39,7 @@ export function Bonus() {
               </p>
               <a className="nm-btn" href="#lista" data-nm-magnet>
                 <span>
-                  Entrar na lista da turma
+                  {t.cta}
                 </span>
                 <svg className="nm-ico" aria-hidden="true" focusable="false">
                   <use href="#nm-arrow" />

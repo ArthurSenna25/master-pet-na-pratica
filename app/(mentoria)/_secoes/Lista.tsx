@@ -1,7 +1,9 @@
+import { textos } from "../textos";
 import Image from "next/image";
 import { FormularioMentoria } from "../FormularioMentoria";
 
 export function Lista() {
+  const t = textos();
   return (
     <section className="nm-end" id="lista" aria-labelledby="h-lista" data-screen-label="11 Formulário">
       <div className="nm-end__bg" aria-hidden="true"></div>
@@ -23,7 +25,7 @@ export function Lista() {
           </figure>
           <div className="nm-end__copy">
             <p className="nm-lead">
-              Entre na lista da turma e receba o aviso da abertura em primeira mão.
+              {t.leadFim}
             </p>
             <ul>
               <li>
