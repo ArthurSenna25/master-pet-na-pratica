@@ -167,7 +167,11 @@
 .is-pinned .nm-trilha__pin { height: 100%; padding: calc(var(--nm-hdr) + 2svh) var(--nm-pad) 3svh; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "head ribbon" "deck ribbon" "foot ribbon"; gap: clamp(10px, 2svh, 24px) calc(var(--nm-gap) * 2); }
 .is-pinned .nm-trilha__head { grid-area: head; } .is-pinned .nm-trilha__head .nm-lead { display: none; }
 .is-pinned .nm-trilha__head .nm-h2 { font-size: clamp(26px, min(3vw, 5.2svh), 46px); }
-.is-pinned svg.nm-ribbon { display: block; grid-area: ribbon; width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+.is-pinned svg.nm-ribbon { display: block; grid-area: ribbon; width: 100%; height: 100%; min-height: 0; overflow: hidden;
+  /* a câmera é aproximada: o que sai da coluna esmaece em degradê em vez de ser cortado em linha reta (movimento e curva intactos) */
+  --nm-fade-x: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); --nm-fade-y: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: var(--nm-fade-x), var(--nm-fade-y); -webkit-mask-composite: source-in;
+  mask-image: var(--nm-fade-x), var(--nm-fade-y); mask-composite: intersect; }
 .is-pinned .nm-deck { grid-area: deck; display: grid; grid-template-columns: 1fr; align-content: center; perspective: 1400px; padding: 0; }
 .is-pinned .nm-st { grid-area: 1 / 1; transform-origin: 50% 100%; will-change: transform, opacity; }
 .is-pinned .nm-thread, .is-pinned .nm-st::after { display: none; }
