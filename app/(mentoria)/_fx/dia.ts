@@ -25,7 +25,8 @@ export function dia(): Cleanup {
     sec.classList.add("is-pinned");
     const H = { h: HORA_INICIAL };
     let mostrada = HORA_INICIAL;
-    gsap.set(beats, { autoAlpha: 0, y: 24 });
+    // Dores e palco: só opacity (nunca visibility:hidden), para o leitor de tela ler as 4 dores na ordem do DOM mesmo com o pin (a visibility herdada do palco as esconderia).
+    gsap.set(beats, { opacity: 0, y: 24 });
     // Diagnóstico: só opacity (NUNCA visibility:hidden) + pointer-events, para seguir na árvore de acessibilidade e no Tab desde o início.
     gsap.set(diag, { opacity: 0, y: 36, pointerEvents: "none" });
     const tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: "top top", end: "bottom bottom", scrub: 0.6, invalidateOnRefresh: true } });
@@ -37,10 +38,10 @@ export function dia(): Cleanup {
       const t0 = (Number(b.dataset.h) - HORA_INICIAL) * POR_HORA;
       const prox = beats[i + 1];
       const t1 = prox ? (Number(prox.dataset.h) - HORA_INICIAL) * POR_HORA : 4.0;
-      tl.to(b, { autoAlpha: 1, y: 0, duration: 0.3, ease: "power3.out" }, t0 + 0.05);
-      if (prox) tl.to(b, { autoAlpha: 0, y: -18, duration: 0.25 }, t1 - 0.25);
+      tl.to(b, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, t0 + 0.05);
+      if (prox) tl.to(b, { opacity: 0, y: -18, duration: 0.25 }, t1 - 0.25);
     });
-    tl.to(palco, { autoAlpha: 0, duration: 0.35 }, 4.1)
+    tl.to(palco, { opacity: 0, duration: 0.35 }, 4.1)
       .set(diag, { pointerEvents: "auto" }, 4.25)
       .to(diag, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 4.25)
       .to({}, { duration: 0.3 });

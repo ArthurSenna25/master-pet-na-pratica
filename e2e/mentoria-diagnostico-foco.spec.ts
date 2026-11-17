@@ -48,3 +48,19 @@ test.describe("reduced-motion", () => {
     expect(y0).toBe(0);
   });
 });
+
+// Leitor de tela simulado: a árvore de acessibilidade (ariaSnapshot) ignora visibility:hidden. Com o pin, as 4 dores e o título têm de estar nela
+// em qualquer ponto do percurso (início, meio e fim = 18h), na ordem do DOM.
+test("as dores do relógio ficam na árvore de acessibilidade durante todo o percurso do pin", async ({ page }) => {
+  await page.goto("/mentoria");
+  await expect(page.locator(".nm-dia.is-pinned")).toHaveCount(1);
+  const dores = ["O dia começa na correria", "Cada um faz do seu jeito", "O preço vira palpite", "Tudo passa por você"];
+  for (const f of [0, 0.5, 0.99]) {
+    await page.evaluate((fr) => { const s = document.querySelector(".nm-dia") as HTMLElement; scrollTo(0, s.getBoundingClientRect().top + scrollY + (s.offsetHeight - innerHeight) * fr); }, f);
+    await page.waitForTimeout(900);
+    const arvore = await page.locator(".nm-dia").ariaSnapshot();
+    let pos = -1;
+    for (const d of dores) { const i = arvore.indexOf(d); expect(i, `"${d}" ausente da árvore de acessibilidade (percurso ${f})`).toBeGreaterThan(pos); pos = i; }
+    expect(arvore, `título do Dia (percurso ${f})`).toContain("Das 8h às 18h");
+  }
+});
