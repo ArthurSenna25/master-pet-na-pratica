@@ -6,10 +6,10 @@ export function Dia() {
   const t = textos();
   return (
     <section className="nm-dia" id="dia" aria-labelledby="h-dia" data-screen-label="02 Um dia na bancada">
-      <figure className="nm-dia__face" aria-hidden="true">
-        <Image src="/mentoria/camila-bancada.webp" width={900} height={1125} alt="" unoptimized />
-      </figure>
       <div className="nm-dia__pin">
+        <figure className="nm-dia__face" aria-hidden="true">
+          <Image src="/mentoria/camila-bancada.webp" width={900} height={1125} alt="" unoptimized />
+        </figure>
         <div className="nm-dia__stage">
           <div className="nm-dia__head">
             <span className="nm-eyebrow">

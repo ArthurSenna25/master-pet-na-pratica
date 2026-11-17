@@ -7,6 +7,22 @@ export const EVENTO_ESTACAO = "nm:hit"; // enviado pelo Diagnostico ("Onde o seu
 
 const TOTAL = 6;
 
+/** Realce vindo do Diagnóstico: acende o cartão e o botão da estação escolhida. Só classe (estado, sem movimento): vale também com reduced-motion. */
+export function realce(): Cleanup {
+  const sec = document.querySelector<HTMLElement>(".nm-trilha");
+  if (!sec) return () => {};
+  const aoEscolher = (e: Event) => {
+    const n = Number((e as CustomEvent<number>).detail);
+    sec.querySelectorAll<HTMLElement>(".nm-st").forEach((c) => c.classList.toggle("is-hit", Number(c.dataset.st) === n));
+    sec.querySelectorAll<HTMLElement>("[data-st-go]").forEach((b) => b.classList.toggle("is-hit", Number(b.dataset.stGo) === n));
+  };
+  window.addEventListener(EVENTO_ESTACAO, aoEscolher);
+  return () => {
+    window.removeEventListener(EVENTO_ESTACAO, aoEscolher);
+    sec.querySelectorAll(".is-hit").forEach((e) => e.classList.remove("is-hit"));
+  };
+}
+
 /**
  * Cena 3 · Trilha (handoff v4). Pin (PIN): fita dourada em perspectiva + cartões em profundidade + ambiente deslocado, 1 estação por 1/5 do scroll, com snap.
  * Sem pin (NOPIN): cartões sobem ao entrar (só se estão abaixo da dobra) e o fio vertical cresce. Reduced-motion: esta função não é chamada
@@ -46,18 +62,16 @@ export function trilha(): Cleanup {
   };
   sec.addEventListener("click", aoClicar);
 
-  // "Onde o seu dia trava?": acende a estação escolhida (cartão e nó da fita).
-  const aoEscolher = (e: Event) => {
-    const n = Number((e as CustomEvent<number>).detail);
-    deck.forEach((c) => c.classList.toggle("is-hit", Number(c.dataset.st) === n));
-    fita?.setHit(n);
-  };
+  // "Onde o seu dia trava?": o realce do cartão e do botão é `realce()` (vale também sem a cena); aqui só o nó da fita, e lembra a escolha se a fita for refeita.
+  let hit = 0;
+  const aoEscolher = (e: Event) => { hit = Number((e as CustomEvent<number>).detail); fita?.setHit(hit); };
   window.addEventListener(EVENTO_ESTACAO, aoEscolher);
 
   const mm = gsap.matchMedia();
   mm.add(PIN, () => {
     sec.classList.add("is-pinned");
     const f = (fita = construirFita(ribbon));
+    if (hit) f.setHit(hit);
     const P = { t: 0 };
     const cartoes = (t: number) => {
       deck.forEach((c, j) => {
@@ -72,7 +86,7 @@ export function trilha(): Cleanup {
     };
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: sec, start: "top top", end: "+=100%", pin: true, scrub: 0.7, anticipatePin: 1, invalidateOnRefresh: true,
+        trigger: sec, start: "top top", end: "bottom bottom", scrub: 0.7, invalidateOnRefresh: true, // pin = position: sticky no CSS (sem layout shift)
         snap: { snapTo: 1 / (TOTAL - 1), directional: false, inertia: false, // desvio do protótipo: sem inércia o snap vai à estação mais próxima (com ela, a nav 1→3 caía em outra estação)
            duration: { min: 0.25, max: 0.6 }, delay: 0.05, ease: "power2.inOut" },
       },

@@ -167,6 +167,10 @@ test("diagnóstico pré-seleciona o maior desafio no cliente e NÃO envia nada",
   const posts: string[] = [];
   page.on("request", (r) => r.method() === "POST" && posts.push(r.url()));
   await page.goto("/mentoria");
+  // com o pin do "Um dia na bancada" (>=900x720) o Diagnóstico só aparece às 18h, no fim do percurso: rola até lá
+  await expect(page.locator(".nm-dia.is-pinned")).toHaveCount(1); // espera a hidratação (a seção só ganha o percurso do pin depois dela; viewport padrão 1280x720 = pin)
+  await page.evaluate(() => { const s = document.querySelector("#dia") as HTMLElement; window.scrollTo(0, s.offsetTop + s.offsetHeight - window.innerHeight); });
+  await expect(page.locator(".nm-diag")).toBeVisible();
   await page.locator("a.nm-pick[data-desafio='preco']").click();
   await expect(page.locator("a.nm-pick[data-desafio='preco']")).toHaveAttribute("aria-current", "true");
   await passo1(page, `${PREFIXO}${sufixo()}`);

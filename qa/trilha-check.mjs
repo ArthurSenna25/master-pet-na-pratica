@@ -19,17 +19,17 @@ const CASOS = [
 const estado = (p) => p.evaluate(() => {
   const s = document.querySelector(".nm-trilha");
   const cards = [...s.querySelectorAll(".nm-st")];
-  const sp = s.parentElement.classList.contains("pin-spacer") ? s.parentElement : null;
+  const sp = null; // pin por position: sticky: não há pin-spacer; a seção pinada tem 200svh e o conteúdo gruda
   const prev = (sp ?? s).previousElementSibling, next = (sp ?? s).nextElementSibling;
   const R = (e) => e.getBoundingClientRect();
   return {
-    pinned: s.classList.contains("is-pinned"), spacer: !!sp, ribbonKids: s.querySelector(".nm-ribbon").childElementCount,
+    pinned: s.classList.contains("is-pinned"), spacer: getComputedStyle(s.querySelector(".nm-trilha__pin")).position === "sticky", ribbonKids: s.querySelector(".nm-ribbon").childElementCount,
     navVisible: getComputedStyle(s.querySelector(".nm-stnav")).display !== "none",
     opac: cards.map((c) => +getComputedStyle(c).opacity), vis: cards.filter((c) => c.getBoundingClientRect().width > 0 && getComputedStyle(c).visibility !== "hidden").length,
     overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
     secH: R(s).height, vh: innerHeight, secScroll: s.scrollHeight, pinH: s.querySelector('.nm-trilha__pin').clientHeight, pinScroll: s.querySelector('.nm-trilha__pin').scrollHeight,
     gapAntes: prev ? Math.round(R(sp ?? s).top - R(prev).bottom) : 0, gapDepois: next ? Math.round(R(next).top - R(sp ?? s).bottom) : 0,
-    spTop: sp ? Math.round(R(sp).top + scrollY) : Math.round(R(s).top + scrollY), spH: sp ? Math.round(R(sp).height) : 0,
+    spTop: sp ? Math.round(R(sp).top + scrollY) : Math.round(R(s).top + scrollY), spH: Math.round(R(s).height),
   };
 });
 
@@ -76,7 +76,7 @@ for (const [nome, tipo] of [["chromium", chromium], ["webkit", webkit]]) {
     ok(!s.overflowX, `${tag}: sem overflow horizontal`);
     ok(errs.length === 0, `${tag}: sem erro de console ${errs[0] ?? ""}`);
     if (pin) {
-      ok(s.secH <= s.vh + 1 && s.pinScroll <= s.pinH + 1, `${tag}: seção pinada cabe na tela (seção=${Math.round(s.secH)}, conteúdo=${s.pinScroll}/${s.pinH}, vh=${s.vh}; o fundo ambiente inset:-3% é cortado)`);
+      ok(s.pinH <= s.vh + 1 && s.pinScroll <= s.pinH + 1, `${tag}: seção pinada cabe na tela (seção=${Math.round(s.secH)}, conteúdo=${s.pinScroll}/${s.pinH}, vh=${s.vh}; o fundo ambiente inset:-3% é cortado)`);
       ok(Math.abs(s.gapAntes) <= 1 && Math.abs(s.gapDepois) <= 1, `${tag}: sem vão (antes=${s.gapAntes}px, depois=${s.gapDepois}px)`);
       await p.evaluate((y) => scrollTo(0, y), s.spTop); await p.waitForTimeout(1200);
       for (const k of [0, 2, 5]) {

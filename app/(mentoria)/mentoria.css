@@ -87,6 +87,10 @@
 .nm-hero__inner { position: relative; z-index: 3; width: 100%; max-width: var(--nm-max); margin-inline: auto; padding: calc(var(--nm-hdr) + var(--nm-sec) * .4) var(--nm-pad) calc(var(--nm-sec) * .6); }
 .nm-hero__copy { display: grid; gap: clamp(14px, 2.6svh, 28px); justify-items: start; max-width: min(42rem, 54vw); }
 .nm-hero__copy .nm-lead { color: var(--text-on-navy-2); max-width: 30em; }
+/* entrada da abertura: keyframes de CSS (nada é escondido por JS; sem JS roda igual; reduced-motion desliga em `.nm *` mais abaixo) */
+@keyframes nm-in { from { opacity: 0; transform: translateY(.45em); } to { opacity: 1; transform: none; } }
+.nm-hero__copy > * { animation: nm-in .9s cubic-bezier(.16, 1, .3, 1) both; }
+.nm-hero__copy > :nth-child(2) { animation-delay: .06s; } .nm-hero__copy > :nth-child(3) { animation-delay: .14s; } .nm-hero__copy > :nth-child(4) { animation-delay: .22s; } .nm-hero__copy > :nth-child(5) { animation-delay: .3s; }
 .nm-hero__cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
 .nm-facts { display: flex; flex-wrap: wrap; gap: 6px var(--space-3); font-size: 16px; color: var(--text-on-navy-2); }
 .nm-facts li { display: flex; align-items: center; gap: 8px; } .nm-facts .nm-ico { width: 14px; height: 14px; color: var(--mp-gold-400); }
@@ -99,12 +103,12 @@
 
 /* 02 · um dia na bancada */
 .nm-dia { position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(900px 600px at 15% 100%, rgba(47,74,134,.5), transparent 70%), linear-gradient(180deg, var(--mp-navy-950), var(--mp-navy-900)); }
-.nm-dia__face { position: absolute; z-index: 0; right: calc(var(--nm-pad) * .6); top: calc(var(--nm-hdr) + 2svh); bottom: 34%; width: min(30vw, 28rem); margin: 0; opacity: .3; pointer-events: none; -webkit-mask-image: radial-gradient(70% 70% at 50% 45%, #000 38%, transparent 76%); mask-image: radial-gradient(70% 70% at 50% 45%, #000 38%, transparent 76%); }
+.nm-dia__face { position: absolute; z-index: -1; right: calc(var(--nm-pad) * .6); top: calc(var(--nm-hdr) + 2svh); bottom: 34%; width: min(30vw, 28rem); margin: 0; opacity: .3; pointer-events: none; -webkit-mask-image: radial-gradient(70% 70% at 50% 45%, #000 38%, transparent 76%); mask-image: radial-gradient(70% 70% at 50% 45%, #000 38%, transparent 76%); }
 .nm-dia__face img { width: 100%; height: 100%; object-fit: cover; }
 .nm-dia__pin { position: relative; z-index: 1; max-width: var(--nm-max); margin-inline: auto; padding: var(--nm-sec) var(--nm-pad); display: grid; gap: calc(var(--nm-gap) * 1.4); }
 .nm-dia__stage { display: grid; gap: var(--nm-gap); }
 .nm-dia__head { display: grid; gap: var(--space-2); max-width: 40rem; }
-.nm-clock { display: none; font-family: var(--font-display); font-size: clamp(80px, min(13vw, 24svh), 220px); line-height: .9; color: var(--mp-gold-400); } .nm-clock span { opacity: .55; }
+.nm-clock { display: none; font-family: var(--font-display); font-size: clamp(80px, min(13vw, 24svh), 220px); line-height: .9; color: var(--mp-gold-400); } .nm-clock span { opacity: .55; } .nm-clock b { display: inline-block; min-width: 1.18em; text-align: right; } /* caixa na largura do "08" (a mais larga, medida): trocar a hora não move o relógio (CLS) */
 .nm-beats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--nm-gap); max-width: 64rem; }
 .nm-beat { display: grid; gap: 6px; align-content: start; padding-top: 14px; border-top: 1px solid rgba(205,170,85,.35); }
 .nm-beat__t { font-family: var(--font-display); font-size: clamp(24px, min(2.4vw, 4svh), 34px); color: var(--mp-gold-400); line-height: 1; }
@@ -128,8 +132,9 @@
 .nm-rail li.is-on { color: var(--mp-gold-400); font-weight: var(--fw-semibold); } .nm-rail li.is-on i { background: var(--mp-gold-400); box-shadow: 0 0 0 6px rgba(205,170,85,.28); }
 @media (max-width: 899px) { .nm-diag { grid-template-columns: 1fr; } .nm-dia__face { width: 56vw; top: 6%; bottom: auto; height: 36%; opacity: .16; } .nm-rail li { font-size: 12px; } }
 /* pin (JS; ≥900×720): palco e diagnóstico ocupam a mesma célula */
-.nm-dia.is-pinned { height: 100svh; }
-.is-pinned .nm-dia__pin { height: 100%; align-content: center; padding-top: calc(var(--nm-hdr) + 2svh); padding-bottom: 3svh; }
+/* pin por position: sticky (não por position: fixed do GSAP, que gerava layout shift em cada borda do pin): a seção ganha 90svh de percurso e o conteúdo gruda no topo */
+.nm-dia.is-pinned { height: calc(100svh + 90svh); overflow: clip; }
+.is-pinned .nm-dia__pin { position: sticky; top: 0; height: 100svh; align-content: center; padding-top: calc(var(--nm-hdr) + 2svh); padding-bottom: 3svh; }
 .is-pinned .nm-dia__stage, .is-pinned .nm-diag { grid-area: 1 / 1; }
 .is-pinned .nm-dia__stage { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; grid-template-areas: "head clock" "beats clock"; }
 .is-pinned .nm-dia__head { grid-area: head; } .is-pinned .nm-clock { display: block; grid-area: clock; justify-self: end; align-self: end; }
@@ -155,7 +160,7 @@
 .nm-stnav button .nm-ico { width: 18px; height: 18px; } .nm-stnav button[data-st-go="prev"] .nm-ico { transform: rotate(180deg); }
 .nm-tags { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 .nm-tag { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; min-height: 44px; border-radius: var(--radius-pill); border: var(--hairline-gold-on-navy); background: rgba(6,15,38,.5); font-size: 16px; }
-.nm-st.is-on { border-color: rgba(220,197,138,.8); } .nm-st.is-hit { box-shadow: var(--shadow-lg), 0 0 0 2px var(--mp-gold-400); }
+.nm-st.is-on { border-color: rgba(220,197,138,.8); } .nm-st.is-hit { box-shadow: var(--shadow-lg), 0 0 0 2px var(--mp-gold-400); } .nm-stnav button.is-hit { box-shadow: 0 0 0 2px var(--mp-gold-400); }
 .nm-ribbon text { font-family: var(--font-display); }
 @media (max-width: 1099px) { .nm-deck { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 699px) {
@@ -163,8 +168,10 @@
   .nm-thread { display: block; position: absolute; left: 17px; top: 14px; bottom: 14px; width: 2px; background: linear-gradient(var(--mp-gold-300), var(--mp-gold-500)); transform-origin: top; }
   .nm-st::after { content: ""; position: absolute; left: -43px; top: 22px; width: 14px; height: 14px; border-radius: 50%; background: var(--mp-navy-900); border: 2px solid var(--mp-gold-400); }
 }
-.nm-trilha.is-pinned { height: 100svh; padding: 0; }
-.is-pinned .nm-trilha__pin { height: 100%; padding: calc(var(--nm-hdr) + 2svh) var(--nm-pad) 3svh; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "head ribbon" "deck ribbon" "foot ribbon"; gap: clamp(10px, 2svh, 24px) calc(var(--nm-gap) * 2); }
+/* pin por position: sticky (ver Dia): 100svh de percurso; o fundo ambiente (inset -3% -4%) também fica sticky, sobreposto ao conteúdo */
+.nm-trilha.is-pinned { display: flow-root; height: calc(100svh + 100svh); padding: 0; overflow: clip; } /* flow-root: a margem negativa do fundo não colapsa e não puxa a seção para cima */
+.nm-trilha.is-pinned .nm-trilha__amb { position: sticky; inset: auto; top: -3svh; height: 106svh; margin: -3svh -4% -103svh; }
+.is-pinned .nm-trilha__pin { position: sticky; top: 0; height: 100svh; padding: calc(var(--nm-hdr) + 2svh) var(--nm-pad) 3svh; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "head ribbon" "deck ribbon" "foot ribbon"; gap: clamp(10px, 2svh, 24px) calc(var(--nm-gap) * 2); }
 .is-pinned .nm-trilha__head { grid-area: head; } .is-pinned .nm-trilha__head .nm-lead { display: none; }
 .is-pinned .nm-trilha__head .nm-h2 { font-size: clamp(26px, min(3vw, 5.2svh), 46px); }
 .is-pinned svg.nm-ribbon { display: block; grid-area: ribbon; width: 100%; height: 100%; min-height: 0; overflow: hidden;
