@@ -108,7 +108,10 @@
 .nm-dia__pin { position: relative; z-index: 1; max-width: var(--nm-max); margin-inline: auto; padding: var(--nm-sec) var(--nm-pad); display: grid; gap: calc(var(--nm-gap) * 1.4); }
 .nm-dia__stage { display: grid; gap: var(--nm-gap); }
 .nm-dia__head { display: grid; gap: var(--space-2); max-width: 40rem; }
-.nm-clock { display: none; font-family: var(--font-display); font-size: clamp(80px, min(13vw, 24svh), 220px); line-height: .9; color: var(--mp-gold-400); } .nm-clock span { opacity: .55; } .nm-clock b { display: inline-block; min-width: 1.18em; text-align: right; } /* caixa na largura do "08" (a mais larga, medida): trocar a hora não move o relógio (CLS) */
+.nm-clock { display: none; container-type: inline-size; white-space: nowrap; text-align: end; font-variant-numeric: tabular-nums; font-family: var(--font-display); line-height: .9; color: var(--mp-gold-400); }
+.nm-clock b, .nm-clock span { font-size: clamp(56px, min(9vw, 24svh), 220px); line-height: .9; } /* fallback sem container queries */
+@supports (width: 1cqi) { .nm-clock b, .nm-clock span { font-size: clamp(56px, min(34cqi, 24svh), 220px); } } /* UMA linha: "00:00" mede ≈ 2,73em (medido) ⇒ fonte ≤ 36% da largura da COLUNA (cqi), também limitada pela altura */
+.nm-clock span { opacity: .55; } .nm-clock b { display: inline-block; min-width: 1.18em; text-align: right; font-weight: inherit; } /* caixa na largura do maior horário (medida): trocar a hora não move o relógio (CLS) */
 .nm-beats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--nm-gap); max-width: 64rem; }
 .nm-beat { display: grid; gap: 6px; align-content: start; padding-top: 14px; border-top: 1px solid rgba(205,170,85,.35); }
 .nm-beat__t { font-family: var(--font-display); font-size: clamp(24px, min(2.4vw, 4svh), 34px); color: var(--mp-gold-400); line-height: 1; }
@@ -137,7 +140,7 @@
 .is-pinned .nm-dia__pin { position: sticky; top: 0; height: 100svh; align-content: center; padding-top: calc(var(--nm-hdr) + 2svh); padding-bottom: 3svh; }
 .is-pinned .nm-dia__stage, .is-pinned .nm-diag { grid-area: 1 / 1; }
 .is-pinned .nm-dia__stage { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; grid-template-areas: "head clock" "beats clock"; }
-.is-pinned .nm-dia__head { grid-area: head; } .is-pinned .nm-clock { display: block; grid-area: clock; justify-self: end; align-self: end; }
+.is-pinned .nm-dia__head { grid-area: head; } .is-pinned .nm-clock { display: block; grid-area: clock; justify-self: stretch; align-self: end; }
 .is-pinned .nm-beats { grid-area: beats; display: grid; grid-template-columns: 1fr; } .is-pinned .nm-beat { grid-area: 1 / 1; max-width: 30rem; }
 .is-pinned .nm-diag { align-self: center; }
 
