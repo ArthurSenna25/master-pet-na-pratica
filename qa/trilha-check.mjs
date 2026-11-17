@@ -11,7 +11,7 @@ const ERRO_CSP = /report-only mode/;
 
 // [rótulo, largura CSS, altura CSS, esperaPin]  (125% = viewport CSS dividido por 1,25)
 const CASOS = [
-  ["1366x768@100", 1366, 768, true], ["1366x768@125", 1093, 614, false],
+  ["1366x768@100", 1366, 768, true], ["1366x768@125", 1093, 614, true],
   ["1440x900@100", 1440, 900, true], ["1440x900@125", 1152, 720, true],
   ["390x844", 390, 844, false],
 ];
@@ -66,7 +66,7 @@ for (const [nome, tipo] of [["chromium", chromium], ["webkit", webkit]]) {
     await ctx.close();
   }
 
-  // 3) com movimento: pin só em >=900x720; vão; layout; capturas
+  // 3) com movimento: pin conforme PIN de _fx/util.ts (degraus 900x640 e 1091x590); vão; layout; capturas
   for (const [rot, w, h, pin] of CASOS) {
     const { ctx, p, errs } = await novo(w, h);
     await p.goto(url, { waitUntil: "load" }); await p.waitForTimeout(2000);

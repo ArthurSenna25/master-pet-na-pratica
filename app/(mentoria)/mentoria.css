@@ -1,6 +1,6 @@
 /* Mentoria Master Pet · Natal v4 — CSS próprio, prefixo nm-*. Escopo .nm. Sem preflight, sem components.css.
    SISTEMA DE TAMANHO: nenhuma altura fixa em px. Espaços = --nm-pad / --nm-gap / --nm-sec (clamp com vw e svh); tipografia = clamp(min(vw, svh)).
-   Layout muda por LARGURA (900px); o pin (JS) exige também altura ≥720px. Padrão = tudo visível (sem JS / reduced-motion).
+   Layout muda por LARGURA (900px); o pin (JS) exige também altura mínima: critério único em _fx/util.ts (PIN). Padrão = tudo visível (sem JS / reduced-motion).
    Classes de estado vindas do JS: .nm-js, .is-pinned, .is-on, .is-hit. */
 .nm, .nm *, .nm *::before, .nm *::after { box-sizing: border-box; }
 .nm { --nm-hdr: 68px; --nm-pad: clamp(20px, 5vw, 80px); --nm-gap: clamp(16px, 2.4vw, 40px); --nm-sec: clamp(40px, 8svh, 104px); --nm-max: 1280px; --nm-focus: var(--focus-ring);

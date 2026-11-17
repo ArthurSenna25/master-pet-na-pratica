@@ -10,8 +10,8 @@ mkdirSync(OUT, { recursive: true });
 const fails = [];
 const ok = (c, m) => { if (!c) fails.push(m); console.log(c ? "ok  " : "FAIL", m); };
 const ERRO_CSP = /report-only mode/;
-// [rotulo, w, h, pin esperado (>=900x720)]
-const CASOS = [["1366x768@100", 1366, 768, true], ["1366x768@125", 1093, 614, false], ["1440x900@100", 1440, 900, true], ["1440x900@125", 1152, 720, true], ["390x844", 390, 844, false]];
+// [rotulo, w, h, pin esperado (PIN de _fx/util.ts)]
+const CASOS = [["1366x768@100", 1366, 768, true], ["1366x768@125", 1093, 614, true], ["1440x900@100", 1440, 900, true], ["1440x900@125", 1152, 720, true], ["390x844", 390, 844, false]];
 
 const sleep = (p, ms) => p.waitForTimeout(ms);
 const topAbs = (p, sel) => p.evaluate((s) => { const e = document.querySelector(s), sp = e.parentElement.classList.contains("pin-spacer") ? e.parentElement : e; return Math.round(sp.getBoundingClientRect().top + scrollY); }, sel);

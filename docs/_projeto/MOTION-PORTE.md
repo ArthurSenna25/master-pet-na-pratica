@@ -1,7 +1,7 @@
 # MOTION-PORTE — cenas do `mentoria.js` (v4) na ordem do DOM de `/mentoria`
 
 Fonte de verdade: `docs/_projeto/handoff/mentoria-natal-v4/mentoria.js` (`initMotion`). O `MOTION.md` da v4 vale só para depoimentos, FAQ e CTA.
-Regras gerais do protótipo: só `transform`/`opacity`/`clip-path` (+ `stroke-dashoffset`); estado oculto só para o que está **abaixo da dobra** (`below()` = top > 92% da janela; única exceção: linhas do H1, com failsafe de 3 s); sem JS tudo legível; reduced-motion = nenhuma cena (interações continuam). Pin só em `(min-width:900px) and (min-height:720px)` (PIN) — abaixo disso, versão lite (NOPIN).
+Regras gerais do protótipo: só `transform`/`opacity`/`clip-path` (+ `stroke-dashoffset`); estado oculto só para o que está **abaixo da dobra** (`below()` = top > 92% da janela; única exceção: linhas do H1, com failsafe de 3 s); sem JS tudo legível; reduced-motion = nenhuma cena (interações continuam). Pin só no critério único `PIN` de `_fx/util.ts` (degraus 900×640 e 1091×590; medido por `qa/pin-matriz.mjs`) — abaixo disso, versão lite (NOPIN).
 Implementação no Next: `app/(mentoria)/_fx/MentoriaFx.tsx` cria as cenas **nesta ordem**, com **um** `ScrollTrigger.sort()` e `refresh()` no `load` e em `document.fonts.ready`. Cada cena = 1 módulo em `_fx/`, 1 commit, aprovação antes da próxima.
 
 | # DOM | Seção (`_secoes/`) | Cena (rótulo do JS) | Gatilho | Pin? | Estado sem JS / reduced-motion | Status |
