@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { construirFita, type Fita } from "./fita";
-import { clamp, lerp, NOPIN, PIN, type Cleanup } from "./util";
+import { cabe, clamp, lerp, NOPIN, PIN, type Cleanup } from "./util";
 
 export const EVENTO_ESTACAO = "nm:hit"; // enviado pelo Diagnostico ("Onde o seu dia trava?"): detail = nº da estação
 
@@ -68,8 +68,33 @@ export function trilha(): Cleanup {
   window.addEventListener(EVENTO_ESTACAO, aoEscolher);
 
   const mm = gsap.matchMedia();
+  const semPin = (): Cleanup => {
+    setCur(1);
+    const anims: gsap.core.Animation[] = [];
+    const triggers: ScrollTrigger[] = [];
+    const fio = sec.querySelector<HTMLElement>(".nm-thread");
+    // só o que está abaixo da dobra começa oculto (acima, nada é escondido: sem flash nem CLS)
+    if (deckEl.getBoundingClientRect().top > window.innerHeight * 0.92) {
+      gsap.set(deck, { opacity: 0, y: 36 });
+      triggers.push(ScrollTrigger.create({
+        trigger: deckEl, start: "top 85%", once: true,
+        onEnter: () => anims.push(gsap.to(deck, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.1, clearProps: "opacity,transform" })),
+      }));
+      if (fio) {
+        gsap.set(fio, { scaleY: 0 });
+        anims.push(gsap.to(fio, { scaleY: 1, ease: "none", scrollTrigger: { trigger: deckEl, start: "top 70%", end: "bottom 70%", scrub: 0.5 } }));
+      }
+    }
+    return () => {
+      anims.forEach((a) => a.kill()); triggers.forEach((t) => t.kill());
+      gsap.set([...deck, ...(fio ? [fio] : [])], { clearProps: "opacity,transform" });
+      deck.forEach((c) => c.classList.remove("is-on"));
+    };
+  };
   mm.add(PIN, () => {
     sec.classList.add("is-pinned");
+    const pinEl = sec.querySelector<HTMLElement>(".nm-trilha__pin");
+    if (!pinEl || !cabe(pinEl, deck, deckEl)) { sec.classList.remove("is-pinned"); return semPin(); } // não cabe: cards, nunca corte (ver PIN em util.ts)
     const f = (fita = construirFita(ribbon));
     if (hit) f.setHit(hit);
     const P = { t: 0 };
@@ -103,29 +128,7 @@ export function trilha(): Cleanup {
     };
   });
 
-  mm.add(NOPIN, () => {
-    setCur(1);
-    const anims: gsap.core.Animation[] = [];
-    const triggers: ScrollTrigger[] = [];
-    const fio = sec.querySelector<HTMLElement>(".nm-thread");
-    // só o que está abaixo da dobra começa oculto (acima, nada é escondido: sem flash nem CLS)
-    if (deckEl.getBoundingClientRect().top > window.innerHeight * 0.92) {
-      gsap.set(deck, { opacity: 0, y: 36 });
-      triggers.push(ScrollTrigger.create({
-        trigger: deckEl, start: "top 85%", once: true,
-        onEnter: () => anims.push(gsap.to(deck, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.1, clearProps: "opacity,transform" })),
-      }));
-      if (fio) {
-        gsap.set(fio, { scaleY: 0 });
-        anims.push(gsap.to(fio, { scaleY: 1, ease: "none", scrollTrigger: { trigger: deckEl, start: "top 70%", end: "bottom 70%", scrub: 0.5 } }));
-      }
-    }
-    return () => {
-      anims.forEach((a) => a.kill()); triggers.forEach((t) => t.kill());
-      gsap.set([...deck, ...(fio ? [fio] : [])], { clearProps: "opacity,transform" });
-      deck.forEach((c) => c.classList.remove("is-on"));
-    };
-  });
+  mm.add(NOPIN, semPin);
 
   return () => {
     sec.removeEventListener("click", aoClicar);

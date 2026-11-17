@@ -12,5 +12,12 @@ export const PIN_WIDE_W = 1091, PIN_WIDE_H = 590; // degrau tela larga (notebook
 export const PIN = `(min-width:${PIN_MIN_W}px) and (min-height:${PIN_MIN_H}px), (min-width:${PIN_WIDE_W}px) and (min-height:${PIN_WIDE_H}px)`;
 export const NOPIN = `(max-width:${PIN_MIN_W - 1}px), (max-height:${PIN_WIDE_H - 1}px), (max-width:${PIN_WIDE_W - 1}px) and (max-height:${PIN_MIN_H - 1}px)`;
 
+/**
+ * Rede de segurança em tempo de execução: com o pin ligado (classe `.is-pinned` já posta), o conteúdo cabe na altura disponível?
+ * Se não, o chamador desfaz o pin e cai para cards (NOPIN) em vez de cortar. `itens` (opcional) têm de caber na altura de `area`.
+ */
+export const cabe = (pin: HTMLElement, itens: HTMLElement[] = [], area: HTMLElement = pin): boolean =>
+  pin.scrollHeight <= pin.clientHeight + 1 && itens.every((i) => i.offsetHeight <= area.clientHeight + 1);
+
 export const clamp = (v: number, a: number, b: number): number => Math.max(a, Math.min(b, v));
 export const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
