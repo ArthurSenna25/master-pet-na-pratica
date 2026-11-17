@@ -27,6 +27,9 @@ const ERRO_TETO = "Muitos envios no momento. Tente de novo em cerca de uma hora.
 const ERRO_FORM_FECHADO = "As pré-inscrições ainda não abriram.";
 const MAX_UA = 400;
 
+const valoresDigitados = (raw: Record<string, string>) =>
+  Object.fromEntries(Object.entries(raw).filter(([k]) => k !== "consentimento" && k !== "site" && !k.startsWith("$")));
+
 /** Campos que o servidor grava por campanha, já validados. `mensagem`/`curso` só existem no presencial. */
 interface Dados {
   nome: string; whatsapp: string; cidade: string; negocio: string; tempo: string; equipe: string; desafio: string;
@@ -63,15 +66,16 @@ export async function processarEnvio(campanha: Campanha, form: FormData): Promis
   const raw = Object.fromEntries([...form.entries()].filter(([, v]) => typeof v === "string")) as Record<string, string>;
   const lido = ler(campanha, raw);
   if (!lido.ok) {
-    const values = Object.fromEntries(Object.entries(raw).filter(([k]) => k !== "consentimento" && k !== "site" && !k.startsWith("$")));
-    return { errors: lido.errors, values };
+    return { errors: lido.errors, values: valoresDigitados(raw) };
   }
   const d = lido.d;
+  // Erro do servidor (limite, teto, falha): o React 19 zera o formulário após a action; devolver o que foi digitado evita perder tudo (consentimento nunca volta).
+  const falha = (message: string): LeadState => ({ message, values: valoresDigitados(raw) });
 
   // 3. IP -> HMAC (sem header em produção: recusa)
   const h = await headers();
   const ip = getClientIp(h);
-  if (!ip) return { message: ERRO_GENERICO };
+  if (!ip) return falha(ERRO_GENERICO);
   const agora = Date.now();
 
   try {
@@ -83,7 +87,7 @@ export async function processarEnvio(campanha: Campanha, form: FormData): Promis
       .select({ n: count() })
       .from(rateLimitEnvio)
       .where(and(eq(rateLimitEnvio.ipHmac, hmac), gt(rateLimitEnvio.criadoEm, inicioJanela(agora))));
-    if (isLimited(n)) return { message: ERRO_LIMITE };
+    if (isLimited(n)) return falha(ERRO_LIMITE);
 
     // 4b. teto global/hora DA CAMPANHA (qualquer IP). Resposta honesta (não ok:true); log só com o nome do evento, sem dado pessoal.
     const [{ total }] = await db
@@ -92,7 +96,7 @@ export async function processarEnvio(campanha: Campanha, form: FormData): Promis
       .where(and(eq(rateLimitEnvio.campanha, campanha), gt(rateLimitEnvio.criadoEm, inicioJanelaGlobal(agora))));
     if (isTetoGlobal(total)) {
       console.warn("lead_teto_global_atingido");
-      return { message: ERRO_TETO };
+      return falha(ERRO_TETO);
     }
 
     // 5. tudo na MESMA transação (db.batch): retenção do limite, registro do limite, lead, consentimento
@@ -134,6 +138,6 @@ export async function processarEnvio(campanha: Campanha, form: FormData): Promis
   } catch (e) {
     // nunca logar valores nem a mensagem do driver (pode conter dados): só nome e código
     console.error("lead_envio_falhou", e instanceof Error ? e.name : "erro", (e as { code?: string })?.code ?? "");
-    return { message: ERRO_GENERICO };
+    return falha(ERRO_GENERICO);
   }
 }

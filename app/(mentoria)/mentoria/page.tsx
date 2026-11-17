@@ -1,3 +1,4 @@
+import { MentoriaFx } from "../_fx/MentoriaFx";
 import { Sprite1 } from "../_secoes/Sprite1";
 import { PularParaForm } from "../_secoes/PularParaForm";
 import { Cabecalho } from "../_secoes/Cabecalho";
@@ -40,6 +41,7 @@ export default function Page() {
         <Lista />
       </main>
       <Fab />
+      <MentoriaFx />
       <Rodape />
     </div>
   );

@@ -27,10 +27,11 @@ function resolver(de: string, alvo: string): string | null {
   return null;
 }
 
-/** Tudo que o escopo alcança: arquivos do projeto (relativos a app/) e pacotes (nomes). */
-function alcance(raizes: string[]): { arquivos: Set<string>; pacotes: Set<string> } {
+/** Tudo que o escopo alcança: arquivos do projeto (relativos a app/), pacotes (nomes) e QUEM importa cada pacote. */
+function alcance(raizes: string[]): { arquivos: Set<string>; pacotes: Set<string>; importadores: Map<string, Set<string>> } {
   const vistos = new Set<string>();
   const pacotes = new Set<string>();
+  const importadores = new Map<string, Set<string>>();
   const fila = [...raizes];
   while (fila.length) {
     const f = fila.pop()!;
@@ -41,16 +42,26 @@ function alcance(raizes: string[]): { arquivos: Set<string>; pacotes: Set<string
       if (alvo.startsWith(".") || alvo.startsWith("@/")) {
         const r = resolver(f, alvo);
         if (r && r.startsWith(APP)) fila.push(r);
-      } else pacotes.add(alvo.startsWith("@") ? alvo.split("/").slice(0, 2).join("/") : alvo.split("/")[0]);
+      } else {
+        const pkg = alvo.startsWith("@") ? alvo.split("/").slice(0, 2).join("/") : alvo.split("/")[0];
+        pacotes.add(pkg);
+        importadores.set(pkg, (importadores.get(pkg) ?? new Set()).add(rel(f)));
+      }
     }
   }
-  return { arquivos: new Set([...vistos].map(rel)), pacotes };
+  return { arquivos: new Set([...vistos].map(rel)), pacotes, importadores };
 }
+
+// GSAP da mentoria: SÓ no módulo (mentoria)/_fx/. Devolve quem, fora dele, importa biblioteca de animação.
+const FX_MENTORIA = /^\(mentoria\)\/_fx\//;
+const gsapForaDoFx = (a: ReturnType<typeof alcance>, animacao: string[]) =>
+  animacao.flatMap((p) => [...(a.importadores.get(p) ?? [])]).filter((f) => !FX_MENTORIA.test(f));
 
 // Bibliotecas de animação: nenhuma entra em mentoria/admin/legal por import novo (GSAP da mentoria só no commit de cenas, com este guarda ajustado de propósito).
 const ANIMACAO = ["gsap", "@gsap/react", "lenis", "motion", "framer-motion", "three"];
 const ESCOPOS: { nome: string; pastas: string[]; proibidoArquivo: RegExp; proibidoPacote: string[] }[] = [
-  { nome: "mentoria", pastas: ["(mentoria)"], proibidoArquivo: /^(landing\/|_fx\/|admin\/|_components\/(LandingFx|LeadForm|Hero|Faq|Depoimentos))/, proibidoPacote: ANIMACAO },
+  // mentoria: animação liberada só em (mentoria)/_fx/ (checada à parte, por importador); app/_fx/ e a landing continuam proibidos.
+  { nome: "mentoria", pastas: ["(mentoria)"], proibidoArquivo: /^(landing\/|_fx\/|admin\/|_components\/(LandingFx|LeadForm|Hero|Faq|Depoimentos))/, proibidoPacote: ["lenis", "motion", "framer-motion", "three"] },
   { nome: "admin", pastas: ["admin"], proibidoArquivo: /^(landing\/|_fx\/|\(mentoria\)\/|_components\/LandingFx)/, proibidoPacote: ANIMACAO },
   { nome: "presencial", pastas: ["(presencial)"], proibidoArquivo: /^(admin\/|\(mentoria\)\/)/, proibidoPacote: [] },
   { nome: "legal", pastas: ["(legal)"], proibidoArquivo: /^(admin\/|\(mentoria\)\/|_fx\/|_components\/LandingFx)/, proibidoPacote: ANIMACAO },
@@ -68,6 +79,35 @@ describe("o scanner enxerga as formas de import que poderiam burlá-lo", () => {
       }
     } finally {
       rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("GSAP da mentoria só em (mentoria)/_fx/ (as duas direções)", () => {
+  const tmp = (sub: string, nome: string, linha: string) => {
+    const dir = join(APP, "(mentoria)", sub);
+    mkdirSync(dir, { recursive: true });
+    const f = join(dir, nome);
+    writeFileSync(f, `${linha}\n`);
+    return { f, dir };
+  };
+  it("permitido: a mentoria alcança gsap, e só por arquivos de (mentoria)/_fx/", () => {
+    const a = alcance(arquivos(join(APP, "(mentoria)")));
+    expect(a.pacotes.has("gsap")).toBe(true);
+    expect(gsapForaDoFx(a, ANIMACAO)).toEqual([]);
+  });
+  it("proibido: gsap importado em qualquer outro lugar da mentoria é detectado", () => {
+    const { f, dir } = tmp("__tmp_fora__", "x.ts", 'import gsap from "gsap";');
+    try { expect(gsapForaDoFx(alcance([f]), ANIMACAO)).toEqual(["(mentoria)/__tmp_fora__/x.ts"]); } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+  it("proibido: a mentoria importar app/_fx/ (landing) é detectado pelo escopo", () => {
+    const { f, dir } = tmp("__tmp_landing__", "y.ts", 'import "../../_fx/hero";');
+    try { expect([...alcance([f]).arquivos].some((x) => ESCOPOS[0].proibidoArquivo.test(x))).toBe(true); } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+  it("a landing/admin/legal não alcançam (mentoria)/_fx/", () => {
+    for (const nome of ["presencial", "admin", "legal"]) {
+      const e = ESCOPOS.find((s) => s.nome === nome)!;
+      expect([...alcance(e.pastas.flatMap((p) => arquivos(join(APP, p)))).arquivos].filter((x) => FX_MENTORIA.test(x)), nome).toEqual([]);
     }
   });
 });

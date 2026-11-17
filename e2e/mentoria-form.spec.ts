@@ -96,6 +96,43 @@ test("botão de envio desabilita durante o envio; duplo clique e dois submits na
   }
 });
 
+test("a trava de envio se libera depois de erro de validação e de erro do servidor: novo envio funciona", async ({ browser }) => {
+  const ip = "203.0.113.201";
+  const ctx = await browser.newContext({ extraHTTPHeaders: { "x-forwarded-for": ip } });
+  const page = await ctx.newPage();
+  const negocio = `${PREFIXO}${sufixo()}`;
+  const hm = ipHmac(ip);
+  try {
+    await page.goto("/mentoria");
+    await passo1(page, `${PREFIXO}${sufixo()}`);
+    await passo2(page, negocio);
+    // (a) erro de validação no cliente (sem consentimento): nada enviado, e o envio seguinte funciona
+    await page.getByLabel(/Concordo em receber/).uncheck();
+    await page.locator("button[type=submit]").click();
+    await expect(page.locator("#e-consent span")).toContainText("consentimento");
+    expect(await leads()).toHaveLength(0);
+    // (b) erro do servidor: o limite por IP (5 em 10 min) já está esgotado
+    await sql`insert into rate_limit (ip_hmac, campanha) select ${hm}, 'mentoria' from generate_series(1, 5)`;
+    await page.getByLabel(/Concordo em receber/).check();
+    await page.locator("button[type=submit]").click();
+    await expect(page.getByRole("alert").filter({ hasText: "Muitos envios" })).toBeVisible();
+    await expect(page.locator("button[type=submit]")).toBeEnabled();
+    expect(await leads()).toHaveLength(0);
+    // (c) o limite acaba: o mesmo formulário envia (a trava não ficou presa)
+    await sql`delete from rate_limit where ip_hmac = ${hm}`;
+    await expect(page.locator("#f-cidade")).toHaveValue("Lins/SP"); // o que foi digitado volta após erro do servidor
+    await expect(page.getByLabel("1 a 3 anos")).toBeChecked();
+    await expect(page.getByLabel(/Concordo em receber/)).not.toBeChecked(); // o consentimento nunca volta marcado depois de um erro do servidor
+    await page.getByLabel(/Concordo em receber/).check();
+    await page.locator("button[type=submit]").click();
+    await expect(page.getByRole("heading", { name: "Pronto, você está na lista!" })).toBeVisible();
+    expect((await leads()).filter((l) => l.negocio === negocio)).toHaveLength(1);
+  } finally {
+    await sql`delete from rate_limit where ip_hmac = ${hm}`;
+    await ctx.close();
+  }
+});
+
 test("durante o envio o botão fica desabilitado e o form aria-busy", async ({ page }) => {
   await page.route("**/mentoria", async (r) => { if (r.request().method() === "POST") await new Promise((ok) => setTimeout(ok, 1200)); await r.continue(); });
   await page.goto("/mentoria");

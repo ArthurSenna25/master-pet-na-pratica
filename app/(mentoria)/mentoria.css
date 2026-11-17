@@ -149,7 +149,7 @@
 .nm-st__n { display: block; font-family: var(--font-display); font-size: clamp(36px, min(4vw, 6.4svh), 64px); line-height: 1; color: var(--mp-gold-300); margin-bottom: clamp(8px, 1.4svh, 14px); }
 .nm-st p { color: var(--text-on-navy-2); margin-top: 8px; max-width: 30em; }
 .nm-trilha__foot { display: grid; gap: var(--space-3); }
-.nm-stnav { display: none; flex-wrap: wrap; gap: 8px; } .nm-js .nm-stnav { display: flex; }
+.nm-stnav { display: none; flex-wrap: wrap; gap: 8px; } .nm-js .nm-stnav, .nm-trilha.is-js .nm-stnav { display: flex; }
 .nm-stnav button { min-width: 44px; height: 44px; padding: 0; border-radius: 50%; border: var(--hairline-gold-on-navy); background: rgba(6,15,38,.5); color: var(--mp-gold-400); font: var(--fw-semibold) 17px var(--font-body); cursor: pointer; display: grid; place-items: center; }
 .nm-stnav button[aria-current="true"] { background: var(--action-bg); color: var(--action-fg); border-color: transparent; }
 .nm-stnav button .nm-ico { width: 18px; height: 18px; } .nm-stnav button[data-st-go="prev"] .nm-ico { transform: rotate(180deg); }

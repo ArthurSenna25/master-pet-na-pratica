@@ -31,6 +31,7 @@ export function Diagnostico({ cta }: { cta: string }) {
   const escolher = (o: Opcao) => {
     setSel(o);
     window.dispatchEvent(new CustomEvent(EVENTO_DESAFIO, { detail: { desafio: o.desafio } }));
+    window.dispatchEvent(new CustomEvent("nm:hit", { detail: o.estacao })); // acende a estação na cena da trilha (sem a cena, ninguém escuta)
   };
 
   const est = sel ? ESTACAO[sel.estacao] : null;

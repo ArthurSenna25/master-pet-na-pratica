@@ -108,7 +108,7 @@ export function FormMentoria() {
   }, []);
 
   useEffect(() => { if (ok) okRef.current?.focus(); }, [ok]);
-  useEffect(() => { if (!pending) enviando.current = false; }, [pending]);
+  useEffect(() => { if (!pending) enviando.current = false; }, [pending, state]); // state muda a cada resposta: libera mesmo se o React não chegou a renderizar pending=true
 
   const mostrarPasso1 = !js || passo === 1 || erroPasso1;
   const mostrarPasso2 = !js || (passo === 2 && !erroPasso1);
