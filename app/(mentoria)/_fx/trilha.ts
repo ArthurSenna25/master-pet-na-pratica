@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { construirFita, type Fita } from "./fita";
-import { cabe, clamp, lerp, NOPIN, PIN, type Cleanup } from "./util";
+import { clamp, lerp, NOPIN, PIN, pinCabeNosDois, type Cleanup } from "./util";
 
 export const EVENTO_ESTACAO = "nm:hit"; // enviado pelo Diagnostico ("Onde o seu dia trava?"): detail = nº da estação
 
@@ -94,7 +94,7 @@ export function trilha(): Cleanup {
   mm.add(PIN, () => {
     sec.classList.add("is-pinned");
     const pinEl = sec.querySelector<HTMLElement>(".nm-trilha__pin");
-    if (!pinEl || !cabe(pinEl, deck, deckEl)) { sec.classList.remove("is-pinned"); return semPin(); } // não cabe: cards, nunca corte (ver PIN em util.ts)
+    if (!pinEl || !pinCabeNosDois()) { sec.classList.remove("is-pinned"); return semPin(); } // não cabe: cards, nunca corte (ver PIN em util.ts)
     const f = (fita = construirFita(ribbon));
     if (hit) f.setHit(hit);
     const P = { t: 0 };

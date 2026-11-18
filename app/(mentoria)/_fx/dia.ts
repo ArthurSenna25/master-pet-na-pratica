@@ -1,6 +1,6 @@
 import gsap from "gsap";
 import { rise } from "./rise";
-import { cabe, NOPIN, PIN, type Cleanup } from "./util";
+import { NOPIN, PIN, pinCabeNosDois, type Cleanup } from "./util";
 
 const HORA_INICIAL = 8;
 const HORA_FINAL = 18;
@@ -25,7 +25,7 @@ export function dia(): Cleanup {
   mm.add(PIN, () => {
     sec.classList.add("is-pinned");
     const pinEl = sec.querySelector<HTMLElement>(".nm-dia__pin");
-    if (!pinEl || !cabe(pinEl)) { sec.classList.remove("is-pinned"); return semPin(); } // não cabe: cards, nunca corte (ver PIN em util.ts)
+    if (!pinEl || !pinCabeNosDois()) { sec.classList.remove("is-pinned"); return semPin(); } // não cabe: cards, nunca corte (ver PIN em util.ts)
     const H = { h: HORA_INICIAL };
     let mostrada = HORA_INICIAL;
     // Dores e palco: só opacity (nunca visibility:hidden), para o leitor de tela ler as 4 dores na ordem do DOM mesmo com o pin (a visibility herdada do palco as esconderia).
