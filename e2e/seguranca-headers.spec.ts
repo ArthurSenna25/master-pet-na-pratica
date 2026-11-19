@@ -14,5 +14,8 @@ for (const rota of ROTAS) {
   test(`cabeçalhos de segurança presentes em ${rota}`, async ({ request }) => {
     const r = await request.get(rota);
     for (const [nome, re] of Object.entries(ESPERADOS)) expect(r.headers()[nome], nome).toMatch(re);
+    expect(r.headers()["content-security-policy-report-only"]).toContain("default-src 'self'");
+    expect(r.headers()["permissions-policy"]).not.toContain("interest-cohort");
+    expect(r.headers()["x-powered-by"]).toBeUndefined();
   });
 }

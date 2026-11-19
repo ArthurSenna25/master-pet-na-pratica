@@ -19,6 +19,7 @@ const CSP = [
 const HOST_MENTORIA = "mentoria-master-pet.vercel.app";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   async rewrites() {
     const host = [{ type: "host" as const, value: HOST_MENTORIA }];
     return {
@@ -52,7 +53,7 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=(), interest-cohort=()",
+            value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=()",
           },
           { key: "X-Frame-Options", value: "DENY" },
           // Só vale em HTTPS (ignorado em http://localhost). Sem preload: é irreversível por meses.
