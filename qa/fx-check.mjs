@@ -21,7 +21,8 @@ for (const [name, type, w, h] of cases) {
     const ctx = await b.newContext({ viewport: { width: w, height: h }, reducedMotion: rm, hasTouch: w < 900, isMobile: w < 900 && name === "chromium" });
     const p = await ctx.newPage();
     const errs = [];
-    p.on("console", (m) => m.type() === "error" && errs.push(m.text()));
+    // Mesmo filtro dos e2e (hash.spec): só o aviso do WebKit de que a CSP Report-Only não tem report-to. Violação real de CSP continua reprovando.
+    p.on("console", (m) => m.type() === "error" && !/report-only mode/.test(m.text()) && errs.push(m.text()));
     p.on("pageerror", (e) => errs.push(String(e)));
     await p.goto(url, { waitUntil: "load" });
     await p.waitForTimeout(2500);

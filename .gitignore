@@ -52,3 +52,6 @@ qa/out/
 
 # exceção: modelo de variáveis, sem valores
 !.env.example
+
+# local, nao versionar
+AGENTS.md

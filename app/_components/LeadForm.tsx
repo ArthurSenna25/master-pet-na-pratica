@@ -1,12 +1,11 @@
 "use client";
 // F4: formulário em 3 passos. SSR mostra os 3 passos juntos e o envio funciona sem JS (server action + permalink);
-// depois da hidratação (`js`) vira passo a passo. Validação de verdade: Zod no servidor (enviarLead).
+// depois da hidratação (`js`) vira passo a passo. Validação de verdade: Zod no servidor (enviarLeadPresencial).
 import Image from "next/image";
-import Link from "next/link";
-import { Fragment, useActionState, useEffect, useRef, useState, useSyncExternalStore, type FocusEvent, type FormEvent, type PointerEvent } from "react";
+import { useActionState, useEffect, useRef, useState, useSyncExternalStore, type FocusEvent, type FormEvent, type PointerEvent } from "react";
 import { entrarPasso, reduzido, sairPasso, sucesso } from "../_fx/form";
-import { consentParts } from "../_lib/consent";
-import { enviarLead, type LeadState } from "../_lib/lead-action";
+import { ConsentLabel } from "./ConsentLabel";
+import { enviarLeadPresencial, type LeadState } from "../_lib/lead-action";
 import { JA_FEZ_MENTORIA, MAIOR_DESAFIO, PESSOAS, TEMPO_FUNCIONAMENTO } from "../_lib/lead-options";
 import { formatarTelefone } from "../_lib/lead-rules";
 import type { LeadField } from "../_lib/lead-schema";
@@ -80,7 +79,7 @@ function Group({ legend, name, options, prov, checked, error }: GroupProps) {
 }
 
 export function LeadForm() {
-  const [state, action, pending] = useActionState(enviarLead, INICIAL, "/#conversar");
+  const [state, action, pending] = useActionState(enviarLeadPresencial, INICIAL, "/#conversar");
   const js = useSyncExternalStore(semAssinatura, () => true, () => false); // false no SSR/hidratação, true depois
   const [step, setStep] = useState(0);
   const [local, setLocal] = useState<Erros>({}); // "" = erro dispensado (campo editado)
@@ -272,11 +271,7 @@ export function LeadForm() {
                 <label className="lp-consent">
                   <input type="checkbox" id="consent" name="consentimento" required aria-describedby={erro("consentimento") ? "consent-err" : undefined} />
                   <span>
-                    {consentParts().map((p, i) => (
-                      <Fragment key={i}>
-                        {p.href ? <Link href={p.href} target="_blank" rel="noopener noreferrer">{p.text}</Link> : p.text}
-                      </Fragment>
-                    ))}
+                    <ConsentLabel campanha="presencial" />
                   </span>
                 </label>
                 {erro("consentimento") && <p className="lp-cmsg" id="consent-err" role="alert">{erro("consentimento")}</p>}

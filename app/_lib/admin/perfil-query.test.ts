@@ -24,4 +24,11 @@ describe("carregarPerfil (uma query agregada, sem dado pessoal)", () => {
     for (const g of depois) for (const i of g.itens) expect(Object.keys(i).sort()).toEqual(["n", "rotulo"]);
     expect(JSON.stringify(depois)).not.toContain("Ana Teste");
   });
+
+  it("ja_fez_mentoria nulo (mentoria) vira 'Não perguntado', não 'Não'", async () => {
+    const n = async () => (await carregarPerfil(db)).find((g) => g.dim === "mentoria")?.itens.find((i) => i.rotulo === "Não perguntado")?.n ?? 0;
+    const n0 = await n();
+    await db.insert(lead).values({ ...base, nome: "Bia Teste", cidadeUf: "Zzteste/MS", tempoFuncionamento: "1 a 3 anos", pessoas: "2 a 3", maiorDesafio: "Equipe", jaFezMentoria: null, campanha: "mentoria" });
+    expect(await n()).toBe(n0 + 1);
+  });
 });

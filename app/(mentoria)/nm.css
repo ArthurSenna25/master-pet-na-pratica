@@ -1,0 +1,13 @@
+/* Base da campanha mentoria (F10 c4). O resto vem de nm-tokens.css (tokens escopados em .nm) e mentoria.css (cópia do handoff, prefixo nm-*).
+   html/body: só o que o protótipo fazia como "demo" (fundo escuro no overscroll) e a suavização de fonte; sem reset global. */
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; background: #060f26; }
+body.nm-root { margin: 0; background: #060f26; }
+
+/* Notas dentro do cartão escuro do formulário (o .nm-muted do handoff é para fundo claro: contraste insuficiente aqui). */
+.nm-form__nota { color: var(--text-on-navy-2); font-size: 16px; line-height: 1.5; margin-top: var(--space-2); }
+
+/* Formulário em 2 passos (c5). Sem JS: os dois passos aparecem juntos e "Continuar"/"Voltar" não existem; com JS (.is-js) ligam. */
+.nm .nm-form.is-js [data-nm-next] { display: inline-flex; }
+.nm .nm-form.is-js .nm-prog { display: grid; }
+.nm-form:not(.is-js) [data-nm-back] { display: none; }
+.nm-form__erro { padding: 12px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--mp-beige-50); background: rgba(163, 50, 47, .45); color: var(--mp-beige-50); font-weight: var(--fw-semibold); }

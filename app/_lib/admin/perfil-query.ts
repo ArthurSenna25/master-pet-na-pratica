@@ -13,7 +13,7 @@ export async function carregarPerfil(db = getDb()): Promise<GrupoPerfil[]> {
     select 'desafio' as dim, ${lead.maiorDesafio} as valor, count(*)::int as n from ${lead} group by 2
     union all select 'tempo', ${lead.tempoFuncionamento}, count(*)::int from ${lead} group by 2
     union all select 'pessoas', ${lead.pessoas}, count(*)::int from ${lead} group by 2
-    union all select 'mentoria', case when ${lead.jaFezMentoria} then 'Sim' else 'Não' end, count(*)::int from ${lead} group by 2
+    union all select 'mentoria', case when ${lead.jaFezMentoria} then 'Sim' when ${lead.jaFezMentoria} is false then 'Não' else 'Não perguntado' end, count(*)::int from ${lead} group by 2
     union all (select 'cidade', ${lead.cidadeUf}, count(*)::int from ${lead} group by 2 order by 3 desc, 2 limit ${TOP_CIDADES})
   `);
   return montarPerfil(r.rows as unknown as LinhaPerfil[]);

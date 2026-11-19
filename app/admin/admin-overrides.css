@@ -1,12 +1,13 @@
 /* Overrides do admin sobre CSS global (admin.css fica com os valores do handoff). Registrados no PROGRESS (F8). */
 
-/* 1. landing-v6.css:231 `main section:not(.lp-hero)` (margem -48px, raio 48px, filete dourado ::after) vazou para as <section> do painel.
+/* 1. (F10 c3: o painel tem root layout próprio e NÃO carrega mais o CSS da landing; as regras 1/1b ficam só por garantia, sem citar seletores lp-.)
+   Antes: landing-v6.css `main section` (margem -48px, raio 48px, filete dourado ::after) vazava para as <section> do painel.
    Especificidade 0,2,2 > 0,1,2 da landing; o raio volta ao do cartão. */
-.ad main section:not(.lp-hero) { margin-top: 0; border-radius: var(--radius-lg); }
+.ad main section { margin-top: 0; border-radius: var(--radius-lg); }
 /* 1b. landing-v6.css:234/250 `main>section:not(:last-child){padding-bottom:~176px}` e :233 (z-index por posição) também vazavam: o cartão ganhava 156 px de vão embaixo. */
 .ad main > section:not(:last-child) { padding-bottom: 20px; }
 .ad main > section { z-index: auto; }
-.ad main section:not(.lp-hero)::after { content: none; }
+.ad main section::after { content: none; }
 
 /* 2. Botão de ação dentro do menu (Sair é <form>+<button>, o handoff usa <a>): mesma aparência de .ad-mi. */
 .ad button.ad-mi { width: 100%; text-align: left; background: none; border: 0; cursor: pointer; font: inherit; font-weight: 600; }

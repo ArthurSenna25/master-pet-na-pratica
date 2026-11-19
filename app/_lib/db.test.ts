@@ -11,7 +11,7 @@ vi.mock("next/headers", () => ({
 import { anonimizarLead } from "./anonimizar";
 import { getDb } from "./db";
 import { auditLog, consentEvents, lead, rateLimitEnvio } from "./db/schema";
-import { enviarLead } from "./lead-action";
+import { enviarLeadPresencial as enviarLead } from "./lead-action";
 import { CONSENT_TEXT, LEGAL_TEXT_VERSION } from "./legal-version";
 import { ipHmac, sha256Hex } from "./seguranca";
 
@@ -158,7 +158,7 @@ describe("enviarLead", () => {
       novoIp();
       const r = await enviarLead({}, form());
       expect(r.ok).toBeUndefined();
-      expect(r.message).toBe("Muitos envios em pouco tempo. Aguarde alguns minutos e tente de novo.");
+      expect(r.message).toBe("Muitos envios no momento. Tente de novo em cerca de uma hora.");
       expect(await contarLeads()).toBe(antes);
     } finally {
       delete process.env.TETO_GLOBAL_TESTE;

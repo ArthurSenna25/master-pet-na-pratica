@@ -1,0 +1,11 @@
+NENHUM TOKEN NOVO.
+
+Reaproveitados de ../tokens/: colors, typography, spacing (incl. --radius-arch), effects (--shadow-*, --bg-atmosphere, --bg-navy-depth, --hairline-gold-on-navy), motion (tilt/parallax/reveal como referência).
+
+Variáveis LOCAIS (escopo .nm, derivadas dos tokens; não entram em tokens/):
+  --nm-focus  anel de foco (--focus-ring no claro, --focus-ring-on-navy nas cenas escuras)
+  --nm-pad    respiro lateral fluido (clamp)
+  --nm-night  fundo "noite" = radial de ouro translúcido + linear navy-900→950
+
+Constantes dentro do shader 3D (nm-scene.js): cores do cetim (navy) e do ouro antigo, espelhando --mp-navy-* e --mp-gold-* (não são tokens CSS).
+Não importar components/components.css: mentoria.css é autônomo (wordmark, botão, campos próprios com prefixo nm-*).
