@@ -5,6 +5,7 @@ import { listarLeads, resumoPorStatus } from "../../_lib/admin/leads-query";
 import { Aviso } from "../Aviso";
 import { Cabecalho } from "../Cabecalho";
 import { LeadsLista } from "../LeadsLista";
+import { SeletorCampanha } from "../SeletorCampanha";
 import { BarraFiltros } from "./BarraFiltros";
 import { BuscaLeads } from "./BuscaLeads";
 import { EstadoVazio } from "./EstadoVazio";
@@ -26,6 +27,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       <main className="ad-main">
         {raw.ok === "excluido" && <Aviso tipo="ok">Lead excluído.</Aviso>}
         <div className="ad-pg-hd"><h1>Leads</h1></div>
+        <SeletorCampanha atual={p.campanha} href={(c) => hrefLeads(p, { campanha: c, pagina: 1 })} />
         <PillsStatus p={p} resumo={resumo} />
         <BuscaLeads p={p} />
         <BarraFiltros p={p} total={total} />

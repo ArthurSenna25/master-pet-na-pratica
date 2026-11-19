@@ -1,6 +1,11 @@
+import type { Campanha } from "../../_lib/admin/campanha";
 import type { ParamsLista } from "../../_lib/admin/busca";
 
 /** URL da lista com os parâmetros atuais + mudanças. O estado dos filtros vive na URL (links, sem JS). */
+/** Link da lista a partir da Visão geral: só campanha (+ extras), o resto no padrão. */
+export const hrefLista = (campanha: Campanha | undefined, mudar: Partial<ParamsLista> = {}) =>
+  hrefLeads({ q: "", ordem: "desc", pagina: 1, campanha }, mudar);
+
 export function hrefLeads(p: ParamsLista, mudar: Partial<ParamsLista> = {}): string {
   const n = { ...p, ...mudar };
   const q = new URLSearchParams();

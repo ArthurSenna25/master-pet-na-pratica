@@ -30,7 +30,7 @@ test.describe("painel: lista, busca, filtro, resumo", () => {
       // Estrutura: tabela só >= 900 px, cartões abaixo; sempre 1 link por lead no que está visível.
       await expect(page.getByRole("table")).toHaveCount(w >= 900 ? 1 : 0);
       if (w >= 900) {
-        await expect(page.getByRole("columnheader")).toHaveText(["Nome", "Negócio", "Cidade", "Status", "Recebido em", "Ações"]);
+        await expect(page.getByRole("columnheader")).toHaveText(["Nome", "Negócio", "Cidade", "Campanha", "Status", "Recebido em", "Ações"]);
         await expect(page.getByRole("table", { name: "Leads recebidos" })).toBeVisible();
       }
       await expect(page.getByRole("link", { name: "Ver lead Zz Ana Teste" })).toHaveCount(1);

@@ -15,7 +15,7 @@ export default async function VisaoGeralPage({ searchParams }: { searchParams: P
   return (
     <>
       <Cabecalho email={session.user.email} ativa="visao" />
-      <VisaoGeralView dados={dados} perfil={perfil} agora={agora} ok={typeof ok === "string" ? ok : undefined} />
+      <VisaoGeralView dados={dados} perfil={perfil} agora={agora} ok={typeof ok === "string" ? ok : undefined} campanha={campanha} />
     </>
   );
 }
