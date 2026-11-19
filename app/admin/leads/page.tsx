@@ -16,7 +16,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   const raw = await searchParams;
   const p = lerParams(raw);
   const agora = new Date();
-  const [{ total, linhas }, resumo] = await Promise.all([listarLeads(p), resumoPorStatus()]);
+  const [{ total, linhas }, resumo] = await Promise.all([listarLeads(p), resumoPorStatus(p.campanha)]);
   const totalGeral = Object.values(resumo).reduce((a, b) => a + b, 0);
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
 

@@ -21,6 +21,11 @@ describe("busca", () => {
   it("params inválidos caem no padrão", () => {
     expect(lerParams({ status: "x", ordem: "zz", pagina: "-3" })).toEqual({ q: "", status: undefined, ordem: "desc", pagina: 1 });
   });
+  it("campanha: valor válido passa; inválido, vazio ou ausente = todas", () => {
+    expect(lerParams({ campanha: "mentoria" }).campanha).toBe("mentoria");
+    expect(lerParams({ campanha: ["presencial", "mentoria"] }).campanha).toBe("presencial");
+    for (const c of ["x", "", "MENTORIA", undefined]) expect(lerParams({ campanha: c }).campanha).toBeUndefined();
+  });
 });
 
 const PRE = "zz-teste-busca-";
@@ -45,5 +50,17 @@ describe("listarLeads (banco teste)", () => {
     const r4 = await listarLeads({ ...p, q: PRE, status: "convertido" });
     expect(r4.linhas.map((l) => l.nome)).toEqual(["Ana Cemx"]);
     expect((await resumoPorStatus()).convertido).toBeGreaterThanOrEqual(1);
+  });
+  it("filtro de campanha isola a lista e o resumo", async () => {
+    await db.insert(lead).values([{ ...base("Eva Mentoria", "67999990004", `${PRE}Mentor`), campanha: "mentoria", jaFezMentoria: null }]);
+    const p = { q: PRE, ordem: "desc" as const, pagina: 1 };
+    const m = await listarLeads({ ...p, campanha: "mentoria" });
+    expect(m.linhas.map((l) => l.nome)).toEqual(["Eva Mentoria"]);
+    const pr = await listarLeads({ ...p, campanha: "presencial" });
+    expect(pr.linhas.some((l) => l.nome === "Eva Mentoria")).toBe(false);
+    expect(pr.total).toBeGreaterThan(0);
+    const antes = (await resumoPorStatus("mentoria")).novo;
+    expect(antes).toBeGreaterThanOrEqual(1);
+    expect((await resumoPorStatus("presencial")).novo + antes).toBeLessThanOrEqual((await resumoPorStatus()).novo);
   });
 });

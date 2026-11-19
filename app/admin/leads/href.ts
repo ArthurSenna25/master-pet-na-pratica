@@ -6,6 +6,7 @@ export function hrefLeads(p: ParamsLista, mudar: Partial<ParamsLista> = {}): str
   const q = new URLSearchParams();
   if (n.q) q.set("q", n.q);
   if (n.status) q.set("status", n.status);
+  if (n.campanha) q.set("campanha", n.campanha);
   if (n.ordem !== "desc") q.set("ordem", n.ordem);
   if (n.pagina > 1) q.set("pagina", String(n.pagina));
   const s = q.toString();
