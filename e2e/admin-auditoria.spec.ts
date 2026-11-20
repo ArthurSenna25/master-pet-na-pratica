@@ -16,7 +16,7 @@ test("com sessão: baixa o CSV de auditoria (sem PII, com o próprio export) e o
   const [csvDl] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Baixar auditoria (CSV)" }).click()]);
   expect(csvDl.suggestedFilename()).toMatch(/^auditoria-\d{4}-\d{2}-\d{2}\.csv$/);
   const csv = await readFile((await csvDl.path())!, "utf8");
-  expect(csv.replace(/^\uFEFF/, "").split("\r\n")[0]).toBe("fonte,id,evento,lead_id,texto_versao,texto_hash,data_utc");
+  expect(csv.replace(/^\uFEFF/, "").split("\r\n")[0]).toBe("fonte,id,evento,lead_id,campanha,texto_versao,texto_hash,data_utc");
   expect(csv).toContain("admin_events,");
   expect(csv).toMatch(/admin_events,[^,]+,login,/); // o login deste teste
   expect(csv).toMatch(/admin_events,[^,]+,export_auditoria,/); // o próprio export

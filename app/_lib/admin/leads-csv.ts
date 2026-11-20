@@ -1,14 +1,15 @@
 import "server-only";
-import { asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { getDb } from "../db";
 import { lead } from "../db/schema";
+import type { Campanha } from "./campanha";
 import { montarCsv } from "./csv";
 import { registrarExportacao } from "./events";
 
-// ja_fez_mentoria: true/false, ou "nao_perguntado" (campanha mentoria; nulo no banco); vazio só em lead anonimizado. SAÍDA DE DADO PESSOAL. Fora: ip_hmac, user_agent e todo consent_events (isso é a auditoria). Quem chamar DEVE ter checado a sessão.
+// campanha: sempre preenchida (mantida na anonimização); origem_campanha: vazia se anonimizado. ja_fez_mentoria: true/false, ou "nao_perguntado" (campanha mentoria; nulo no banco); vazio só em lead anonimizado. SAÍDA DE DADO PESSOAL. Fora: ip_hmac, user_agent e todo consent_events (isso é a auditoria). Quem chamar DEVE ter checado a sessão.
 export const CABECALHO_LEADS = [
   "id", "nome", "whatsapp", "cidade_uf", "negocio", "tempo_funcionamento", "pessoas", "maior_desafio",
-  "ja_fez_mentoria", "mensagem", "status", "observacao", "origem", "criado_em_utc", "atualizado_em_utc", "anonimizado_em_utc",
+  "ja_fez_mentoria", "campanha", "origem_campanha", "mensagem", "status", "observacao", "origem", "criado_em_utc", "atualizado_em_utc", "anonimizado_em_utc",
 ] as const;
 
 /**
@@ -16,9 +17,9 @@ export const CABECALHO_LEADS = [
  * Lead anonimizado sai só com id, status e datas: os campos pessoais são zerados aqui também (defesa em profundidade).
  * ponytail: sem LIMIT (volume N2 pequeno); acima de ~100 mil linhas, paginar/stream.
  */
-export async function gerarCsvLeads(db = getDb()): Promise<string> {
+export async function gerarCsvLeads(campanha?: Campanha, db = getDb()): Promise<string> {
   await registrarExportacao("export_leads", db);
-  const rows = await db.select().from(lead).orderBy(asc(lead.criadoEm));
+  const rows = await db.select().from(lead).where(campanha ? eq(lead.campanha, campanha) : undefined).orderBy(asc(lead.criadoEm));
   return montarCsv(
     CABECALHO_LEADS,
     rows.map((l) => {
@@ -26,7 +27,7 @@ export async function gerarCsvLeads(db = getDb()): Promise<string> {
       const p = <T>(v: T) => (anon ? "" : v); // pessoal: vazio se anonimizado
       return [
         l.id, p(l.nome), p(l.whatsapp), p(l.cidadeUf), p(l.negocio), p(l.tempoFuncionamento), p(l.pessoas), p(l.maiorDesafio),
-        p(l.jaFezMentoria ?? "nao_perguntado"), p(l.mensagem), l.status, p(l.observacao), p(l.origem), l.criadoEm, l.atualizadoEm, l.anonimizadoEm,
+        p(l.jaFezMentoria ?? "nao_perguntado"), l.campanha, p(l.origemCampanha), p(l.mensagem), l.status, p(l.observacao), p(l.origem), l.criadoEm, l.atualizadoEm, l.anonimizadoEm,
       ];
     }),
   );

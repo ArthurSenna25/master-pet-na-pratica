@@ -1,6 +1,6 @@
 // Prova, no branch de TESTE, que o texto da confirmação de anonimizar (ConfirmacaoLgpd) bate com o que o código faz.
 // Apagado: nome, negócio, WhatsApp, mensagem, observação, ip_hmac, user_agent. Mantido: cidade/UF, tempo, equipe, desafio, mentoria,
-// status, datas, origem (lead e consentimento), texto_versao, texto_hash, aceito_em.
+// status, datas, origem (lead e consentimento), campanha, texto_versao, texto_hash, aceito_em.
 import { eq, like } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { anonimizarLead } from "./anonimizar";
@@ -16,7 +16,7 @@ describe("anonimizarLead: o que a tela promete", () => {
     const aceitoEm = new Date("2031-05-05T12:00:00Z");
     const [l] = await db.insert(lead).values({
       nome: "Ana Prova", whatsapp: "67999990099", cidadeUf: "Lins/SP", negocio: `${PRE}Pet Prova`, tempoFuncionamento: "1 a 3 anos", pessoas: "2 a 3",
-      maiorDesafio: "Equipe", jaFezMentoria: true, mensagem: "oi", status: "em_contato", observacao: "obs", origem: `${PRE}https://exemplo.test/p`,
+      maiorDesafio: "Equipe", jaFezMentoria: true, mensagem: "oi", campanha: "mentoria", origemCampanha: "instagram", status: "em_contato", observacao: "obs", origem: `${PRE}https://exemplo.test/p`,
     }).returning();
     await db.insert(consentEvents).values({ leadId: l.id, textoVersao: "0.2 de teste", textoHash: "hash-prova", aceitoEm, origem: `${PRE}https://exemplo.test/p`, ipHmac: "ip-hmac", userAgent: "ua" });
 
@@ -26,6 +26,8 @@ describe("anonimizarLead: o que a tela promete", () => {
     expect([a.nome, a.negocio, a.whatsapp, a.mensagem, a.observacao]).toEqual(["", "", "", null, null]); // apagado
     expect(a.anonimizadoEm).not.toBeNull();
     expect([a.cidadeUf, a.tempoFuncionamento, a.pessoas, a.maiorDesafio, a.jaFezMentoria, a.status]).toEqual(["Lins/SP", "1 a 3 anos", "2 a 3", "Equipe", true, "em_contato"]); // mantido
+    expect(a.campanha).toBe("mentoria"); // campanha mantida
+    expect(a.origemCampanha).toBeNull(); // origem_campanha (rastreio de canal) apagada, como a origem no CSV
     expect(a.origem).toBe(`${PRE}https://exemplo.test/p`); // origem do lead mantida
     expect(a.criadoEm.getTime()).toBe(l.criadoEm.getTime()); // datas mantidas
 

@@ -14,7 +14,7 @@ export default async function VisaoGeralPage({ searchParams }: { searchParams: P
   const [dados, perfil] = await Promise.all([carregarVisaoGeral(agora, campanha), carregarPerfil(campanha)]);
   return (
     <>
-      <Cabecalho email={session.user.email} ativa="visao" />
+      <Cabecalho email={session.user.email} ativa="visao" campanha={campanha} />
       <VisaoGeralView dados={dados} perfil={perfil} agora={agora} ok={typeof ok === "string" ? ok : undefined} campanha={campanha} />
     </>
   );

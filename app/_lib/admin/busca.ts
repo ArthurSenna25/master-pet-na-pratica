@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CAMPANHAS, CAMPANHA_ROTULO } from "./campanha";
+import { CAMPANHA_ROTULO, campanhaSchema } from "./campanha";
 import { STATUS, STATUS_ROTULO } from "./status";
 
 export const POR_PAGINA = 20;
@@ -22,7 +22,7 @@ export function padraoTelefone(termo: string): string | null {
 const paramsSchema = z.object({
   q: z.string().trim().max(100).catch(""),
   status: z.enum(STATUS).optional().catch(undefined),
-  campanha: z.enum(CAMPANHAS).optional().catch(undefined), // inválido ou ausente = todas
+  campanha: campanhaSchema, // inválido ou ausente = todas
   ordem: z.enum(["desc", "asc"]).catch("desc"),
   pagina: z.coerce.number().int().min(1).max(10000).catch(1),
 });

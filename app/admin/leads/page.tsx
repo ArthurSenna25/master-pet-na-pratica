@@ -23,7 +23,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <Cabecalho email={session.user.email} ativa="leads" />
+      <Cabecalho email={session.user.email} ativa="leads" campanha={p.campanha} />
       <main className="ad-main">
         {raw.ok === "excluido" && <Aviso tipo="ok">Lead excluído.</Aviso>}
         <div className="ad-pg-hd"><h1>Leads</h1></div>
