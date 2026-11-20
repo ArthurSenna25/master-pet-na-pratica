@@ -39,6 +39,25 @@ describe("carregarVisaoGeral", () => {
     expect(sem["2031-02-24"]).toBe(0);
   });
 
+  it("campanha: filtra KPIs/semanas/chamar e porCampanha conta por campanha", async () => {
+    const agora = new Date("2031-03-12T15:00:00Z");
+    const m = { ...novo("2031-03-11T15:00:00Z"), campanha: "mentoria", jaFezMentoria: null };
+    const antes = await carregarVisaoGeral(agora);
+    const antesM = await carregarVisaoGeral(agora, "mentoria");
+    await db.insert(lead).values([m, novo("2031-03-11T16:00:00Z")]);
+    const d = await carregarVisaoGeral(agora);
+    const dm = await carregarVisaoGeral(agora, "mentoria");
+    const dp = await carregarVisaoGeral(agora, "presencial");
+    expect(d.total - antes.total).toBe(2);
+    expect(dm.total - antesM.total).toBe(1);
+    expect(d.porCampanha.mentoria - antes.porCampanha.mentoria).toBe(1);
+    expect(dm.porCampanha.presencial).toBe(0);
+    expect(dp.porCampanha.mentoria).toBe(0);
+    expect(dm.chamar.every((c) => c.campanha === "mentoria")).toBe(true);
+    expect(dp.chamar.every((c) => c.campanha === "presencial")).toBe(true);
+    expect(dm.semanas.reduce((a, s) => a + s.n, 0)).toBe(antesM.semanas.reduce((a, s) => a + s.n, 0) + 1);
+  });
+
   it("para chamar: no máximo 5, só 'novo', mais antigos primeiro", async () => {
     const { chamar } = await carregarVisaoGeral();
     expect(chamar.length).toBeLessThanOrEqual(5);

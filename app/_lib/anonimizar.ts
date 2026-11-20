@@ -14,7 +14,7 @@ export async function anonimizarLead(leadId: string, db = getDb()): Promise<void
   await db.batch([
     db
       .update(lead)
-      .set({ nome: "", whatsapp: "", negocio: "", mensagem: null, observacao: null, anonimizadoEm: agora, atualizadoEm: agora })
+      .set({ nome: "", whatsapp: "", negocio: "", mensagem: null, observacao: null, origemCampanha: null, anonimizadoEm: agora, atualizadoEm: agora })
       .where(eq(lead.id, leadId)),
     db.update(consentEvents).set({ ipHmac: null, userAgent: null }).where(eq(consentEvents.leadId, leadId)),
     db.insert(auditLog).values({ acao: "anonimizar_lead", leadId, criadoEm: agora }),

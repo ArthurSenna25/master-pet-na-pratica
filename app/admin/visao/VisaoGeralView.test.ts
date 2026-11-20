@@ -8,7 +8,7 @@ import { VisaoGeralView } from "./VisaoGeralView";
 
 const agora = new Date("2031-03-12T15:00:00Z");
 const base = (o: Partial<VisaoGeral>): VisaoGeral => ({
-  total: 0, porStatus: { novo: 0, em_contato: 0, convertido: 0, nao_convertido: 0 }, hoje: 0, seteDias: 0, novosHaMaisDe48h: 0,
+  total: 0, porStatus: { novo: 0, em_contato: 0, convertido: 0, nao_convertido: 0 }, hoje: 0, seteDias: 0, novosHaMaisDe48h: 0, porCampanha: { presencial: 0, mentoria: 0 },
   semanas: preencherSemanas(semanasRecentes(agora), []), chamar: [], ...o,
 });
 const html = (d: VisaoGeral, perfil = []) => renderToStaticMarkup(createElement(VisaoGeralView, { dados: d, perfil, agora }));

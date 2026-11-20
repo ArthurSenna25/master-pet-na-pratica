@@ -2,19 +2,21 @@ import type { GrupoPerfil } from "../../_lib/admin/perfil";
 import { esteVsPassada, janelaGrafico, poucosLeads, taxaConversao } from "../../_lib/admin/visao-geral";
 import type { VisaoGeral } from "../../_lib/admin/visao-geral-query";
 import { vars } from "../../_components/vars";
+import { CAMPANHA_ROTULO, type Campanha } from "../../_lib/admin/campanha";
 import { Aviso } from "../Aviso";
 import { Icone } from "../Icone";
+import { hrefLista } from "../leads/href";
+import { SeletorCampanha } from "../SeletorCampanha";
 import { Funil } from "./Funil";
 import { GraficoSemanas } from "./GraficoSemanas";
 import { Kpi } from "./Kpi";
 import { ParaChamarLista } from "./ParaChamar";
 import { PerfilLeads } from "./PerfilLeads";
 
-const LISTA_AGUARDANDO = "/admin/leads?status=novo&ordem=asc";
 
 /** Visão geral. Todos os números vêm prontos de `dados` (servidor); aqui só marcação. Mostra a tela inteira também com 0 leads. */
-export function VisaoGeralView({ dados, perfil = [], agora, ok }: { dados: VisaoGeral; perfil?: GrupoPerfil[]; agora: Date; ok?: string }) {
-  const { total, porStatus, hoje, seteDias, novosHaMaisDe48h, semanas, chamar } = dados;
+export function VisaoGeralView({ dados, perfil = [], agora, ok, campanha }: { dados: VisaoGeral; perfil?: GrupoPerfil[]; agora: Date; ok?: string; campanha?: Campanha }) {
+  const { total, porStatus, porCampanha, hoje, seteDias, novosHaMaisDe48h, semanas, chamar } = dados;
   const taxa = taxaConversao(porStatus.convertido, porStatus.nao_convertido);
   const grafico = janelaGrafico(semanas, total);
   const { atual, passada, delta } = esteVsPassada(grafico);
@@ -23,12 +25,14 @@ export function VisaoGeralView({ dados, perfil = [], agora, ok }: { dados: Visao
     <main className="ad-main">
       {ok === "senha" && <Aviso tipo="ok"><b>Senha alterada.</b> Os outros aparelhos foram desconectados.</Aviso>}
       <div className="ad-pg-hd"><h1>Visão geral</h1></div>
+      <SeletorCampanha atual={campanha} href={(c) => (c ? `/admin?campanha=${c}` : "/admin")} />
+      {!campanha && <p className="ad-sub ad-camp-n">{(Object.keys(CAMPANHA_ROTULO) as Campanha[]).map((c, i) => <span key={c}>{i > 0 && " · "}{CAMPANHA_ROTULO[c]}: <b>{porCampanha[c]}</b></span>)}</p>}
       {poucosLeads(total) && <p className="ad-note"><Icone nome="info" />Com poucos leads, as tendências ainda não são confiáveis.</p>}
 
       <div className="ad-kpis">
         <Kpi i={0} rotulo="Novos hoje" numero={hoje} sub="desde a meia-noite" />
         <Kpi i={1} rotulo="Novos nos últimos 7 dias" numero={seteDias} sub="incluindo hoje" />
-        <Kpi i={2} href={LISTA_AGUARDANDO} rotulo="Aguardando contato" numero={porStatus.novo}
+        <Kpi i={2} href={hrefLista(campanha, { status: "novo", ordem: "asc" })} rotulo="Aguardando contato" numero={porStatus.novo}
           sub={novosHaMaisDe48h > 0 ? <><Icone nome="alert" />{novosHaMaisDe48h} há mais de 48 h</> : "nenhum há mais de 48 h"} />
         <Kpi i={3} rotulo="Taxa de conversão" semDados="Ainda sem dados suficientes"
           numero={taxa.pct === null ? null : `${taxa.pct}%`}
@@ -38,11 +42,11 @@ export function VisaoGeralView({ dados, perfil = [], agora, ok }: { dados: Visao
       <div className="ad-g2">
         <section className="ad-card ad-in" style={vars({ "--i": 3 })} aria-labelledby="visao-call">
           <div className="ad-card__h"><h2 id="visao-call">Para chamar agora</h2><p className="ad-sub">Os mais antigos primeiro</p></div>
-          <ParaChamarLista itens={chamar} agora={agora} totalAguardando={porStatus.novo} semLeads={total === 0} />
+          <ParaChamarLista itens={chamar} agora={agora} totalAguardando={porStatus.novo} semLeads={total === 0} campanha={campanha} />
         </section>
         <section className="ad-card ad-in" style={vars({ "--i": 4 })} aria-labelledby="visao-fn">
           <div className="ad-card__h"><h2 id="visao-fn">Leads por status</h2></div>
-          <Funil porStatus={porStatus} total={total} />
+          <Funil porStatus={porStatus} total={total} campanha={campanha} />
         </section>
       </div>
 

@@ -45,6 +45,12 @@ describe("gerarCsvAuditoria", () => {
     for (const proibido of ["IPHMAC-ZZ", "UA-ZZ-AGENT", nome, "67999990077", "texto livre sigiloso", "url-origem", "ip_hmac", "user_agent"]) {
       expect(csv).not.toContain(proibido);
     }
+    // campanha só nas linhas de consent_events (join com o lead); audit_log/admin_events sem campanha
+    const cab = CABECALHO_AUDITORIA as readonly string[];
+    const cols = csv.replace(/^\uFEFF/, "").split("\r\n").filter(Boolean).slice(1).map((l) => l.split(","));
+    const cCamp = cab.indexOf("campanha");
+    expect(cols.filter((c) => c[0] === "consent_events" && c[cab.indexOf("lead_id")] === l.id).map((c) => c[cCamp])).toEqual(["presencial"]);
+    expect(cols.filter((c) => c[0] !== "consent_events").every((c) => c[cCamp] === "")).toBe(true);
     // consentimento presente (prova) e fórmula neutralizada
     expect(csv).toContain("consent_events");
     expect(csv).toContain("hash-zz");

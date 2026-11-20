@@ -12,6 +12,7 @@ import { Aviso } from "../../Aviso";
 import { BotaoWhatsapp } from "../../BotaoWhatsapp";
 import { Cabecalho } from "../../Cabecalho";
 import { Icone } from "../../Icone";
+import { SeloCampanha } from "../../SeloCampanha";
 import { SeloStatus } from "../../SeloStatus";
 import { BarraSalvar } from "./BarraSalvar";
 import { BlocoLgpd } from "./BlocoLgpd";
@@ -62,6 +63,7 @@ export async function LeadDetalhe({ params, searchParams, modal = false, email }
         <p className="ad-sub">Recebido em {dataHora(l.criadoEm)} · {haQuanto(l.criadoEm, agora)}</p>
       </div>
       <div className="ad-dlg__hr">
+        <SeloCampanha campanha={l.campanha} />
         <SeloStatus status={l.status} />
         {modal ? <BotaoFechar /> : <Link className="ad-link" href="/admin/leads" prefetch={false}>← Voltar para a lista</Link>}
       </div>

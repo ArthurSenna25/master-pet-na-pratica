@@ -1,20 +1,22 @@
 import "server-only";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { lead } from "../db/schema";
+import type { Campanha } from "./campanha";
 import { STATUS, type Status } from "./status";
 import { diaSP, meiaNoiteSP, preencherSemanas, semanasRecentes, type Semana } from "./visao-geral";
 
 const HORA_MS = 3_600_000;
 const LIMITE_CHAMAR = 5;
 
-export interface ParaChamar { id: string; nome: string; negocio: string; cidadeUf: string; whatsapp: string; criadoEm: Date; anonimizado: boolean }
+export interface ParaChamar { campanha: string; id: string; nome: string; negocio: string; cidadeUf: string; whatsapp: string; criadoEm: Date; anonimizado: boolean }
 export interface VisaoGeral {
   total: number;
   porStatus: Record<Status, number>;
   hoje: number;
   seteDias: number;
   novosHaMaisDe48h: number;
+  porCampanha: Record<Campanha, number>; // contagem por campanha NO filtro atual (com filtro, só a escolhida tem valor)
   semanas: Semana[];
   chamar: ParaChamar[];
 }
@@ -22,7 +24,8 @@ export interface VisaoGeral {
 const iso = (d: Date) => d.toISOString();
 
 /** Só agregados e os 5 mais antigos em "novo". 3 queries em paralelo; `agora` injetável para teste. */
-export async function carregarVisaoGeral(agora = new Date(), db = getDb()): Promise<VisaoGeral> {
+export async function carregarVisaoGeral(agora = new Date(), campanha?: Campanha, db = getDb()): Promise<VisaoGeral> {
+  const onde = campanha ? eq(lead.campanha, campanha) : undefined;
   const semanas = semanasRecentes(agora);
   const inicioJanela = meiaNoiteSP(semanas[0]);
   const inicioHoje = meiaNoiteSP(diaSP(agora));
@@ -36,18 +39,20 @@ export async function carregarVisaoGeral(agora = new Date(), db = getDb()): Prom
       hoje: n(sql`count(*) filter (where ${lead.criadoEm} >= ${iso(inicioHoje)}::timestamptz)`),
       seteDias: n(sql`count(*) filter (where ${lead.criadoEm} >= ${iso(seteDias)}::timestamptz)`),
       velhos: n(sql`count(*) filter (where ${lead.status} = 'novo' and ${lead.criadoEm} < ${iso(h48)}::timestamptz)`),
+      presencial: n(sql`count(*) filter (where ${lead.campanha} = 'presencial')`),
+      mentoria: n(sql`count(*) filter (where ${lead.campanha} = 'mentoria')`),
       novo: n(sql`count(*) filter (where ${lead.status} = 'novo')`),
       em_contato: n(sql`count(*) filter (where ${lead.status} = 'em_contato')`),
       convertido: n(sql`count(*) filter (where ${lead.status} = 'convertido')`),
       nao_convertido: n(sql`count(*) filter (where ${lead.status} = 'nao_convertido')`),
-    }).from(lead),
+    }).from(lead).where(onde),
     // Semana ISO (segunda) no fuso de SP; fuso como literal (parâmetro faria o GROUP BY divergir do SELECT).
     db.select({
       semana: sql<string>`to_char(date_trunc('week', ${lead.criadoEm} at time zone 'America/Sao_Paulo'), 'YYYY-MM-DD')`,
       n: n(sql`count(*)`),
-    }).from(lead).where(sql`${lead.criadoEm} >= ${iso(inicioJanela)}::timestamptz`).groupBy(sql`1`),
-    db.select({ id: lead.id, nome: lead.nome, negocio: lead.negocio, cidadeUf: lead.cidadeUf, whatsapp: lead.whatsapp, criadoEm: lead.criadoEm, anonimizadoEm: lead.anonimizadoEm })
-      .from(lead).where(eq(lead.status, "novo")).orderBy(asc(lead.criadoEm)).limit(LIMITE_CHAMAR),
+    }).from(lead).where(and(sql`${lead.criadoEm} >= ${iso(inicioJanela)}::timestamptz`, onde)).groupBy(sql`1`),
+    db.select({ campanha: lead.campanha, id: lead.id, nome: lead.nome, negocio: lead.negocio, cidadeUf: lead.cidadeUf, whatsapp: lead.whatsapp, criadoEm: lead.criadoEm, anonimizadoEm: lead.anonimizadoEm })
+      .from(lead).where(and(eq(lead.status, "novo"), onde)).orderBy(asc(lead.criadoEm)).limit(LIMITE_CHAMAR),
   ]);
 
   const porStatus = Object.fromEntries(STATUS.map((s) => [s, tot[s]])) as Record<Status, number>;
@@ -57,6 +62,7 @@ export async function carregarVisaoGeral(agora = new Date(), db = getDb()): Prom
     hoje: tot.hoje,
     seteDias: tot.seteDias,
     novosHaMaisDe48h: tot.velhos,
+    porCampanha: { presencial: tot.presencial, mentoria: tot.mentoria },
     semanas: preencherSemanas(semanas, porSemana),
     chamar: chamar.map(({ anonimizadoEm, ...c }) => ({ ...c, anonimizado: anonimizadoEm !== null })),
   };

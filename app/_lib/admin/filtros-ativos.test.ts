@@ -12,6 +12,11 @@ describe("filtrosAtivos", () => {
     expect(f[1].rotulo).toBe("Status: Novo");
     expect(f[2].limpar).toMatchObject({ ordem: "desc" });
   });
+  it("campanha vira chip removível; inválida não gera chip", () => {
+    const f = filtrosAtivos(lerParams({ campanha: "mentoria", pagina: "4" }));
+    expect(f).toEqual([{ id: "campanha", rotulo: "Campanha: Mentoria", limpar: { campanha: undefined, pagina: 1 } }]);
+    expect(filtrosAtivos(lerParams({ campanha: "zz" }))).toEqual([]);
+  });
   it("valores inválidos na URL caem no padrão e não geram chip", () => {
     expect(filtrosAtivos(lerParams({ status: "xx", ordem: "zz" }))).toEqual([]);
   });
