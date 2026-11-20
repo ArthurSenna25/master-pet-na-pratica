@@ -6,7 +6,7 @@ import { registrarAdminEvento } from "../_lib/admin/events";
 import { ERRO_LOGIN, loginSchema } from "../_lib/admin/login-schema";
 import { ERRO_SENHA_ATUAL, trocaSenhaSchema } from "../_lib/admin/senha-schema";
 import { bloqueado, chaveLogin, chaveTrocaSenha, LOGIN, registrarFalha, TROCA_SENHA, zerar } from "../_lib/admin/tentativas";
-import { auth } from "../_lib/auth";
+import { getAuth } from "../_lib/auth";
 import { getClientIp, ipHmac } from "../_lib/seguranca";
 import { requireSession } from "../_lib/session";
 
@@ -25,7 +25,7 @@ export async function loginAction(_prev: LoginState, form: FormData): Promise<Lo
   const chave = chaveLogin(ip ? ipHmac(ip) : null);
   if (await bloqueado(chave, LOGIN)) return { error: ERRO_LIMITE };
   try {
-    await auth.api.signInEmail({ body: parsed.data, headers: h });
+    await getAuth().api.signInEmail({ body: parsed.data, headers: h });
   } catch (e) {
     // sem e-mail/senha em log; só o status
     if (e instanceof APIError && e.statusCode === 429) return { error: ERRO_LIMITE };
@@ -40,7 +40,7 @@ export async function loginAction(_prev: LoginState, form: FormData): Promise<Lo
 export async function logoutAction() {
   await requireSession();
   await registrarAdminEvento("logout");
-  await auth.api.signOut({ headers: await headers() });
+  await getAuth().api.signOut({ headers: await headers() });
   redirect("/admin/login");
 }
 
@@ -59,7 +59,7 @@ export async function changePasswordAction(_prev: SenhaState, form: FormData): P
   const chave = chaveTrocaSenha(session.user.id);
   if (await bloqueado(chave, TROCA_SENHA)) return { errors: { atual: ERRO_LIMITE } };
   try {
-    await auth.api.changePassword({
+    await getAuth().api.changePassword({
       body: { currentPassword: parsed.data.atual, newPassword: parsed.data.nova, revokeOtherSessions: true },
       headers: await headers(),
     });
@@ -71,6 +71,6 @@ export async function changePasswordAction(_prev: SenhaState, form: FormData): P
   await zerar(chave);
   await registrarAdminEvento("troca_senha");
   // O Better Auth apaga todas as sessões e grava um cookie novo. Só prometo "continua logado" se o cookie novo vale de fato.
-  const viva = await auth.api.getSession({ headers: new Headers({ cookie: (await cookies()).toString() }) });
+  const viva = await getAuth().api.getSession({ headers: new Headers({ cookie: (await cookies()).toString() }) });
   redirect(viva ? "/admin?ok=senha" : "/admin/login?ok=senha");
 }
