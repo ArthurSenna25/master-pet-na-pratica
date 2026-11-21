@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { abertura } from "./abertura";
 import { dia } from "./dia";
+import { fab } from "./fab";
 import { realce, trilha } from "./trilha";
 import { PIN, pinCabeNosDois, type Cleanup } from "./util";
 
@@ -19,6 +20,7 @@ const undo = (...fns: (Cleanup | undefined)[]): Cleanup => () => fns.forEach((f)
 /** Cenas GSAP da campanha mentoria (uma por etapa aprovada; hoje abertura, dia e trilha), criadas na ORDEM DO DOM. Não renderiza nada. Reduced-motion: nenhuma cena (página estática). */
 export function MentoriaFx() {
   useGSAP(() => {
+    const stopFab = fab(); // navegação, não movimento: vale também com reduced-motion
     const stopRealce = realce(); // estado do Diagnóstico → trilha, também sem movimento
     const mm = gsap.matchMedia();
     let vivo = true;
@@ -57,7 +59,7 @@ export function MentoriaFx() {
         undo(stopAbertura, stopDia, stopTrilha, () => window.removeEventListener("load", refrescar))();
       };
     });
-    return () => { vivo = false; mm.revert(); stopRealce(); };
+    return () => { vivo = false; mm.revert(); stopRealce(); stopFab(); };
   });
   return null;
 }
