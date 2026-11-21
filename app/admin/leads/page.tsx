@@ -5,6 +5,7 @@ import { listarLeads, resumoPorStatus } from "../../_lib/admin/leads-query";
 import { Aviso } from "../Aviso";
 import { Cabecalho } from "../Cabecalho";
 import { LeadsLista } from "../LeadsLista";
+import { SeletorCampanha } from "../SeletorCampanha";
 import { BarraFiltros } from "./BarraFiltros";
 import { BuscaLeads } from "./BuscaLeads";
 import { EstadoVazio } from "./EstadoVazio";
@@ -16,16 +17,17 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   const raw = await searchParams;
   const p = lerParams(raw);
   const agora = new Date();
-  const [{ total, linhas }, resumo] = await Promise.all([listarLeads(p), resumoPorStatus()]);
+  const [{ total, linhas }, resumo] = await Promise.all([listarLeads(p), resumoPorStatus(p.campanha)]);
   const totalGeral = Object.values(resumo).reduce((a, b) => a + b, 0);
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
 
   return (
     <>
-      <Cabecalho email={session.user.email} ativa="leads" />
+      <Cabecalho email={session.user.email} ativa="leads" campanha={p.campanha} />
       <main className="ad-main">
         {raw.ok === "excluido" && <Aviso tipo="ok">Lead excluído.</Aviso>}
         <div className="ad-pg-hd"><h1>Leads</h1></div>
+        <SeletorCampanha atual={p.campanha} href={(c) => hrefLeads(p, { campanha: c, pagina: 1 })} />
         <PillsStatus p={p} resumo={resumo} />
         <BuscaLeads p={p} />
         <BarraFiltros p={p} total={total} />

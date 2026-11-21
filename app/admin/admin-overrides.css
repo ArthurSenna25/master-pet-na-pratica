@@ -43,3 +43,11 @@
 /* Barra de salvar: confirmação (status + hora) à esquerda. */
 .ad .ad-savebar__msg { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .ad .ad-saved__t { font-size: 15px; color: var(--text-2); white-space: nowrap; }
+/* Campanha (F10 c7): selo com ícone+texto; cores = pares já conferidos (pill inativo: navy sobre sunken; pill ativo: bege sobre navy). */
+.ad .ad-st--camp-presencial { background: var(--surface-sunken); color: var(--mp-navy-800); }
+.ad .ad-st--camp-mentoria { background: var(--mp-navy-800); color: var(--mp-beige-50); }
+.ad .ad-pills--camp { padding-bottom: 12px; }
+.ad .ad-camp-n { margin: 0 0 12px; }
+.ad .ad-lcard__b { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.ad .ad-call__who .ad-st { align-self: flex-start; margin: 4px 0; }
+.ad .ad-dlg__hr { flex-wrap: wrap; min-width: 0; }

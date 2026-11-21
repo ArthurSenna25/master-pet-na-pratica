@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { count, eq, like } from "drizzle-orm";
 import { expect, test, type Page } from "@playwright/test";
-import { auth } from "../app/_lib/auth";
+import { getAuth } from "../app/_lib/auth";
 import { getDb } from "../app/_lib/db";
 import { account, adminEvents, rateLimit, user } from "../app/_lib/db/schema";
 import { entrar } from "./admin-helpers";
@@ -24,7 +24,7 @@ const eventos = async () => (await getDb().select({ n: count() }).from(adminEven
 
 /** Rede de segurança: grava o hash da senha original direto na conta, sem passar pela UI. */
 async function restaurarSenhaOriginal() {
-  const ctx = await auth.$context;
+  const ctx = await getAuth().$context;
   const [u] = await getDb().select({ id: user.id }).from(user).where(eq(user.email, (process.env.ADMIN_EMAIL ?? "").toLowerCase()));
   if (u) await getDb().update(account).set({ password: await ctx.password.hash(ORIGINAL) }).where(eq(account.userId, u.id));
 }

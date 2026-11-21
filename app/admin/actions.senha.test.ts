@@ -5,7 +5,7 @@ const m = vi.hoisted(() => ({ changePassword: vi.fn(), getSession: vi.fn() }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers(), cookies: async () => ({ toString: () => "better-auth.session_token=novo" }) }));
 vi.mock("next/navigation", () => ({ redirect: (u: string) => { throw new Error(`REDIRECT:${u}`); } }));
 vi.mock("../_lib/session", () => ({ requireSession: async () => ({ user: { id: "u1", email: "a@b.c" } }) }));
-vi.mock("../_lib/auth", () => ({ auth: { api: { changePassword: m.changePassword, getSession: m.getSession, signInEmail: vi.fn() } } }));
+vi.mock("../_lib/auth", () => ({ getAuth: () => ({ api: { changePassword: m.changePassword, getSession: m.getSession, signInEmail: vi.fn() } }) }));
 vi.mock("../_lib/admin/tentativas", () => ({ bloqueado: async () => false, registrarFalha: vi.fn(), zerar: vi.fn(), chaveLogin: vi.fn(), chaveTrocaSenha: () => "k", LOGIN: {}, TROCA_SENHA: {} }));
 vi.mock("../_lib/admin/events", () => ({ registrarAdminEvento: vi.fn() }));
 vi.mock("../_lib/seguranca", () => ({ getClientIp: vi.fn(), ipHmac: vi.fn() }));

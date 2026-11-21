@@ -3,13 +3,15 @@ import { logoutAction } from "./actions";
 import { FechaMenus } from "./FechaMenus";
 import { Icone } from "./Icone";
 
+import type { Campanha } from "../_lib/admin/campanha";
+
 export type AbaAdmin = "visao" | "leads";
 
 // Links de download são <a>, não <Link>: Link faria prefetch e dispararia o export (que grava registro).
-function ItensExportar() {
+function ItensExportar({ campanha }: { campanha?: Campanha }) {
   return (
     <>
-      <a className="ad-mi" href="/admin/leads.csv" download><Icone nome="download" />Baixar leads (CSV)</a>
+      <a className="ad-mi" href={campanha ? `/admin/leads.csv?campanha=${campanha}` : "/admin/leads.csv"} download><Icone nome="download" />Baixar leads (CSV){campanha ? ` — ${campanha === "mentoria" ? "Mentoria" : "Presencial"}` : ""}</a>
       <a className="ad-mi" href="/admin/auditoria.csv" download><Icone nome="download" />Baixar auditoria (CSV)</a>
       <a className="ad-mi" href="/admin/decisoes-lgpd" download><Icone nome="download" />Baixar documento LGPD</a>
       <p className="ad-mw"><Icone nome="alert" />O CSV de leads contém dados pessoais; guarde o arquivo com cuidado.</p>
@@ -18,7 +20,7 @@ function ItensExportar() {
 }
 
 /** Cabeçalho compacto: marca + abas + (≥ 1000 px) Exportar, e-mail, Alterar senha, Sair; abaixo disso tudo dentro de "Menu". */
-export function Cabecalho({ email, ativa }: { email: string; ativa: AbaAdmin }) {
+export function Cabecalho({ email, ativa, campanha }: { email: string; ativa: AbaAdmin; campanha?: Campanha }) {
   const aba = (id: AbaAdmin, href: string, texto: string) => (
     <Link className="ad-tab" href={href} prefetch={false} aria-current={ativa === id ? "page" : undefined}>{texto}</Link>
   );
@@ -30,7 +32,7 @@ export function Cabecalho({ email, ativa }: { email: string; ativa: AbaAdmin }) 
         <div className="ad-hd__wide">
           <details className="ad-dd">
             <summary className="ad-btn ad-btn--onnavy">Exportar<Icone nome="chev" /></summary>
-            <div className="ad-dd__p"><ItensExportar /></div>
+            <div className="ad-dd__p"><ItensExportar campanha={campanha} /></div>
           </details>
           {/* E-mail só renderizado (nunca logado); data-admin-email serve para cobri-lo em screenshots. */}
           <span className="ad-mail" data-admin-email>{email}</span>
@@ -42,7 +44,7 @@ export function Cabecalho({ email, ativa }: { email: string; ativa: AbaAdmin }) 
           <div className="ad-dd__p">
             <p className="ad-mail ad-mail--in" data-admin-email>{email}</p>
             <p className="ad-mh">Exportar</p>
-            <ItensExportar />
+            <ItensExportar campanha={campanha} />
             <hr />
             <Link className="ad-mi" href="/admin/senha" prefetch={false}><Icone nome="lock" />Alterar senha</Link>
             <form action={logoutAction}><button type="submit" className="ad-mi">Sair</button></form>

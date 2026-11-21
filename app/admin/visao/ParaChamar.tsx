@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { vars } from "../../_components/vars";
 import { haQuanto } from "../../_lib/admin/visao-geral";
+import type { Campanha } from "../../_lib/admin/campanha";
 import type { ParaChamar as Item } from "../../_lib/admin/visao-geral-query";
 import { linkWhatsapp } from "../../_lib/admin/whatsapp";
+import { SeloCampanha } from "../SeloCampanha";
+import { hrefLista } from "../leads/href";
 import { BotaoWhatsapp } from "../BotaoWhatsapp";
 import { Icone } from "../Icone";
 
 const H48_MS = 48 * 3_600_000;
-const LINK_LISTA = "/admin/leads?status=novo&ordem=asc";
 
 /** "Para chamar agora": até 5 leads "novo", os mais antigos primeiro. > 48 h = ícone de alerta + texto âmbar (nunca só cor). */
-export function ParaChamarLista({ itens, agora, totalAguardando, semLeads }: { itens: Item[]; agora: Date; totalAguardando: number; semLeads: boolean }) {
+export function ParaChamarLista({ itens, agora, totalAguardando, semLeads, campanha }: { itens: Item[]; agora: Date; totalAguardando: number; semLeads: boolean; campanha?: Campanha }) {
   if (itens.length === 0) {
     return (
       <div className="ad-empty ad-empty--sm">
@@ -30,7 +32,7 @@ export function ParaChamarLista({ itens, agora, totalAguardando, semLeads }: { i
           const antigo = agora.getTime() - l.criadoEm.getTime() > H48_MS;
           return (
             <li key={l.id} className="ad-call ad-in" style={vars({ "--i": k + 3 })}>
-              <div className="ad-call__who"><b>{nome}</b>{!l.anonimizado && <span>{l.negocio} · {l.cidadeUf}</span>}</div>
+              <div className="ad-call__who"><b>{nome}</b><SeloCampanha campanha={l.campanha} />{!l.anonimizado && <span>{l.negocio} · {l.cidadeUf}</span>}</div>
               <span className={`ad-call__age${antigo ? " is-old" : ""}`}><Icone nome={antigo ? "alert" : "clock"} />{haQuanto(l.criadoEm, agora)}</span>
               <div className="ad-call__act">
                 {wa && <BotaoWhatsapp href={wa} nome={nome} />}
@@ -41,7 +43,7 @@ export function ParaChamarLista({ itens, agora, totalAguardando, semLeads }: { i
         })}
       </ul>
       {totalAguardando > itens.length && (
-        <Link className="ad-more" href={LINK_LISTA} prefetch={false}>Ver todos os {totalAguardando} aguardando<Icone nome="arrow" /></Link>
+        <Link className="ad-more" href={hrefLista(campanha, { status: "novo", ordem: "asc" })} prefetch={false}>Ver todos os {totalAguardando} aguardando<Icone nome="arrow" /></Link>
       )}
     </>
   );

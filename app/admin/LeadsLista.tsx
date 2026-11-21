@@ -4,6 +4,7 @@ import type { listarLeads } from "../_lib/admin/leads-query";
 import { linkWhatsapp } from "../_lib/admin/whatsapp";
 import { BotaoWhatsapp } from "./BotaoWhatsapp";
 import { Icone } from "./Icone";
+import { SeloCampanha } from "./SeloCampanha";
 import { SeloStatus } from "./SeloStatus";
 import { dataCurta as data } from "../_lib/admin/formato";
 
@@ -27,7 +28,7 @@ export function LeadsLista({ linhas, agora }: { linhas: Linha[]; agora: Date }) 
         <caption className="ad-vh">Leads recebidos</caption>
         <thead>
           <tr>
-            <th scope="col">Nome</th><th scope="col">Negócio</th><th scope="col">Cidade</th><th scope="col">Status</th><th scope="col">Recebido em</th>
+            <th scope="col">Nome</th><th scope="col">Negócio</th><th scope="col">Cidade</th><th scope="col">Campanha</th><th scope="col">Status</th><th scope="col">Recebido em</th>
             <th scope="col"><span className="ad-vh">Ações</span></th>
           </tr>
         </thead>
@@ -37,6 +38,7 @@ export function LeadsLista({ linhas, agora }: { linhas: Linha[]; agora: Date }) 
               <th scope="row"><Link className="ad-rl" href={`/admin/lead/${l.id}`} prefetch={false} aria-label={rotulo(l)}>{nome(l)}</Link></th>
               <td>{l.anonimizadoEm ? "—" : l.negocio}</td>
               <td>{l.anonimizadoEm ? "—" : l.cidadeUf}</td>
+              <td><SeloCampanha campanha={l.campanha} /></td>
               <td><SeloStatus status={l.status} /></td>
               <td className="ad-dt">{data(l.criadoEm)}</td>
               <td className="ad-act">
@@ -53,7 +55,7 @@ export function LeadsLista({ linhas, agora }: { linhas: Linha[]; agora: Date }) 
           <li key={l.id} className="ad-lcard">
             <div className="ad-lcard__top">
               <Link className="ad-rl" href={`/admin/lead/${l.id}`} prefetch={false} aria-label={rotulo(l)}>{nome(l)}</Link>
-              <SeloStatus status={l.status} />
+              <span className="ad-lcard__b"><SeloCampanha campanha={l.campanha} /><SeloStatus status={l.status} /></span>
             </div>
             {!l.anonimizadoEm && <p className="ad-lcard__m">{l.negocio} · {l.cidadeUf}</p>}
             <p className="ad-lcard__d"><Icone nome="clock" />Recebido em {data(l.criadoEm)} · {haQuanto(l.criadoEm, agora)}</p>

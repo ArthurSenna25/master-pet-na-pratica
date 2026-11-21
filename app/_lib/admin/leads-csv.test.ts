@@ -29,7 +29,7 @@ afterAll(async () => {
 describe("gerarCsvLeads", () => {
   it("registra export_leads (sem lead_id), neutraliza fórmula, e anonimizado sai sem dado pessoal; sem ip/ua/consent", async () => {
     await novo("Zz Leads Ativo", { observacao: "=1+1", mensagem: "@cmd" });
-    await novo("Zz Leads Mentoria", { campanha: "mentoria", jaFezMentoria: null });
+    await novo("Zz Leads Mentoria", { campanha: "mentoria", jaFezMentoria: null, origemCampanha: "canal-zz" });
     const idAnon = await novo("Zz Leads Anonimo", { observacao: "segredo-obs", mensagem: "segredo-msg" });
     await anonimizarLead(idAnon);
 
@@ -58,9 +58,30 @@ describe("gerarCsvLeads", () => {
     expect(linhas.find((l) => l.includes("Zz Leads Mentoria"))!.split(",")[col]).toBe("nao_perguntado");
     expect(ativo.split(",")[col]).toBe("false");
 
+    const cC = CABECALHO_LEADS.indexOf("campanha");
+    const cO = CABECALHO_LEADS.indexOf("origem_campanha");
+    const mentoria = linhas.find((l) => l.includes("Zz Leads Mentoria"))!.split(",");
+    expect([ativo.split(",")[cC], ativo.split(",")[cO]]).toEqual(["presencial", ""]);
+    expect([mentoria[cC], mentoria[cO]]).toEqual(["mentoria", "canal-zz"]);
+
     const anon = linhas.find((l) => l.startsWith(idAnon))!;
     expect(anon).toBeDefined();
     for (const pessoal of ["Zz Leads Anonimo", "67999990055", "segredo-obs", "segredo-msg", `${PRE}Pet`, `${PRE}o`]) expect(anon).not.toContain(pessoal);
     expect(anon.split(",").slice(0, 3)).toEqual([idAnon, "", ""]);
+    expect(anon.split(",")[cC]).toBe("presencial"); // campanha é mantida na anonimização
+    expect(anon.split(",")[cO]).toBe("");
+  });
+
+  it("filtro de campanha: só as linhas da campanha; anonimizado de mentoria sai com campanha e sem origem_campanha", async () => {
+    const id = await novo("Zz Leads Anon Mentoria", { campanha: "mentoria", jaFezMentoria: null, origemCampanha: "canal-anon" });
+    await anonimizarLead(id);
+    const csv = await gerarCsvLeads("mentoria");
+    const linhas = csv.replace(/^\uFEFF/, "").split("\r\n").filter(Boolean);
+    const cC = CABECALHO_LEADS.indexOf("campanha");
+    expect(linhas.slice(1).every((l) => l.split(",")[cC] === "mentoria")).toBe(true);
+    const anon = linhas.find((l) => l.startsWith(id))!.split(",");
+    expect([anon[cC], anon[CABECALHO_LEADS.indexOf("origem_campanha")]]).toEqual(["mentoria", ""]);
+    expect(csv).not.toContain("canal-anon");
+    expect((await gerarCsvLeads("presencial")).includes(id)).toBe(false);
   });
 });

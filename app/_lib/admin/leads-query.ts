@@ -2,16 +2,17 @@ import "server-only";
 import { and, asc, count, desc, eq, ilike, or, sql, type SQL } from "drizzle-orm";
 import { getDb } from "../db";
 import { lead } from "../db/schema";
+import type { Campanha } from "./campanha";
 import { padraoTelefone, padraoTexto, POR_PAGINA, type ParamsLista } from "./busca";
 import { STATUS, type Status } from "./status";
 
-export function filtros(p: Pick<ParamsLista, "q" | "status">): SQL | undefined {
+export function filtros(p: Pick<ParamsLista, "q" | "status" | "campanha">): SQL | undefined {
   const texto = padraoTexto(p.q);
   const tel = padraoTelefone(p.q);
   const buscas: SQL[] = [];
   if (texto) buscas.push(ilike(lead.nome, texto), ilike(lead.negocio, texto), ilike(lead.cidadeUf, texto));
   if (tel) buscas.push(sql`${lead.whatsapp} like ${tel}`);
-  return and(p.status ? eq(lead.status, p.status) : undefined, buscas.length ? or(...buscas) : undefined);
+  return and(p.status ? eq(lead.status, p.status) : undefined, p.campanha ? eq(lead.campanha, p.campanha) : undefined, buscas.length ? or(...buscas) : undefined);
 }
 
 export async function listarLeads(p: ParamsLista, db = getDb()) {
@@ -27,8 +28,8 @@ export async function listarLeads(p: ParamsLista, db = getDb()) {
   return { total, linhas };
 }
 
-export async function resumoPorStatus(db = getDb()): Promise<Record<Status, number>> {
-  const r = await db.select({ status: lead.status, n: count() }).from(lead).groupBy(lead.status);
+export async function resumoPorStatus(campanha?: Campanha, db = getDb()): Promise<Record<Status, number>> {
+  const r = await db.select({ status: lead.status, n: count() }).from(lead).where(campanha ? eq(lead.campanha, campanha) : undefined).groupBy(lead.status);
   const out = Object.fromEntries(STATUS.map((s) => [s, 0])) as Record<Status, number>;
   for (const { status, n } of r) if (status in out) out[status as Status] = n;
   return out;

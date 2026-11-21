@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CAMPANHA_ROTULO, campanhaSchema } from "./campanha";
 import { STATUS, STATUS_ROTULO } from "./status";
 
 export const POR_PAGINA = 20;
@@ -21,6 +22,7 @@ export function padraoTelefone(termo: string): string | null {
 const paramsSchema = z.object({
   q: z.string().trim().max(100).catch(""),
   status: z.enum(STATUS).optional().catch(undefined),
+  campanha: campanhaSchema, // inválido ou ausente = todas
   ordem: z.enum(["desc", "asc"]).catch("desc"),
   pagina: z.coerce.number().int().min(1).max(10000).catch(1),
 });
@@ -28,16 +30,17 @@ export type ParamsLista = z.infer<typeof paramsSchema>;
 
 export function lerParams(raw: Record<string, string | string[] | undefined>): ParamsLista {
   const um = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-  return paramsSchema.parse({ q: um(raw.q) ?? "", status: um(raw.status) || undefined, ordem: um(raw.ordem), pagina: um(raw.pagina) });
+  return paramsSchema.parse({ q: um(raw.q) ?? "", status: um(raw.status) || undefined, campanha: um(raw.campanha) || undefined, ordem: um(raw.ordem), pagina: um(raw.pagina) });
 }
 
-export interface FiltroAtivo { id: "q" | "status" | "ordem"; rotulo: string; limpar: Partial<ParamsLista> }
+export interface FiltroAtivo { id: "q" | "status" | "campanha" | "ordem"; rotulo: string; limpar: Partial<ParamsLista> }
 
 /** Filtros fora do padrão, para chips removíveis e para o "Limpar filtros". Página não conta. */
 export function filtrosAtivos(p: ParamsLista): FiltroAtivo[] {
   const r: FiltroAtivo[] = [];
   if (p.q) r.push({ id: "q", rotulo: `Busca: ${p.q}`, limpar: { q: "", pagina: 1 } });
   if (p.status) r.push({ id: "status", rotulo: `Status: ${STATUS_ROTULO[p.status]}`, limpar: { status: undefined, pagina: 1 } });
+  if (p.campanha) r.push({ id: "campanha", rotulo: `Campanha: ${CAMPANHA_ROTULO[p.campanha]}`, limpar: { campanha: undefined, pagina: 1 } });
   if (p.ordem !== "desc") r.push({ id: "ordem", rotulo: "Ordem: mais antigos", limpar: { ordem: "desc", pagina: 1 } });
   return r;
 }
