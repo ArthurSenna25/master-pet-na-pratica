@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { abertura } from "./abertura";
 import { bonus } from "./bonus";
+import { depoimentos } from "./depoimentos";
 import { dia } from "./dia";
 import { fab } from "./fab";
 import { magnetico } from "./magnetico";
@@ -23,6 +24,7 @@ const undo = (...fns: (Cleanup | undefined)[]): Cleanup => () => fns.forEach((f)
 export function MentoriaFx() {
   useGSAP(() => {
     const stopFab = fab(); // navegação, não movimento: vale também com reduced-motion
+    const stopDepo = depoimentos(); // interação: vale também com reduced-motion
     const stopRealce = realce(); // estado do Diagnóstico → trilha, também sem movimento
     const mm = gsap.matchMedia();
     let vivo = true;
@@ -63,7 +65,7 @@ export function MentoriaFx() {
         undo(stopAbertura, stopDia, stopTrilha, stopBonus, stopMagnetico, () => window.removeEventListener("load", refrescar))();
       };
     });
-    return () => { vivo = false; mm.revert(); stopRealce(); stopFab(); };
+    return () => { vivo = false; mm.revert(); stopRealce(); stopDepo(); stopFab(); };
   });
   return null;
 }

@@ -281,7 +281,7 @@
 .nm-dep__c > figure:not(.nm-dep__vid):hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
 .nm-dep__c blockquote p { font-family: var(--font-display); font-size: 21px; line-height: 1.3; }
 .nm-dep__bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
-.nm-dep__ct { color: var(--text-on-navy-2); font-variant-numeric: tabular-nums; } .nm-dep__btns { display: none; gap: 10px; } .nm-js .nm-dep__btns { display: flex; } .nm-dep__ct { visibility: hidden; } .nm-js .nm-dep__ct { visibility: visible; }
+.nm-dep__ct { color: var(--text-on-navy-2); font-variant-numeric: tabular-nums; } .nm-dep__btns { display: none; gap: 10px; } .nm-dep.is-js .nm-dep__btns { display: flex; } .nm-dep__ct { visibility: hidden; } .nm-dep.is-js .nm-dep__ct { visibility: visible; }
 .nm-dep__btns button { display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border-radius: 50%; border: var(--hairline-gold-on-navy); background: rgba(6,15,38,.5); color: var(--mp-gold-400); cursor: pointer; }
 .nm-dep__btns button:hover:not([disabled]) { background: var(--action-bg); color: var(--action-fg); } .nm-dep__btns button[disabled] { opacity: .45; cursor: default; }
 .nm-dep__btns button[data-nm-dep="-1"] .nm-ico { transform: rotate(180deg); } .nm-dep__btns .nm-ico { width: 20px; height: 20px; }
