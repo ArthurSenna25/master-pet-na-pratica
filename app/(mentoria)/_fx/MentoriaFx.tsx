@@ -7,6 +7,7 @@ import { abertura } from "./abertura";
 import { bonus } from "./bonus";
 import { dia } from "./dia";
 import { fab } from "./fab";
+import { magnetico } from "./magnetico";
 import { realce, trilha } from "./trilha";
 import { PIN, pinCabeNosDois, type Cleanup } from "./util";
 
@@ -30,6 +31,7 @@ export function MentoriaFx() {
       let stopDia = dia();
       let stopTrilha = trilha();
       const stopBonus = bonus();
+      const stopMagnetico = magnetico();
       ScrollTrigger.sort();
       const refrescar = () => { if (vivo) ScrollTrigger.refresh(); };
       window.addEventListener("load", refrescar);
@@ -58,7 +60,7 @@ export function MentoriaFx() {
         window.clearTimeout(timer);
         window.removeEventListener("resize", agendar);
         window.removeEventListener("orientationchange", agendar);
-        undo(stopAbertura, stopDia, stopTrilha, stopBonus, () => window.removeEventListener("load", refrescar))();
+        undo(stopAbertura, stopDia, stopTrilha, stopBonus, stopMagnetico, () => window.removeEventListener("load", refrescar))();
       };
     });
     return () => { vivo = false; mm.revert(); stopRealce(); stopFab(); };

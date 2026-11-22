@@ -2,7 +2,6 @@
 import { chromium } from "@playwright/test";
 const url = process.argv[2] ?? "http://localhost:3000/mentoria";
 const b = await chromium.launch(); let falhas = 0;
-const t = (v) => v === "none" ? "none" : v;
 for (const [nome, w, h, touch, rm] of [["1440", 1440, 900, false, "no-preference"], ["1280", 1280, 680, false, "no-preference"], ["390", 390, 844, true, "no-preference"], ["reduce", 1440, 900, false, "reduce"]]) {
   const ctx = await b.newContext({ viewport: { width: w, height: h }, hasTouch: touch, isMobile: touch, reducedMotion: rm }), p = await ctx.newPage();
   await p.goto(url, { waitUntil: "load" }); await p.waitForTimeout(1500);
