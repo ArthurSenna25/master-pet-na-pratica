@@ -4,6 +4,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { abertura } from "./abertura";
+import { bonus } from "./bonus";
 import { dia } from "./dia";
 import { fab } from "./fab";
 import { realce, trilha } from "./trilha";
@@ -28,6 +29,7 @@ export function MentoriaFx() {
       const stopAbertura = abertura();
       let stopDia = dia();
       let stopTrilha = trilha();
+      const stopBonus = bonus();
       ScrollTrigger.sort();
       const refrescar = () => { if (vivo) ScrollTrigger.refresh(); };
       window.addEventListener("load", refrescar);
@@ -56,7 +58,7 @@ export function MentoriaFx() {
         window.clearTimeout(timer);
         window.removeEventListener("resize", agendar);
         window.removeEventListener("orientationchange", agendar);
-        undo(stopAbertura, stopDia, stopTrilha, () => window.removeEventListener("load", refrescar))();
+        undo(stopAbertura, stopDia, stopTrilha, stopBonus, () => window.removeEventListener("load", refrescar))();
       };
     });
     return () => { vivo = false; mm.revert(); stopRealce(); stopFab(); };
